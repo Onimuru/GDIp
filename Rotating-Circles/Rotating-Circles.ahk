@@ -3,8 +3,6 @@
 #Persistent
 #SingleInstance Force
 
-#Include, %A_ScriptDir%\..\..\..\lib\GDIp.ahk
-
 ListLines, Off
 Process, Priority, , R
 SetBatchLines, -1
