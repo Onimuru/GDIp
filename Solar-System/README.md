@@ -1,5 +1,5 @@
 # Solar-System
 
 ## Input
-- Press and hold the {Left} or {Right} keys to speed up/slow down time.
+- Press the {Left} or {Right} key to speed up/slow down time respectively.
 - Press and hold the {Escape} key to close the program.
