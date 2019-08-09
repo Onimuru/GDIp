@@ -123,13 +123,8 @@ Update:
 			Gdip_DrawLine(vCanvas.G, vCanvas.pPen[1], v.h, v.k, v.parent.h, v.parent.k)
 
 		If (vCanvas.debug) {
-			If (GetKeyState("q", "P")) {
-				p[0] := StrSplit(p[0], "|")
-				For i, v in p[0]
-					p[0] .= (i > 1 ? "|" : "") . v
-
+			If (GetKeyState("q", "P"))
 				ToolTip, % p[0]
-			}
 
 			Else
 				ToolTip
