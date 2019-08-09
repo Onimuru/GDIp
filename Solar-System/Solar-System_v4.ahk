@@ -122,15 +122,10 @@ Update:
 		For i, v in vSolarSystem.planets
 			Gdip_DrawLine(vCanvas.G, vCanvas.pPen[1], v.h, v.k, v.parent.h, v.parent.k)
 
-		If (vCanvas.debug) {
-			If (GetKeyState("q", "P"))
-				ToolTip, % p[0]
-
-			Else
-				ToolTip
-		}
-
 		UpdateLayeredWindow(vCanvas.hwnd, vCanvas.hdc), Gdip_GraphicsClear(vCanvas.G)
+
+		If (vCanvas.debug)
+			ToolTip, % (GetKeyState("q", "P") ? p[0] : "")
 	}
 
 	SetTimer, Update, -1
