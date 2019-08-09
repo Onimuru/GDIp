@@ -15,11 +15,10 @@ Global vRadius := 150, vDiameter := vRadius*2
 	, Date := 0  ;, Date := [Date := Floor(JulianDate(A_YYYY . SubStr("0" . A_MM, -1) . SubStr("0" . A_DD, -1))), Date]
 	, SolarSystem := {"x": 5
 		, "y": 5
-		, "h": vRadius + 5
-		, "k": vRadius + 5}
+		, "h": vCanvas.width/2
+		, "k": vCanvas.height/2}
 	, Planets := []
 	, Depth := []
-	, Debug := 1
 
 Planets.Push(new Planet("Sun", 0, 0, 0, vRadius/5))
 Loop, % Random(1, 7) {
