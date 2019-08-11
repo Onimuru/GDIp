@@ -1,9 +1,5 @@
 # Rotating-Circles
 
-https://www.openprocessing.org/sketch/742134
-
 ## Input
+- Press the {Left} or {Right} key to slow down/speed up the animation respectively.
 - Press and hold the {Escape} key to exit the script.
-
-## Credit
-- [jeeswg](https://www.autohotkey.com/boards/viewtopic.php?t=44375) for the HSB function.
