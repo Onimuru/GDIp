@@ -33,6 +33,12 @@
 		Return (this.pPen[this.pPen.Length()])
 	}
 
+	Update(_clear := 1) {
+		UpdateLayeredWindow(this.hwnd, this.hdc)
+		If (_clear)
+			Gdip_GraphicsClear(this.G)
+	}
+
 	Clear() {
 		Gdip_GraphicsClear(this.G)
 	}
