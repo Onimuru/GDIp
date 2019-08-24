@@ -1,4 +1,4 @@
-﻿;===== Functions ==========;
+;===== Functions ==========;
 
 Array(_parameters*) {
 	r := {"base": __Array}
@@ -16,9 +16,9 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	;===== *** Modified propertie(s):
 
 	/*
-		Array.Length[() [:= Integer]]
+		Array.Length[ := Integer]
 
-		Description
+		Description:
 			Reflects the number of elements in an array.
 	*/
 	Length[] {
@@ -43,11 +43,11 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Push(_element1[, _element2[, ...[, _elementN]]])
 
-		Description
+		Description:
 			Adds one or more elements to the end of an array and returns the new length of the array.
 
-		Note
-			See note on Concat().
+		Note:
+			See known issue on Concat().
 	*/
 	Push(_elements*) {
 		s := this.Length, m := Round(_elements.MaxIndex())
@@ -61,7 +61,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Pop()
 
-		Description
+		Description:
 			Removes the last element from an array and returns that element.
 	*/
 	Pop() {
@@ -71,10 +71,11 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	}
 
 	;===== *** Custom propertie(s):
+
 	/*
 		Array.IsArray
 
-		Description
+		Description:
 			Returns true for all arrays.
 	*/
 	IsArray[] {
@@ -84,11 +85,12 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	}
 
 	;===== *** Custom method(s):
-	/*
-		Array.Sum([_start[, _offset]])
 
-		Description
-			Sums all Integers in an array and optionally offsets the total.
+	/*
+		Array.Sum([_offset[, _start[, _end]]])
+
+		Description:
+			Sums all number values in an array and optionally offsets the total.
 	*/
 	Sum(_offset := 0, _start := 0, _end := "undefined") {
 		s := this.Length
@@ -103,13 +105,13 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Swap(_index1, _index2)
 
-		Description
+		Description:
 			Swap any two elements in an array.
 	*/
 	Swap(_index1, _index2) {
-		r := this[_index1]
+		t := this[_index1]
 		this[_index1] := this[_index2]
-		this[_index2] := r
+		this[_index2] := t
 
 		Return (this)
 	}
@@ -119,12 +121,12 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	;*** CopyWithin()
 
 	/*
-		Array.Fill(_value[, _start[, _end]])
+		Array.Fill([_value[, _start[, _end]]])
 
 		Description:
 			Fills all the elements of an array from a start index to an end index with a static value.
 	*/
-	Fill(_value := "", _start := 0, _end := "undefined") {
+	Fill(_value := "undefined", _start := 0, _end := "undefined") {  ;_value := ["" || """""" || "undefined"].
 		s := this.Length
 			, _start := (_start >= 0 ? Min(s, _start) : Max((s + _start), 0))
 
@@ -152,7 +154,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Shift()
 
-		Description
+		Description:
 			Removes the first element from an array and returns that element.
 	*/
 	Shift() {
@@ -162,10 +164,10 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Sort([_compareFunction])
 
-		Description
+		Description:
 			Sorts the elements of an array in place and returns the array.
 
-		Note
+		Note:
 			Use "StringCaseSense, [On || Off]" with the default _compareFunction to control case sensetivity.
 	*/
 	Sort(_compareFunction := "DefaultSort") {
@@ -175,7 +177,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 			c := 0
 
 			Loop, % s - 1
-				If (%_compareFunction%(this[A_Index - 1], this[A_Index]) = 1)
+				If (%_compareFunction%(this[A_Index - 1], this[A_Index]) > 0)
 					this.Swap(A_Index - (c := 1), A_Index)
 			s--
 		}
@@ -186,7 +188,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Splice(_start[, _count[, _element1[, _element2[, ...[, _elementN]]]]])
 
-		Description
+		Description:
 			Adds and/or removes elements from an array.
 	*/
 	Splice(_start, _count := "undefined", _elements*) {
@@ -205,7 +207,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.UnShift(_element1[, _element2[, ...[, _elementN]]])
 
-		Description
+		Description:
 			Adds one or more elements to the front of an array and returns the new length of the array.
 	*/
 	UnShift(_elements*) {
@@ -220,12 +222,16 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Concat(_element1[, _element2[, ...[, _elementN]]])
 
-		Description
+		Description:
 			Returns a new array that is this array joined with other array(s) and/or value(s).
 
-		Note
-			Known issue: the temp A_Args array used as a parameter does not have a base class to manipulate and as such is beyond my ability to address. Just be careful in how you pass objects to this function. i.e
-			"arrays := [[1, {2: [2]}, 3], [4, 5, 6], [7, 8, 9]], (array := []).Concat(arrays*)" will skip over "arrays[0]".
+		Known issue:
+			The temporary A_Args array used as a parameter does not have a base class to manipulate and as such is beyond my ability to address. Just be careful in how you pass objects to this function. i.e
+
+			array := [[1, {2: [2]}, 3], [4, 5, 6], [7, 8, 9]]
+			MsgBox, % [].Concat(array*).Join(", ")
+
+			will skip over the first index. Use "[].Concat(array)" instead and manually strip nested arrays.
 	*/
 	Concat(_elements*) {
 		r := this  ;Referencing the same object, this is consistent with MDN. Replace with "this.Clone()" if it is not to you liking.
@@ -236,7 +242,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 					r.Push(v[A_Index - 1])
 
 			Else
-				r.Push(v)  ;Catch for objects and string/integer value(s).
+				r.Push(v)  ;Catch for object/string or number element(s).
 		}
 
 		Return (r)
@@ -245,7 +251,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Includes(_needle[, _start])
 
-		Description
+		Description:
 			Determines whether an array contains a certain element, returning true or false as appropriate.
 	*/
 	Includes(_needle, _start := 0) {
@@ -255,7 +261,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.IndexOf(_needle[, _start])
 
-		Description
+		Description:
 			Returns the first (least) index of an element within the array equal to the specified value, or -1 if none is found.
 	*/
 	IndexOf(_needle, _start := 0) {
@@ -275,14 +281,14 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Join([_deliminator])
 
-		Description
+		Description:
 			Joins all elements of an array into a string.
 	*/
-	Join(_separator := ",") {
-		s := Round(this.MaxIndex())
+	Join(_deliminator := ",") {
+		m := Round(this.MaxIndex())
 
 		For i, v in this
-			r .= (v.IsArray ? v.Join(_separator) : IsObject(v) ? "[object Object]" : v) . (i < s ? _separator : "")  ;Uses reccurtion to handle nested arrays.
+			r .= (v.IsArray ? v.Join(_deliminator) : IsObject(v) ? "[object Object]" : v) . (i < m ? _deliminator : "")  ;Uses recursion to handle nested arrays.
 
 		Return (r)
 	}
@@ -290,7 +296,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.LastIndexOf(_needle[, _start])
 
-		Description
+		Description:
 			Returns the last (greatest) index of an element within the array equal to the specified value, or -1 if none is found.
 	*/
 	LastIndexOf(_needle, _start := -1) {
@@ -304,13 +310,13 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 			_start--
 		}
 
-		Return (_start)
+		Return (-1)
 	}
 
 	/*
 		Array.Slice([_start[, _end]])
 
-		Description
+		Description:
 			Extracts a section of an array and returns a new array.
 	*/
 	Slice(_start := 0, _end := "undefined") {
@@ -328,14 +334,14 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.ToString()
 
-		Description
+		Description:
 			Returns a string representing the array and its elements.
 	*/
 	ToString() {
-		s := Round(this.MaxIndex())
+		m := Round(this.MaxIndex())
 
 		For i, v in this
-			r .= (v.IsArray ? v.ToString() : IsObject(v) ? "[object Object]" : v) . (i < s ? "," : "")
+			r .= (v.IsArray ? v.ToString() : IsObject(v) ? "[object Object]" : v) . (i < m ? "," : "")
 
 		Return (r)
 	}
@@ -349,7 +355,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Every(Func("Function"))
 
-		Description
+		Description:
 			Returns true if every element in this array satisfies the provided testing function.
 	*/
 	Every(_callback) {
@@ -363,7 +369,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array := Array.Filter(Func("Function"))
 
-		Description
+		Description:
 			Creates a new array with all of the elements of this array for which the provided filtering function returns true.
 	*/
 	Filter(_callback) {
@@ -379,7 +385,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Find(Func("Function"))
 
-		Description
+		Description:
 			Returns the found value in the array, if an element in the array satisfies the provided testing function or undefined if not found.
 	*/
 	Find(_callback) {
@@ -393,7 +399,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.FindIndex(Func("Function"))
 
-		Description
+		Description:
 			Returns the found index in the array, if an element in the array satisfies the provided testing function or -1 if not found.
 	*/
 	FindIndex(_callback) {
@@ -407,7 +413,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.ForEach(Func("Function"))
 
-		Description
+		Description:
 			Calls a function for each element in the array.
 	*/
 	ForEach(_callback) {
@@ -420,7 +426,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Map(Func("Function"))
 
-		Description
+		Description:
 			Creates a new array with the results of calling a provided function on every element in this array.
 	*/
 	Map(_callback) {
@@ -439,7 +445,7 @@ Class __Array {  ;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refere
 	/*
 		Array.Some(Func("Function"))
 
-		Description
+		Description:
 			Returns true if at least one element in this array satisfies the provided testing function.
 	*/
 	Some(_callback) {
@@ -466,7 +472,7 @@ TrimWhitespace(_element) {
 
 ;===== Numbers:
 IsNaN(_element) {
-	Return (!(_element ~= "^([-+]?[.]?[0-9]+([.][0-9]+)*)$"))  ;*** Add support for E.
+	Return (((_element + 0.0) ~= "^([-+]?[.]?[0-9]+([.][0-9]+)*([eE][+]?[0-9]+)*)$") != 1)
 }
 
 IsEven(_element) {
@@ -479,6 +485,13 @@ IsPrime(_element) {
 			Return (0)
 
 	Return (1)
+}
+
+ToBinary(_element) {
+	While (_element)
+		r := (_element & 1) . r, _element >>= 1
+
+	Return (r)
 }
 
 TrimTrailingZeros(_element) {
