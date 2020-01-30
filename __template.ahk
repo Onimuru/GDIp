@@ -1,19 +1,22 @@
-﻿#KeyHistory 0
+#KeyHistory 0
 #NoEnv
-#Persistent
 #SingleInstance Force
 
-#Include, %A_ScriptDir%\..\..\lib\Array.Prototype.ahk
-#Include, %A_ScriptDir%\..\..\lib\GDIp.ahk
-#Include, %A_ScriptDir%\..\..\lib\GDIp_Canvas.ahk
-#Include, %A_ScriptDir%\..\..\lib\Geometry.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\Array.Prototype.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\GDIp.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\GDIp_Canvas.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\Geometry.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\Functions.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\Math.ahk
 
 ListLines, Off
 Process, Priority, , R
 SetBatchLines, -1
+SetFormat, FloatFast, 0.15
 
 vCanvas := 150
 Global vCanvas := new Canvas("gCanvas", "-Caption +AlwaysOnTop +ToolWindow +OwnDialogs +E0x20", A_ScreenWidth - vCanvas*2.5 + 5, vCanvas*.5 + 5, vCanvas*2 + 10, vCanvas*2 + 10)
+vCircle := New Ellipse(5, 5, vCanvas.Width - 10, vCanvas.Height - 10)
 
 SetTimer, Update, -1
 
@@ -33,14 +36,19 @@ Return
 	}
 	Return
 
+~$F10::
+	If (WinActive(A_ScriptName))
+		ListVars
+	Return
+
 ~$Left::
-	vCanvas.speedratio /= 2
+	vCanvas.SpeedRatio /= 2
 
 	KeyWait, Left
 	Return
 
 ~$Right::
-	vCanvas.speedratio *= 2
+	vCanvas.SpeedRatio *= 2
 
 	KeyWait, Right
 	Return
@@ -55,37 +63,27 @@ Return
 ;===== Labels ==========;
 
 Exit:
-	SetTimer, Update, Delete
+	Critical
 
+	SetTimer, Update, Delete
 	vCanvas.ShutDown()
 
 	ExitApp
-	Return
 
 Update:
-	If (QPC(50)) {
-		vCanvas.degrees := Mod(vCanvas.degrees + 1*vCanvas.speedratio, 360)
+	If (QPC()) {
+		vCanvas.Time := Mod(vCanvas.Time, 360) + (1*vCanvas.SpeedRatio)
 
-		If (vCanvas.speedratio != 1)
-			Gdip_TextToGraphics(vCanvas.G, TrimTrailingZeros(vCanvas.speedratio) . "x", "x" . vCanvas.width - 35 . " cFFFFFFFF Bold r4 s10", "Arial")
+		If (vCanvas.SpeedRatio != 1)
+			Gdip_TextToGraphics(vCanvas.G, (v := Round(vCanvas.SpeedRatio)) . "x", "x" . vCanvas.Width - (20 + 5.75*StrLen(v)) . "y10" . " CFFFFFFFF Bold R4 S10", "Arial")
 
+		Gdip_DrawRectangle(vCanvas.G, vCanvas.pPen[0], 5, 5, vCanvas.Width - 10, vCanvas.Height - 10)
 
-
-		Gdip_DrawRectangle(vCanvas.G, vCanvas.pPen[0], 0, 0, vCanvas.width - 1, vCanvas.height - 1)
-		vCanvas.Update()
+		vCanvas.Update(1, 1)
 	}
 
 	SetTimer, Update, -1
-
 	Return
-
-;===== Functions ==========;
-
-QPC(_time := 50) {
-	Static f := 0, d := !DllCall("QueryPerformanceFrequency", "Int64P", f), n := 0, b := 0
-
-	Return (!DllCall("QueryPerformanceCounter", "Int64P", n) + (b ? ((d := (n - b)/f*1000) > _time ? !(b := n - Mod(d, _time)) + 1 : 0) : !(b := n) - 1))
-}
 
 ;===== Classes ==========;
 
@@ -99,4 +97,12 @@ Class __Class {
 
 	Draw() {
 	}
+}
+
+;===== Functions ==========;
+
+QPC(_Time := 50) {
+	Static f := 0, b := !DllCall("QueryPerformanceFrequency", "Int64P", f)
+
+	Return (!DllCall("QueryPerformanceCounter", "Int64P", n) + (b ? (((d := (n - b)/f*1000) > _Time) ? !(b := n - Mod(d, _Time)) + 1 : 0) : !(b := n) - 1))
 }
