@@ -1,206 +1,266 @@
-﻿Class Angle {
-	Angle(oPoints) {
-		Return, (Math.ToDegrees(ACos((oPoints[0].x*oPoints[1].x + oPoints[0].y*oPoints[1].y)/(Sqrt(oPoints[0].x**2 + oPoints[0].y**2)*Sqrt(oPoints[1].x**2 + oPoints[1].y**2)))))
+﻿ValidateData(ByRef oData, vN) {
+	If (!IsObject(oData)) {
+		oData := []
 	}
-}
+	oData.Length := vN
 
-Class Arc {
-	Area(oEllipse, vDegrees := 0) {
-		a := ((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))
-
-		If (IsObject(oEllipse.radius)) {
+	For i, v in oData {
+		If (!Math.IsNumeric(v)) {
+			oData[i] := Round(v)
 		}
-		Return, ((a/360)*oEllipse.radius**2*Math.Pi)
-	}
-
-	Length(oEllipse, vDegrees := 0) {
-		a := Math.ToRadians((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))
-
-		If (IsObject(oEllipse.radius)) {
-		}
-		Return, (oEllipse.radius*a)
 	}
 }
 
 Class Point2D {
-	__New(oData) {
-		Return, ({"x": (oData[0]) ? (oData[0]) : (0)
-			, "y": (oData[1]) ? (oData[1]) : (0)
+
+	;-----         Constructor          -------------------------;
+
+	;* new Point2D([x, y])
+	__New(oData := "") {
+		ValidateData(oData, 2)
+
+		Return, ({"x": oData[0]
+			, "y": oData[1]
 
 			, "Base": this.__Point2D})
 	}
 
-	;===== General
-	Distance(_point1, _point2) {
-		Return, (Sqrt((_point1.x - _point2.x)**2 + (_point1.y - _point2.y)**2))
+	;-----            Method            -------------------------;
+	;-------------------------           General            -----;
+
+	;* Point2D.Angle([PointObj1, PointObj2])
+	;* Description:
+		;* Calculate the angle from PointObj1 to PointObj2.
+	Angle(oPoints) {
+		Return, Math.ToDegrees(((x := -Math.Atan2({"x": oPoints[1].x - oPoints[0].x, "y": oPoints[1].y - oPoints[0].y})) < 0) ? (Math.Tau + x) : (x))
 	}
 
-	Equals(_point1, _point2) {
-		Return, (_point1.x == _point2.x && _point1.y == _point2.y)
+	;* Point2D.Distance([PointObj1, PointObj2])
+	Distance(oPoints) {
+		Return, (Sqrt((oPoints[0].x - oPoints[1].x)**2 + (oPoints[0].y - oPoints[1].y)**2))
 	}
 
-	Slope(_point1, _point2) {
-		Return, ((_point2.y - _point1.y)/(_point2.x - _point1.x))
+	;* Point2D.Equals([PointObj1, PointObj2])
+	Equals(oPoints) {
+		Return, (oPoints[0].x == oPoints[1].x && oPoints[0].y == oPoints[1].y)
 	}
 
-	MidPoint(_point1, _point2) {
-		Return, (new Point2D((_point1.x + _point2.x)/2, (_point1.y + _point2.y)/2))
+	;* Point2D.Slope([PointObj1, PointObj2])
+	Slope(oPoints) {
+		Return, ((oPoints[1].y - oPoints[0].y)/(oPoints[1].x - oPoints[0].x))
 	}
 
-	;===== Triangle
-	Circumcenter(_point1, _point2, _point3) {
-		m := [Point2D.MidPoint(_point1, _point2), Point2D.MidPoint(_point2, _point3)], s := [(_point2.x - _point1.x)/(_point1.y - _point2.y), (_point3.x - _point2.x)/(_point2.y - _point3.y)], p := [m[1].y - s[1]*m[1].x, m[2].y - s[2]*m[2].x]
-
-		Return, (s[1] == s[2] ? 0 : _point1.y == _point2.y ? new Point2D(m[1].x, s[2]*m[1].x + p[2]) : _point2.y == _point3.y ? new Point2D(m[2].x, s[1]*m[2].x + p[1]) : new Point2D((p[2] - p[1])/(s[1] - s[2]), s[1]*(p[2] - p[1])/(s[1] - s[2]) + p[1]))
+	;* Point2D.MidPoint([PointObj1, PointObj2])
+	MidPoint(oPoints) {
+		Return, (new Point2D([(oPoints[0].x + oPoints[1].x)/2, (oPoints[0].y + oPoints[1].y)/2]))
 	}
 
-	;===== Ellipse
+	;* Point2D.Rotate([PointObj1, PointObj2], Degrees)
+	;* Description:
+		;* Calculate the coordinates of PointObj1 rotated around PointObj2.
+	Rotate(oPoints, vTheta) {
+		a := -Math.ToRadians((vTheta >= 0) ? (Mod(vTheta, 360)) : (360 - Mod(-vTheta, -360)))
+			, c := Math.Cos(a), s := Math.Sin(a)
+
+		x := oPoints[0].x - oPoints[1].x, y := oPoints[0].y - oPoints[1].y
+
+		Return, (new Point2D([x*c - y*s + oPoints[1].x, x*s + y*c + oPoints[1].y]))
+	}
+
+	;-------------------------           Triangle           -----;
+
+	;* Point2D.Circumcenter([PointObj1, PointObj2, PointObj3])
+	Circumcenter(oPoints) {
+		m := [this.MidPoint([oPoints[0], oPoints[1]]), this.MidPoint([oPoints[1], oPoints[2]])]
+			, s := [(oPoints[1].x - oPoints[0].x)/(oPoints[0].y - oPoints[1].y), (oPoints[2].x - oPoints[1].x)/(oPoints[1].y - oPoints[2].y)]
+			, p := [m[0].y - s[0]*m[0].x, m[1].y - s[1]*m[1].x]
+
+		Return, (s[0] == s[1] ? 0 : oPoints[0].y == oPoints[1].y ? new Point2D([m[0].x, s[1]*m[0].x + p[1]]) : oPoints[1].y == oPoints[2].y ? new Point2D([m[1].x, s[0]*m[1].x + p[0]]) : new Point2D([(p[1] - p[0])/(s[0] - s[1]), s[0]*(p[1] - p[0])/(s[0] - s[1]) + p[0]]))
+	}
+
+	;-------------------------           Ellipse            -----;
+
+	;* Point2D.Foci(EllipseObj)
 	Foci(oEllipse) {
-		o := [(oEllipse.radius.a > oEllipse.radius.b)*(o := oEllipse.FocalLength), (oEllipse.radius.a < oEllipse.radius.b)*o]
+		o := [(oEllipse.Radius.a > oEllipse.Radius.b)*(o := oEllipse.FocalLength), (oEllipse.Radius.a < oEllipse.Radius.b)*o]
 
-		Return, ([new Point2D(oEllipse.h - o[1], oEllipse.k - o[2]), new Point2D(oEllipse.h + o[1], oEllipse.k + o[2])])
+		Return, ([new Point2D([oEllipse.h - o[0], oEllipse.k - o[1]]), new Point2D([oEllipse.h + o[0], oEllipse.k + o[1]])])
 	}
 
-	Epicycloid(oEllipse1, oEllipse2, vDegrees := 0) {
-		a := Math.ToRadians((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))
+	;* Point2D.Epicycloid([EllipseObj1, EllipseObj2], Degrees)
+	Epicycloid(oEllipses, vTheta := 0) {
+		a := Math.ToRadians((vTheta >= 0) ? Mod(vTheta, 360) : 360 - Mod(-vTheta, -360))
 
-		Return, (new Point2D(oEllipse1.h + (oEllipse1.radius + oEllipse2.radius)*Cos(a) - oEllipse2.radius*Cos((oEllipse1.radius/oEllipse2.radius + 1)*a), oEllipse.k - o[2], oEllipse1.k + (oEllipse1.radius + oEllipse2.radius)*Sin(a) - oEllipse2.radius*Sin((oEllipse1.radius/oEllipse2.radius + 1)*a)))
+		Return, (new Point2D([oEllipses[0].h + (oEllipses[0].Radius + oEllipses[1].Radius)*Math.Cos(a) - oEllipses[1].Radius*Math.Cos((oEllipses[0].Radius/oEllipses[1].Radius + 1)*a), oEllipse.k - o[2], oEllipses[0].k + (oEllipses[0].Radius + oEllipses[1].Radius)*Math.Sin(a) - oEllipses[1].Radius*Math.Sin((oEllipses[0].Radius/oEllipses[1].Radius + 1)*a)]))
 	}
 
-	Hypocycloid(oEllipse1, oEllipse2, vDegrees := 0) {
-		a := Math.ToRadians((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))
+	;* Point2D.Hypocycloid([EllipseObj1, EllipseObj2], Degrees)
+	Hypocycloid(oEllipses, vTheta := 0) {
+		a := Math.ToRadians((vTheta >= 0) ? Mod(vTheta, 360) : 360 - Mod(-vTheta, -360))
 
-		Return, (new Point2D(oEllipse1.h + (oEllipse1.radius - oEllipse2.radius)*Cos(a) + oEllipse2.radius*Cos((oEllipse1.radius/oEllipse2.radius - 1)*a), oEllipse1.k + (oEllipse1.radius - oEllipse2.radius)*Sin(a) - oEllipse2.radius*Sin((oEllipse1.radius/oEllipse2.radius - 1)*a)))
+		Return, (new Point2D([oEllipses[0].h + (oEllipses[0].Radius - oEllipses[1].Radius)*Math.Cos(a) + oEllipses[1].Radius*Math.Cos((oEllipses[0].Radius/oEllipses[1].Radius - 1)*a), oEllipses[0].k + (oEllipses[0].Radius - oEllipses[1].Radius)*Math.Sin(a) - oEllipses[1].Radius*Math.Sin((oEllipses[0].Radius/oEllipses[1].Radius - 1)*a)]))
 	}
 
-	OnEllipse(oEllipse, vDegrees := 0) {
-		a := -(Math.ToRadians((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360)))
+	;* Point2D.OnEllipse(EllipseObj, Degrees)
+	;* Description:
+		;* Calculate the coordinates of a point on the circumference of EllipseObj.
+	OnEllipse(oEllipse, vTheta := 0) {
+		a := -(Math.ToRadians((vTheta >= 0) ? Mod(vTheta, 360) : 360 - Mod(-vTheta, -360)))
 
-		If (IsObject(oEllipse.radius)) {
-			t := Math.Tan(a), o := [oEllipse.radius.a*oEllipse.radius.b, Sqrt(oEllipse.radius.b**2 + oEllipse.radius.a**2*t**2)], s := (90 < vDegrees && vDegrees <= 270) ? -1 : 1
+		If (IsObject(oEllipse.Radius)) {
+			t := Math.Tan(a), o := [oEllipse.Radius.a*oEllipse.Radius.b, Sqrt(oEllipse.Radius.b**2 + oEllipse.Radius.a**2*t**2)], s := (90 < vTheta && vTheta <= 270) ? -1 : 1
 
 			Return, (new Point2D([oEllipse.h + (o[0]/o[1])*s, oEllipse.k + ((o[0]*t)/o[1])*s]))
 		}
-		Return, (new Point2D([oEllipse.h + oEllipse.radius*Cos(a), oEllipse.k + oEllipse.radius*Sin(a)]))
+		Return, (new Point2D([oEllipse.h + oEllipse.Radius*Math.Cos(a), oEllipse.k + oEllipse.Radius*Math.Sin(a)]))
 	}
 
-	Class __Point2D {
+	;-----         Nested Class         -------------------------;
+
+	Class __Point2D Extends __Object {
 		Clone() {
-			Return, (new Point2D(this.x, this.y))
-		}
-
-		Rotate(vDegrees) {
-			a := Math.ToRadians((vDegrees >= 0) ? (Mod(vDegrees, 360)) : (360 - Mod(-vDegrees, -360)))
-				, c := Cos(a), s := Sin(a)
-
-			Return, (new Point2D(c*this.x - s*this.y, s*this.x + c*this.y))
+			Return, (new Point2D([this.x, this.y]))
 		}
 	}
 }
 
 Class Point3D {
-	__New(oData) {
-		Return, ({"x": (oData[0]) ? (oData[0]) : (0)
-			, "y": (oData[1]) ? (oData[1]) : (0)
-			, "Z": (oData[2]) ? (oData[2]) : (0)
+
+	;* new Point3D([x, y, z])
+	__New(oData := "") {
+		ValidateData(oData, 3)
+
+		Return, ({"x": oData[0]
+			, "y": oData[1]
+			, "z": oData[2]
 
 			, "Base": this.__Point3D})
 	}
 
-	Class __Point3D {
-		RotateX(vDegrees) {
-			;Here we use Euler's matrix formula for rotating a 3D point x degrees around the x-axis
+	Class __Point3D Extends __Object {
+		Rotate(vDegrees, vMode) {
+			;* Here we use Euler's matrix formula for rotating a 3D point x degrees around the x-axis:
 
-			;[ a  b  c ] [ x ]   [ x*a + y*b + z*c ]
-			;[ d  e  f ] [ y ] = [ x*d + y*e + z*f ]
-			;[ g  h  i ] [ z ]   [ x*g + y*h + z*i ]
+			;? [ a  b  c ] [ x ]   [ x*a + y*b + z*c ]
+			;? [ d  e  f ] [ y ] = [ x*d + y*e + z*f ]
+			;? [ g  h  i ] [ z ]   [ x*g + y*h + z*i ]
 
-			;[1      0         0  ]
-			;[0    cos(a)   sin(a)]
-			;[0   -sin(a)   cos(a)]
+			Switch (vMode) {
+				Case "x":
+					;? [1      0         0  ]
+					;? [0    cos(a)   sin(a)]
+					;? [0   -sin(a)   cos(a)]
 
-			a := ((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))*0.017453292519943295769236907684886127134428718885417254560971914
-				, c := Cos(a), s := Sin(a)
+					a := Math.ToRadians((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))
+						, c := Math.Cos(a), s := Math.Sin(a)
 
-			Return, (new Point3D(this.x, this.y*c + this.z*s, this.y*-s + this.z*c))
-		}
+					Return, (new Point3D([this.x, this.y*c + this.z*s, this.y*-s + this.z*c]))
+				Case "y":
+					;? [ cos(a)   0    sin(a)]
+					;? [   0      1      0   ]
+					;? [-sin(a)   0    cos(a)]
 
-		RotateY(vDegrees) {
-			;Y-axis
+					a := Math.ToRadians((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))
+						, c := Math.Cos(a), s := Math.Sin(a)
 
-			;[ cos(a)   0    sin(a)]
-			;[   0      1      0   ]
-			;[-sin(a)   0    cos(a)]
+					Return, (new Point3D([this.x*c + this.z*s, this.y, this.x*-s + this.z*c]))
+				Case "z":
+					;? [ cos(a)   sin(a)   0]
+					;? [-sin(a)   cos(a)   0]
+					;? [    0       0      1]
 
-			a := ((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))*0.017453292519943295769236907684886127134428718885417254560971914
-				, c := Cos(a), s := Sin(a)
+					a := Math.ToRadians((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))
+						, c := Math.Cos(a), s := Math.Sin(a)
 
-			Return, (new Point3D(this.x*c + this.z*s, this.y, this.x*-s + this.z*c))
-		}
-
-		RotateZ(vDegrees) {
-			;Z-axis
-
-			;[ cos(a)   sin(a)   0]
-			;[-sin(a)   cos(a)   0]
-			;[    0       0      1]
-
-			a := ((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))*0.017453292519943295769236907684886127134428718885417254560971914
-				, c := Cos(a), s := Sin(a)
-
-			Return, (new Point3D(this.x*c + this.y*s, this.x*-s + this.y*c, this.z))
+					Return, (new Point3D([this.x*c + this.y*s, this.x*-s + this.y*c, this.z]))
+			}
 		}
 
 		Clone() {
-			Return, (new Point3D(this.x, this.y, this.z))
+			Return, (new Point3D([this.x, this.y, this.z]))
 		}
 	}
 }
 
 Class Vector2D {
-	__New(oData) {
-		Return, ({"x": (oData[0]) ? (oData[0]) : (0)
-			, "y": (oData[1]) ? (oData[1]) : ((oData[0]) ? (oData[0]) : (0))
+
+	;* new Vector2D([x, y])
+	__New(oData := "") {
+		ValidateData(oData, 2)
+
+		Return, ({"x": oData[0]
+			, "y": (oData[1]) ? (oData[1]) : (oData[0])
 
 			, "Base": this.__Vector2D})
 	}
 
-	CrossProduct(_vector1, _vector2) {
-		Return, (_vector1.x*_vector2.y - _vector2.x*_vector1.y)  ;A*B = |A|.|B|.Sin([angle AOB])
+	CrossProduct(oVectors) {
+		Return, (oVectors[0].x*oVectors[1].y - oVectors[1].x*oVectors[0].y)  ;A*B = |A|.|B|.Sin([angle AOB])
 	}
 
-	Distance(_vector1, _vector2) {
-		Return, (Sqrt((_vector1.x - _vector2.x)**2 + (_vector1.y - _vector2.y)**2))
+	Distance(oVectors) {
+		Return, (Sqrt((oVectors[0].x - oVectors[1].x)**2 + (oVectors[0].y - oVectors[1].y)**2))
 	}
 
-	DotProduct(_vector1, _vector2) {
-		Return, (_vector1.x*_vector2.x + _vector2.y*_vector1.y)  ;A.B = |A|.|B|.Cos([angle AOB])
+	DotProduct(oVectors) {
+		Return, (oVectors[0].x*oVectors[1].x + oVectors[1].y*oVectors[0].y)  ;A.B = |A|.|B|.Cos([angle AOB])
 	}
 
-	Equals(_vector1, _vector2) {
-		Return, (_vector1.x == _vector2.x && _vector1.y == _vector2.y)
+	Equals(oVectors) {
+		Return, (oVectors[0].x == oVectors[1].x && oVectors[0].y == oVectors[1].y)
 	}
 
-	Class __Vector2D {
-		Magnitude[] {
-			Get {
-				Return, (Sqrt(this.x**2 + this.y**2))
+	Class __Vector2D Extends __Object {
+
+		__Get(vKey) {
+			Switch (vKey) {
+				Case "Magnitude":
+					Return, (Sqrt(this.x**2 + this.y**2))
 			}
 		}
 
-		Add(_vector) {
-			If (!IsObject(_vector))
-				this.x += _vector, this.y += _vector
-
-			Else
-				this.x += _vector.x, this.y += _vector.y
+		Add(oVector) {
+			If (!IsObject(oVector)) {
+				this.x += oVector, this.y += oVector
+			}
+			Else {
+				this.x += oVector.x, this.y += oVector.y
+			}
 
 			Return, (this)
 		}
 
-		Clone() {
-			Return, (new Vector2D(this.x, this.y))
+		Subtract(oVector) {
+			If (!IsObject(oVector))
+				this.x -= oVector, this.y -= oVector
+
+			Else
+				this.x -= oVector.x, this.y -= oVector.y
+
+			Return, (this)
 		}
+
+        Divide(oVector) {
+			If (!IsObject(oVector)) {
+				this.x /= oVector, this.y /= oVector
+			}
+			Else {
+				this.x /= oVector.x, this.y /= oVector.y
+			}
+
+			Return, (this)
+        }
+
+        Multiply(oVector) {
+			If (!IsObject(oVector)) {
+				this.x *= oVector, this.y *= oVector
+			}
+			Else {
+				this.x *= oVector.x, this.y *= oVector.y
+			}
+
+			Return, (this)
+        }
 
 		Conjugate() {
 			this.x *= -1, this.y *= -1
@@ -208,162 +268,78 @@ Class Vector2D {
 			Return, (this)
 		}
 
-        Divide(_vector) {
-			If (!IsObject(_vector))
-				this.x /= _vector, this.y /= _vector
-
-			Else
-				this.x /= _vector.x, this.y /= _vector.y
-
-			Return, (this)
-        }
-
-        Multiply(_vector) {
-			If (!IsObject(_vector))
-				this.x *= _vector, this.y *= _vector
-
-			Else
-				this.x *= _vector.x, this.y *= _vector.y
-
-			Return, (this)
-        }
-
         Normalise() {
-			m = this.Magnitude
+			m := this.Magnitude
 
-			If (m > 0.001)
+			If (m > Math.Epsilon) {
 				this.x /= m, this.y /= m
+			}
 
 			Return, (this)
         }
 
+		Rotate(vDegrees) {
+			a := Math.ToRadians((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))
+				, s := Math.Sin(a), c := Math.Cos(a)
+
+			this.x := this.x*c - this.y*s, this.y := this.x*s + this.y*c
+
+			Return, (this)
+		}
 
 		Reset() {
-			this.x := 0.0, this.y := 0.0
+			this.x := this.y := 0
 
 			Return, (this)
-		}
-
-		Rotate(vDegrees) {
-			a := ((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))*0.017453292519943295769236907684886127134428718885417254560971914
-				, s := Sin(a), c := Cos(a)
-
-			this.x := this.x*c - this.y*s, this.y := this.x*s + this.y*c
-
-			Return, (this)
-		}
-
-		Subtract(_vector) {
-			If (!IsObject(_vector))
-				this.x -= _vector, this.y -= _vector
-
-			Else
-				this.x -= _vector.x, this.y -= _vector.y
-
-			Return, (this)
-		}
-	}
-}
-
-Class Quaternion {
-	__New(_w := 1, _x := 0, _y := 0, _z := 0) {
-		Return, ({"Base": this.__Quaternion
-			, "w": _w
-			, "x": _x
-			, "y": _y
-			, "z": _z})
-	}
-
-	Equals(_quaternion1, _quaternion2) {
-		Return, (_quaternion1.w == _quaternion2.w && _quaternion1.x == _quaternion2.x && _quaternion1.y == _quaternion2.y && _quaternion1.z == _quaternion2.z)
-	}
-
-	DotProduct(_quaternion1, _quaternion2) {
-        Return, (_quaternion1.w*_quaternion2.w + _quaternion1.x*_quaternion2.x + _quaternion1.y*_quaternion2.y + _quaternion1.z*_quaternion2.z)
-	}
-
-	Class __Quaternion {
-		Magnitude[] {
-			Get {
-				Return, (Sqrt(this.w**2 + this.x**2 + this.y**2 + this.z**2))
-			}
-		}
-
-        Normalise() {
-			m := this.w**2 + this.x**2 + this.y**2 + this.z**2
-
-			If (m > 0.001) {
-				m := Sqrt(m)
-
-				this.w /= m, this.x /= m, this.y /= m, this.z /= m
-			}
-
-			Else
-				this.w := 1, this.x := this.y := this.z := 0
-        }
-
-        Multiply(_quaternion) {
-			this.w := this.w*_quaternion.w - this.x*_quaternion.x - this.y*_quaternion.y - this.z*_quaternion.z
-			, this.x := this.w*_quaternion.x + this.x*_quaternion.w + this.y*_quaternion.z - this.z*_quaternion.y
-			, this.y := this.w*_quaternion.y + this.y*_quaternion.w + this.z*_quaternion.x - this.x*_quaternion.z
-			, this.z := this.w*_quaternion.z + this.z*_quaternion.w + this.x*_quaternion.y - this.y*_quaternion.x
-        }
-
-		Add(_quaternion) {
-			this.w += _quaternion.w, this.x += _quaternion.x, this.y += _quaternion.y, this.z += _quaternion.z
-		}
-
-		Subtract(_quaternion) {
-			this.w -= _quaternion.w, this.x -= _quaternion.x, this.y -= _quaternion.y, this.z -= _quaternion.z
-		}
-
-		Conjugate() {
-			this.x *= -1, this.y *= -1, this.z *= -1
-		}
-
-		Rotate(vDegrees) {
-			a := ((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))*0.017453292519943295769236907684886127134428718885417254560971914
-				, s := Sin(a), c := Cos(a)
-
-			this.Normalise(), (q := this.Clone()).Conjugate()
-
-			this.x := this.x*c - this.y*s, this.y := this.x*s + this.y*c
 		}
 
 		Clone() {
-			Return, (new Quaternion(this.w, this.x, this.y, this.z))
+			Return, (new Vector2D([this.x, this.y]))
 		}
 	}
 }
 
 Class Rectangle {
-	__New(oData) {
-		Return, {"X": oData[0]
-			, "Y": oData[1]
+
+	;* new Rectangle([x, y, Width, Height])
+	__New(oData := "") {
+		ValidateData(oData, 4)
+
+		Return, {"x": oData[0]
+			, "y": oData[1]
 			, "Width": oData[2]
 			, "Height": oData[3]
 
 			, "Base": this.__Rectangle}
 	}
 
-	Class __Rectangle {
+	Class __Rectangle Extends __Object {
+		Clone() {
+			Return, (new Rectangle([this.x, this.y, this.Width, this.Height]))
+		}
 	}
 }
 
 Class Ellipse {
-	__New(oData, vEccentricity := 0) {
-		e := Sqrt(1 - vEccentricity**2), r := [(oData[2] != "") ? (oData[2]/2) : ((oData[3]/2)*e), (oData[3] != "") ? (oData[3]/2) : ((oData[2]/2)*e)]
+
+	;* new Ellipse([x, y, Width, Height], Eccentricity)
+	;* Note:
+		;* Eccentricity can compensate for Width or Height but 2 of the 3 values must be provided to calculate a valid radius.
+	__New(oData := "", vEccentricity := 0) {
+		e := Sqrt(1 - vEccentricity**2), r := [(oData[2] != "") ? (oData[2]/2) : ((oData[3] != "") ? ((oData[3]/2)*e) : (0)), (oData[3] != "") ? (oData[3]/2) : ((oData[2] != "") ? ((oData[2]/2)*e) : (0))]
+
+		ValidateData(oData, 2)  ;* Default just x and y to 0.
 
 		If (r[0] == r[1]) {
-			Return, ({"X": oData[0]
-				, "Y": oData[1]
+			Return, ({"x": oData[0]
+				, "y": oData[1]
 				, "__Radius": r[0]
 
 				, "Base": this.__Circle})
 		}
 
-		Return, ({"X": oData[0]
-			, "Y": oData[1]
+		Return, ({"x": oData[0]
+			, "y": oData[1]
 			, "__Radius": r
 
 			, "Base": this.__Ellipse})
@@ -371,17 +347,17 @@ Class Ellipse {
 
 	InscribeEllipse(oEllipse, vRadius, vDegrees := 0) {
 		a := Math.ToRadians((vDegrees >= 0) ? Mod(vDegrees, 360) : 360 - Mod(-vDegrees, -360))
-			, c := oEllipse.h + (oEllipse.Radius - vRadius)*Cos(a), s := oEllipse.k + (oEllipse.Radius - vRadius)*Sin(a)
+			, c := oEllipse.h + (oEllipse.Radius - vRadius)*Math.Cos(a), s := oEllipse.k + (oEllipse.Radius - vRadius)*Math.Sin(a)
 
 		Return, (new Ellipse([c - vRadius, s - vRadius, vRadius*2, vRadius*2]))
 	}
 
-	Class __Circle {
+	Class __Circle Extends __Object {
 		__Get(vKey) {
 			Switch (vKey) {
-				Case "H":
+				Case "h":
 					Return, (this.X + this.__Radius)
-				Case "K":
+				Case "k":
 					Return, (this.Y + this.__Radius)
 				Case "Radius":
 					Return, (this.__Radius)
@@ -416,10 +392,10 @@ Class Ellipse {
 
 		__Set(vKey, vValue) {
 			Switch (vKey) {
-				Case "H":
-					ObjRawSet(this, "X", vValue - this.__Radius)
-				Case "K":
-					ObjRawSet(this, "Y", vValue - this.__Radius)
+				Case "h":
+					ObjRawSet(this, "x", vValue - this.__Radius)
+				Case "k":
+					ObjRawSet(this, "y", vValue - this.__Radius)
 				Case "Radius":
 					If (IsObject(vValue)) {
 						ObjRawSet(this, "__Radius", [vValue.a, vValue.b]), ObjSetBase(this, Ellipse.__Ellipse)
@@ -435,16 +411,15 @@ Class Ellipse {
 						ObjRawSet(this, "__Radius", vValue/2)
 					}
 			}
-			Return
 		}
 	}
 
-	Class __Ellipse {
+	Class __Ellipse Extends __Object {
 		__Get(vKey) {
 			Switch (vKey) {
-				Case "H":
+				Case "h":
 					Return, (this.X + this.__Radius[0])
-				Case "K":
+				Case "k":
 					Return, (this.Y + this.__Radius[1])
 				Case "Radius":
 					Return, ({"a": this.__Radius[0]
@@ -481,10 +456,10 @@ Class Ellipse {
 
 		__Set(vKey, vValue) {
 			Switch (vKey) {
-				Case "H":
-					ObjRawSet(this, "X", vValue - this.__Radius[0])
-				Case "K":
-					ObjRawSet(this, "Y", vValue - this.__Radius[1])
+				Case "h":
+					ObjRawSet(this, "x", vValue - this.__Radius[0])
+				Case "k":
+					ObjRawSet(this, "y", vValue - this.__Radius[1])
 				Case "Radius":
 					If (IsObject(vValue)) {
 						ObjRawSet(this, "__Radius", [vValue.a, vValue.b])
@@ -500,7 +475,6 @@ Class Ellipse {
 						ObjRawSet(this, "__Radius", vValue/2), ObjSetBase(this, Ellipse.__Circle)
 					}
 			}
-			Return
 		}
 	}
 }
