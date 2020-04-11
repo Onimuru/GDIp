@@ -17,15 +17,14 @@ CoordMode, Mouse, Screen
 ListLines, Off
 Process, Priority, , R
 SetBatchLines, -1
-SetWorkingDir, % A_ScriptDir . "\.."
+SetWorkingDir, % A_ScriptDir . "\..\.."
 
 ;===============           Variable           ===============;
 
 IniRead, vDebug, % A_WorkingDir . "\..\AutoHotkey\cfg\Settings.ini", Debug, Debug
 Global vDebug
 
-v := 150
-Global oCanvas := new GDIp.Canvas([A_ScreenWidth - v*3.5 + 5, v*.5 + 5, v*2 + 10, v*2 + 10], "-Caption +AlwaysOnTop +ToolWindow +OwnDialogs +E0x20")
+Global oCanvas := new GDIp.Canvas([A_ScreenWidth - 150*2.5 + 5, 150*.5 + 5, 150*2 + 10, 150*2 + 10], "-Caption +AlwaysOnTop +ToolWindow +OwnDialogs +E0x20")
 	, oBrush := [new GDIp.Brush(), new GDIp.LinearGradientBrush([5, 5, oCanvas.Size.Width - 10, oCanvas.Size.Height - 10], [Color.Random(), Color.Random()])], oPen := [new GDIp.Pen(), new GDIp.Pen(oBrush[1])]
 
 	, oBorder := new Rectangle([5, 5, oCanvas.Size.Width - 10, oCanvas.Size.Height - 10])
@@ -48,7 +47,6 @@ Exit
 
 	~$^s::
 		Critical
-		SetTitleMatchMode, 2
 
 		Sleep, 200
 		Reload
@@ -91,11 +89,9 @@ Update() {
 	If (QueryPerformanceCounter_Passive()) {
 		__Time := Mod(__Time + 1*oCanvas.SpeedRatio, 360)
 
-		oCanvas.DrawString(oBrush[0], Round(__Time) . "°", "x10 y10 Bold r4 s10")
+		oCanvas.DrawString(oBrush[0], Round(__Time) . "°", "Bold r4 s10 x10 y10")
 		If (oCanvas.SpeedRatio != 1) {
-			v := Round(oCanvas.SpeedRatio, 1)
-
-			oCanvas.DrawString(oBrush[0], v . "x", "x" . oCanvas.Size.Width - (15 + 6*StrLen(v)) . "y10 Bold r4 s10")
+			v := Round(oCanvas.SpeedRatio, 2), oCanvas.DrawString(oBrush[0], v . "x", "Bold r4 s10" . "x" . oCanvas.Size.Width - (15 + 6*StrLen(v)) . "y10")
 		}
 
 		oCanvas.DrawRectangle(oPen[0], oBorder)
