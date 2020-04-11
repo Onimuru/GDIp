@@ -27,7 +27,7 @@ QueryPerformanceCounter_Passive() {
 Class DC {
 	__New(vHWND := 0) {
 		If (!p := DllCall("GetDC", "UPtr", vHWND, "Ptr"))
-			Return, (-1)
+			Return, (ErrorLevel := -1)
 
 		this.HWND := vHWND, this.HDC := p
 	}
@@ -38,7 +38,7 @@ Class DC {
 		}
 
 		e := DllCall("ReleaseDC", "Ptr", this.HWND, "Ptr", this.HDC), this.Base := ""
-		Return, (e)
+		Return, (ErrorLevel := e)
 	}
 }
 
@@ -65,7 +65,7 @@ Class GDIp {
 
 			GDIp.Token := p
 		}
-		Return, (Gdiplus.__ReferenceCount++)
+		Return, (ErrorLevel := Gdiplus.__ReferenceCount++)
 	}
 
 	ShutDown() {
@@ -75,7 +75,7 @@ Class GDIp {
 				DllCall("FreeLibrary", "Ptr", h)
 			}
 		}
-        Return, (Gdiplus.__ReferenceCount)
+        Return, (ErrorLevel := Gdiplus.__ReferenceCount)
 	}
 
 	;-----         Nested Class         -------------------------;
@@ -108,7 +108,7 @@ Class GDIp {
 
 			DllCall("SelectObject", "UPtr", this.HDC, "UPtr", this.OBM), DllCall("DeleteObject", "UPtr", this.HBM), DllCall("DeleteDC", "UPtr", this.HDC)
 			e := DllCall("Gdiplus\GdipDeleteGraphics", "UPtr", this.Handle), this.Base := ""  ;* Prevent all bad calls to Gdiplus.DLL by disconnecting the base and freeing all references towards such functions from the object.
-			Return, (e)
+			Return, (ErrorLevel := e)
 		}
 
 		;-----           Property           -------------------------;
@@ -116,13 +116,13 @@ Class GDIp {
 		__Set(vKey, vValue) {
 			Switch (vKey) {
 				Case "CompositingMode":  ;? 0 = SourceOver (blend), 1 = SourceCopy (overwrite)
-					Return, (DllCall("Gdiplus\GdipSetCompositingMode", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 1)))
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetCompositingMode", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 1)))
 				Case "InterpolationMode":  ;? 0 = Default, 1 = LowQuality, 2 = HighQuality, 3 = Bilinear, 4 = Bicubic, 5 = NearestNeighbor, 6 = HighQualityBilinear, 7 = HighQualityBicubic
-					Return, (DllCall("Gdiplus\GdipSetInterpolationMode", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 7)))
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetInterpolationMode", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 7)))
 				Case "SmoothingMode":  ;? 0 = Default, 1 = HighSpeed, 2 = HighQuality, 3 = None, 4 = AntiAlias
-					Return, (DllCall("Gdiplus\GdipSetSmoothingMode", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 4)))
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetSmoothingMode", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 4)))
 				Case "TextRendering":  ;? 0 = SystemDefault, 1 = SingleBitPerPixelGridFit, 2 = SingleBitPerPixel, 3 = AntiAliasGridFit, 4 = AntiAlias, 5 = ClearTypeGridFit
-					Return, (DllCall("Gdiplus\GdipSetTextRenderingHint", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 5)))
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetTextRenderingHint", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 5)))
 			}
 		}
 
@@ -132,19 +132,19 @@ Class GDIp {
 		;-----             Pen              -----;
 
 		DrawArc(oPen, oRectangle, vStartAngle, vSweepAngle) {
-			Return, (DllCall("Gdiplus\GdipDrawArc", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oRectangle.x, "Float", oRectangle.y, "Float", oRectangle.Width, "Float", oRectangle.Height, "Float", vStartAngle, "Float", vSweepAngle))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipDrawArc", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oRectangle.x, "Float", oRectangle.y, "Float", oRectangle.Width, "Float", oRectangle.Height, "Float", vStartAngle, "Float", vSweepAngle))
 		}
 
 		DrawBezier(oPen, oPoints) {
-			Return, (DllCall("Gdiplus\GdipDrawBezier", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oPoints[0].x, "Float", oPoints[0].y, "Float", oPoints[1].x, "Float", oPoints[1].y, "Float", oPoints[2].x, "Float", oPoints[2].y, "Float", oPoints[3].x, "Float", oPoints[3].y))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipDrawBezier", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oPoints[0].x, "Float", oPoints[0].y, "Float", oPoints[1].x, "Float", oPoints[1].y, "Float", oPoints[2].x, "Float", oPoints[2].y, "Float", oPoints[3].x, "Float", oPoints[3].y))
 		}
 
 		DrawEllipse(oPen, oEllipse) {
-			Return, (DllCall("Gdiplus\GdipDrawEllipse", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oEllipse.x, "Float", oEllipse.y, "Float", oEllipse.Width, "Float", oEllipse.Height))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipDrawEllipse", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oEllipse.x, "Float", oEllipse.y, "Float", oEllipse.Width, "Float", oEllipse.Height))
 		}
 
 		DrawLine(oPen, oPoints) {
-			Return, (DllCall("Gdiplus\GdipDrawLine", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oPoints[0].x, "Float", oPoints[0].y, "Float", oPoints[1].x, "Float", oPoints[1].y))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipDrawLine", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oPoints[0].x, "Float", oPoints[0].y, "Float", oPoints[1].x, "Float", oPoints[1].y))
 		}
 
 		DrawLines(oPen, oPoints) {
@@ -152,7 +152,7 @@ Class GDIp {
 
 			For i, v in oPoints
 				NumPut(v.x, s, 8*i, "Float"), NumPut(v.y, s, 8*i + 4, "Float")
-			Return, (DllCall("Gdiplus\GdipDrawLines", "UPtr", this.Handle, "UPtr", oPen.Handle, "UPtr", &s, "Int", m))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipDrawLines", "UPtr", this.Handle, "UPtr", oPen.Handle, "UPtr", &s, "Int", m))
 		}
 
 		Gdip_DrawPie(oPen, oRectangle, vStartAngle, vSweepAngle) {
@@ -160,17 +160,17 @@ Class GDIp {
 		}
 
 		DrawRectangle(oPen, oRectangle) {
-			Return, (DllCall("Gdiplus\GdipDrawRectangle", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oRectangle.x, "Float", oRectangle.y, "Float", oRectangle.Width, "Float", oRectangle.Height))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipDrawRectangle", "UPtr", this.Handle, "UPtr", oPen.Handle, "Float", oRectangle.x, "Float", oRectangle.y, "Float", oRectangle.Width, "Float", oRectangle.Height))
 		}
 
 		;-----            Brush             -----;
 
 		FillEllipse(oBrush, oEllipse) {
-			Return, (DllCall("Gdiplus\GdipFillEllipse", "UPtr", this.Handle, "UPtr", oBrush.Handle, "Float", oEllipse.x, "Float", oEllipse.y, "Float", oEllipse.Width, "Float", oEllipse.Height))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipFillEllipse", "UPtr", this.Handle, "UPtr", oBrush.Handle, "Float", oEllipse.x, "Float", oEllipse.y, "Float", oEllipse.Width, "Float", oEllipse.Height))
 		}
 
 		FillPie(oBrush, oRectangle, vStartAngle, vSweepAngle) {
-			Return, (DllCall("Gdiplus\GdipFillPie", "UPtr", this.Handle, "UPtr", oBrush.Handle, "Float", oRectangle.x, "Float", oRectangle.y, "Float", oRectangle.Width, "Float", oRectangle.Height, "Float", vStartAngle, "Float", vSweepAngle))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipFillPie", "UPtr", this.Handle, "UPtr", oBrush.Handle, "Float", oRectangle.x, "Float", oRectangle.y, "Float", oRectangle.Width, "Float", oRectangle.Height, "Float", vStartAngle, "Float", vSweepAngle))
 		}
 
 		FillPolygon(oBrush, oPoints, vFillMode := 0) {  ;? FillMode: 0 = Alternate (fill the polygon as a whole), 1 = Winding (fill each new "segment")
@@ -179,11 +179,11 @@ Class GDIp {
 			For i, v in oPoints {
 				NumPut(v.x, b, i*8, "Float"), NumPut(v.y, b, i*8 + 4, "Float")
 			}
-			Return, (DllCall("Gdiplus\GdipFillPolygon", "UPtr", this.Handle, "UPtr", oBrush.Handle, "UPtr", &b, "Int", oPoints.Length, "Int", vFillMode))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipFillPolygon", "UPtr", this.Handle, "UPtr", oBrush.Handle, "UPtr", &b, "Int", oPoints.Length, "Int", vFillMode))
 		}
 
 		FillRectangle(oBrush, oRectangle) {
-			Return, (DllCall("Gdiplus\GdipFillRectangle", "UPtr", this.Handle, "UPtr", oBrush.Handle, "Float", oRectangle.x, "Float", oRectangle.y, "Float", oRectangle.Width, "Float", oRectangle.Height))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipFillRectangle", "UPtr", this.Handle, "UPtr", oBrush.Handle, "Float", oRectangle.x, "Float", oRectangle.y, "Float", oRectangle.Width, "Float", oRectangle.Height))
 		}
 
 		;-----            String            -----;
@@ -193,7 +193,7 @@ Class GDIp {
 
 			If (__Options != vOptions) {
 				If (!o := new GDIp.FontFamily(vFontName)) {
-					Return, (-1)
+					Return, (ErrorLevel := -1)
 				}
 
 				s := 0
@@ -205,12 +205,12 @@ Class GDIp {
 
 				RegExMatch(vOptions, "i)((?<=S)\d+)", r)
 				If (!__Font := new GDIp.Font(o, (r >= 1) ? (r) : (12), s)) {
-					Return, (-2)
+					Return, (ErrorLevel := -2)
 				}
 
 				RegExMatch(vOptions, "i)NoWrap", r)
 				If (!__StringFormat := new GDIp.StringFormat(0x4000 | (r ? 0x1000 : 0))) {
-					Return, (-3)
+					Return, (ErrorLevel := -3)
 				}
 
 				Loop, 4 {
@@ -222,13 +222,13 @@ Class GDIp {
 
 				RegExMatch(vOptions, "i)((?<=H)[a-z]+)", r)  ;? h-setting (horizontal alignment): hLeft = 0, hCenter = 1, hRight = 2
 				If (r && !o[2]) {
-					Return, (5)
+					Return, (ErrorLevel := 5)
 				}
 				DllCall("Gdiplus\GdipSetStringFormatAlign", "UPtr", __StringFormat.Handle, "Int", Round({"Left": 0, "Center": 1, "Centre": 1, "Right": 2}[r]))
 
 				RegExMatch(vOptions, "i)((?<=V)[a-z]+)", r)  ;? v-setting (vertical alignment): vTop = 0, vCenter = 1, vBottom = 2
 				If (r && !o[3]) {
-					Return, (5)
+					Return, (ErrorLevel := 5)
 				}
 				DllCall("Gdiplus\GdipSetStringFormatLineAlign", "UPtr", __StringFormat.Handle, "Int", Round({"Top": 0, "Center": 1, "Centre": 1, "Bottom": 2}[r]))
 
@@ -237,7 +237,7 @@ Class GDIp {
 
 				__Options := vOptions
 			}
-			Return, (DllCall("Gdiplus\GdipDrawString", "UPtr", this.Handle, "WStr", vString, "Int", -1, "UPtr", __Font.Handle, "UPtr", &__Rect, "UPtr", __StringFormat.Handle, "UPtr", oBrush.Handle))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipDrawString", "UPtr", this.Handle, "WStr", vString, "Int", -1, "UPtr", __Font.Handle, "UPtr", &__Rect, "UPtr", __StringFormat.Handle, "UPtr", oBrush.Handle))
 		}
 
 		MeasureString(oData, vString, oFont, oStringFormat) {
@@ -246,7 +246,7 @@ Class GDIp {
 			CreateRect(oData, b)
 
 			If (e := DllCall("gdiplus\GdipMeasureString", "UPtr", this.Handle, "WStr", vString, "Int", -1, "UPtr", oFont.Handle, "UPtr", &b, "UPtr", oStringFormat.Handle, "UPtr", &__Rect, "UInt*", c, "UInt*", l)) {
-				Return, (e)
+				Return, (ErrorLevel := e)
 			}
 			Return, (&__Rect ? [NumGet(__Rect, 0, "Float"), NumGet(__Rect, 4, "Float"), NumGet(__Rect, 8, "Float"), NumGet(__Rect, 12, "Float"), c, l] : 0)
 		}
@@ -256,7 +256,7 @@ Class GDIp {
 		;* Note:
 			;* Using clipping regions you can clear a particular area on the graphics rather than clearing the entire graphics.
 		Clear(vColor := "0x00000000") {
-			Return, (DllCall("Gdiplus\GdipGraphicsClear", "UPtr", this.Handle, "Int", vColor))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipGraphicsClear", "UPtr", this.Handle, "Int", vColor))
 		}
 
 		Update(vClear := 1, vReset := 1, oData := "", vAlpha := 255) {
@@ -282,28 +282,28 @@ Class GDIp {
 					DllCall("Gdiplus\GdipResetWorldTransform", "UPtr", this.Handle)
 				}
 			}
-			Return, (!e)
+			Return, (ErrorLevel := !e)
 		}
 
 		;---------------       World Transform        ---------------;
 
 		Translate(oData) {
-			Return, (DllCall("Gdiplus\GdipTranslateWorldTransform", "UPtr", this.Handle, "Float", oData[0], "Float", oData[1], "Int", 1))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipTranslateWorldTransform", "UPtr", this.Handle, "Float", oData[0], "Float", oData[1], "Int", 1))
 		}
 
 		Rotate(vAngle, oData := "") {
 			If (!oData) {
-				Return, (DllCall("Gdiplus\GdipRotateWorldTransform", "UPtr", this.Handle, "Float", vAngle, "Int", 1))
+				Return, (ErrorLevel := DllCall("Gdiplus\GdipRotateWorldTransform", "UPtr", this.Handle, "Float", vAngle, "Int", 1))
 			}
-			Return, (DllCall("Gdiplus\GdipTranslateWorldTransform", "UPtr", this.Handle, "Float", -oData[0], "Float", -oData[1], "Int", 1) + DllCall("Gdiplus\GdipRotateWorldTransform", "UPtr", this.Handle, "Float", vAngle, "Int", 1) + DllCall("Gdiplus\GdipTranslateWorldTransform", "UPtr", this.Handle, "Float", oData[0], "Float", oData[1], "Int", 1))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipTranslateWorldTransform", "UPtr", this.Handle, "Float", -oData[0], "Float", -oData[1], "Int", 1) + DllCall("Gdiplus\GdipRotateWorldTransform", "UPtr", this.Handle, "Float", vAngle, "Int", 1) + DllCall("Gdiplus\GdipTranslateWorldTransform", "UPtr", this.Handle, "Float", oData[0], "Float", oData[1], "Int", 1))
 		}
 
 		Scale(oData) {
-			Return, (DllCall("Gdiplus\GdipScaleWorldTransform", "UPtr", this.Handle, "Float", oData[0], "Float", oData[1], "Int", 1))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipScaleWorldTransform", "UPtr", this.Handle, "Float", oData[0], "Float", oData[1], "Int", 1))
 		}
 
 		Reset() {
-			Return, (DllCall("Gdiplus\GdipResetWorldTransform", "UPtr", this.Handle))
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipResetWorldTransform", "UPtr", this.Handle))
 		}
 	}
 
@@ -316,7 +316,7 @@ Class GDIp {
 
 		__New(vColor := "0xFFFFFFFF")  {
 			If (e := DllCall("Gdiplus\GdipCreateSolidFill", "UInt", vColor, "UPtr*", p)) {
-				Return, (e)
+				Return, (ErrorLevel := e)
 			}
 			ObjRawSet(this, "Handle", p)
 		}
@@ -327,29 +327,29 @@ Class GDIp {
 			}
 
 			e := DllCall("Gdiplus\GdipDeleteBrush", "UPtr", this.Handle), this.Base := ""
-			Return, (e)
+			Return, (ErrorLevel := e)
 		}
 
 		__Get(vKey){
 			Switch (vKey) {
 				Case "Color":
 					If (e := DllCall("Gdiplus\GdipGetSolidFillColor", "UPtr", this.Handle, "UInt*", c)) {
-						Return, (e)
+						Return, (ErrorLevel := e)
 					}
-					Return, ("0x" . Math.ToBase(c, 10, 16))  ;! new Color(c[0, 2], c[2, 4], c[4, 6], c[6, 8])
+					Return, (ErrorLevel := "0x" . Math.ToBase(c, 10, 16))  ;! new Color(c[0, 2], c[2, 4], c[4, 6], c[6, 8])
 			}
 		}
 
 		__Set(vKey, vValue) {
 			Switch (vKey) {
 				Case "Color":
-					Return, (DllCall("Gdiplus\GdipSetSolidFillColor", "UPtr", this.Handle, "UInt", vValue))
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetSolidFillColor", "UPtr", this.Handle, "UInt", vValue))
 			}
 		}
 
 		Clone() {
 			If (e := DllCall("Gdiplus\GdipCloneBrush", "UPtr", this.Handle, "UPtr*", p)) {
-				Return, (e)
+				Return, (ErrorLevel := e)
 			}
 			Return, ({"Handle": p, "Base": this.Base})
 		}
@@ -375,7 +375,7 @@ Class GDIp {
 			}
 
 			If (e) {
-				Return, (e)
+				Return, (ErrorLevel := e)
 			}
 			ObjRawSet(this, "Handle", p)
 		}
@@ -386,7 +386,7 @@ Class GDIp {
 					VarSetCapacity(c, 8, 0)
 
 					If (e := DllCall("Gdiplus\GdipGetLineColors", "UPtr", this.Handle, "Ptr", &c)) {
-						Return, (e)
+						Return, (ErrorLevel := e)
 					}
 					Return, (["0x" . Math.ToBase(NumGet(c, 0, "UInt"), 10, 16), "0x" . Math.ToBase(NumGet(c, 4, "UInt"), 10, 16)])
 			}
@@ -409,7 +409,7 @@ Class GDIp {
 
 		__New(vColor := "0xFFFFFFFF", vWidth := 1) {
 			If (e := IsObject(vColor) ? DllCall("Gdiplus\GdipCreatePen2", "UPtr", vColor.Handle, "Float", vWidth, "Int", 2, "UPtr*", p) : DllCall("Gdiplus\GdipCreatePen1", "UInt", vColor, "Float", vWidth, "Int", 2, "UPtr*", p)) {
-				Return, (e)
+				Return, (ErrorLevel := e)
 			}
 			ObjRawSet(this, "Handle", p)
 		}
@@ -420,19 +420,19 @@ Class GDIp {
 			}
 
 			e := DllCall("Gdiplus\GdipDeletePen", "UPtr", this.Handle), this.Base := ""
-			Return, (e)
+			Return, (ErrorLevel := e)
 		}
 
 		__Get(vKey){
 			Switch (vKey) {
 				Case "Color":
 					If (e := DllCall("Gdiplus\GdipGetPenColor", "UPtr", this.Handle, "UInt*", c)) {
-						Return, (e)
+						Return, (ErrorLevel := e)
 					}
 					Return, ("0x" . Math.ToBase(c, 10, 16))
 				Case "Width":
 					If (e := DllCall("Gdiplus\GdipGetPenWidth", "UPtr", this.Handle, "Float*", c)) {
-						Return, (e)
+						Return, (ErrorLevel := e)
 					}
 					Return, (~~c)
 			}
@@ -441,17 +441,17 @@ Class GDIp {
 		__Set(vKey, vValue) {
 			Switch (vKey) {
 				Case "Brush":
-					Return, (DllCall("Gdiplus\GdipSetPenBrushFill", "UPtr", this.Handle, "UPtr", vValue.Handle))
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetPenBrushFill", "UPtr", this.Handle, "UPtr", vValue.Handle))
 				Case "Color":
-					Return, (DllCall("Gdiplus\GdipSetPenColor", "UPtr", this.Handle, "UInt", vValue))
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetPenColor", "UPtr", this.Handle, "UInt", vValue))
 				Case "Width":
-					Return, (DllCall("Gdiplus\GdipSetPenWidth", "UPtr", this.Handle, "Float", vValue))
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetPenWidth", "UPtr", this.Handle, "Float", vValue))
 			}
 		}
 
 		Clone() {
 			If (e := DllCall("Gdiplus\GdipClonePen", "UPtr", this.Handle, "UPtr*", p)) {
-				Return, (e)
+				Return, (ErrorLevel := e)
 			}
 			Return, ({"Handle": p, "Base": this.Base})
 		}
@@ -460,7 +460,7 @@ Class GDIp {
 	Class FontFamily {
 		__New(vFont := "Arial") {
 			If (e := DllCall("Gdiplus\GdipCreateFontFamilyFromName", "WStr", vFont, "UPtr", 0, "UPtr*", p)) {  ;? http://www.jose.it-berater.org/gdiplus/reference/flatapi/fontfamily/gdipcreatefontfamilyfromname.htm
-				Return, (e)
+				Return, (ErrorLevel := e)
 			}
 			ObjRawSet(this, "Handle", p)
 		}
@@ -471,14 +471,14 @@ Class GDIp {
 			}
 
 			e := DllCall("Gdiplus\GdipDeleteFontFamily", "UPtr", this.Handle), this.Base := ""
-			Return, (e)
+			Return, (ErrorLevel := e)
 		}
 	}
 
 	Class Font {
 		__New(oFontFamily, vSize := "", vStyle := 0) {  ;? Style: 0 = Regular, 1 = Bold, 2 = Italic, 3 = BoldItalic, 4 = Underline, 8 = Strikeout
 			If (e := DllCall("Gdiplus\GdipCreateFont", "UPtr", oFontFamily.Handle, "Float", vSize, "Int", vStyle, "UInt", 2, "UPtr*", p)) {  ;? http://www.jose.it-berater.org/gdiplus/reference/flatapi/font/gdipcreatefont.htm
-				Return, (e)
+				Return, (ErrorLevel := e)
 			}
 			ObjRawSet(this, "Handle", p)
 		}
@@ -489,7 +489,7 @@ Class GDIp {
 			}
 
 			e := DllCall("Gdiplus\GdipDeleteFont", "UPtr", this.Handle), this.Base := ""
-			Return, (e)
+			Return, (ErrorLevel := e)
 		}
 
 	}
@@ -497,7 +497,7 @@ Class GDIp {
 	Class StringFormat {
 		__New(vFormat := 0, vLanguage := 0) {  ;? Format: 0x0001 = StringFormatFlagsDirectionRightToLeft, 0x0002 = StringFormatFlagsDirectionVertical, 0x0004 = StringFormatFlagsNoFitBlackBox, 0x0020 = StringFormatFlagsDisplayFormatControl, 0x0400 = StringFormatFlagsNoFontFallback, 0x0800 = StringFormatFlagsMeasureTrailingSpaces, 0x1000 = StringFormatFlagsNoWrap, 0x2000 = StringFormatFlagsLineLimit, 0x4000 = StringFormatFlagsNoClip
 			If (e := DllCall("Gdiplus\GdipCreateStringFormat", "UInt", vFormat, "UShort", vLanguage, "UPtr*", p)) {
-				Return, (e)
+				Return, (ErrorLevel := e)
 			}
 			ObjRawSet(this, "Handle", p)
 		}
@@ -508,15 +508,15 @@ Class GDIp {
 			}
 
 			e := DllCall("Gdiplus\GdipDeleteStringFormat", "UPtr", this.Handle), this.Base := ""
-			Return, (e)
+			Return, (ErrorLevel := e)
 		}
 
 		__Set(vKey, vValue) {
 			Switch (vKey) {
 				Case "Align":
-					Return, (DllCall("Gdiplus\GdipSetStringFormatAlign", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 2)))  ;? Align (Horizontal): 0 = Left, 1 = Center, 2 = Right
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetStringFormatAlign", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 2)))  ;? Align (Horizontal): 0 = Left, 1 = Center, 2 = Right
 				Case "LineAlign":
-					Return, (DllCall("Gdiplus\GdipSetStringFormatLineAlign", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 2)))  ;? LineAlign (Vertical): 0 = Top, 1 = Center, 2 = Bottom
+					Return, (ErrorLevel := DllCall("Gdiplus\GdipSetStringFormatLineAlign", "UPtr", this.Handle, "Int", Math.Clamp(vValue, 0, 2)))  ;? LineAlign (Vertical): 0 = Top, 1 = Center, 2 = Bottom
 			}
 		}
 	}
