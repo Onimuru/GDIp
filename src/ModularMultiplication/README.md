@@ -1,4 +1,4 @@
-# Modular-Multiplication
+# ModularMultiplication
 
 A model of [times tables](https://www.youtube.com/watch?v=qhbuKbxJsk8/).
 
