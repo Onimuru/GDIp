@@ -2,7 +2,7 @@
 
 A model of [times tables](https://www.youtube.com/watch?v=qhbuKbxJsk8/).
 
-![](https://imgur.com/a/jYqJBuQ.gif)
+![](https://i.imgur.com/3rs6vfS.gif)
 
 ## Input
 - Press and hold the {Spacebar} key to toggle show/hide.
