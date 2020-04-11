@@ -1,4 +1,4 @@
-# Solar-System
+# SolarSystem
 
 ![](https://i.imgur.com/gCjuBI9.gif)
 
