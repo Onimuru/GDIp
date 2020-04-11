@@ -24,11 +24,11 @@ IniRead, vDebug, % A_WorkingDir . "\..\AutoHotkey\cfg\Settings.ini", Debug, Debu
 Global vDebug
 
 GDIp.Startup()
-Global oCanvas := new GDIp.Canvas([A_ScreenWidth - 350, 50, 300, 200], "-Caption +AlwaysOnTop +ToolWindow +OwnDialogs +E0x20")
+Global oCanvas := new GDIp.Canvas([0, 0, A_ScreenWidth, A_ScreenHeight - 1], "-Caption +AlwaysOnTop +ToolWindow +OwnDialogs +E0x20")
 
 ;===============            Other             ===============;
 
-Histogram([], 30, {"x": 0, "y": 0, "Width": 300, "Height": 200})
+Histogram([], 30, {"x": A_ScreenWidth - 350, "y": 50, "Width": 300, "Height": 200})
 
 OnExit("Exit")
 
