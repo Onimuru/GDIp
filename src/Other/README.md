@@ -1,7 +1,3 @@
-# ParticleCircle
-
-![](https://gifs.com/gif/5QD6Lx)
-
 # InscribedCircles
 
 ## Input
