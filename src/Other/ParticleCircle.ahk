@@ -34,12 +34,6 @@ Loop, 1080 {
 	oParticle.Push(new Particle(A_Index))
 }
 
-;a := [1, 2, 3], b := a.Clone()
-;b.Shift()
-;MsgBox(a.Print() ", " b.Print())
-;b := a.Clone()
-;MsgBox(a.Print() ", " b.Print())
-
 ;===============            Other             ===============;
 
 OnExit("Exit"), Update()
@@ -113,8 +107,6 @@ Update() {
 				oCanvas.DrawEllipse(oPen[0], {"x": p.x, "y": p.y, "Width": 2, "Height": 2})
 			}
 		}
-
-;		oCanvas.DrawRectangle(oPen[0], {"x": 5, "y": 5, "Width": oCanvas.Rectangle.Width - 10, "Height": oCanvas.Rectangle.Height - 10})
 
 		oCanvas.Update()
 	}
