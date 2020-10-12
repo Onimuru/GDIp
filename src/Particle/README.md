@@ -1,6 +1,6 @@
 # ParticleCircle
 
-![ParticleCircle](https://github.com/Onimuru/GDIp/tree/master/res/image/ParticleCircle.gif?raw=true)
+![ParticleCircle](https://github.com/Onimuru/GDIp/tree/master/res/image/ParticleCircle.gif)
 
 ## Input
 - Press the {Left} or {Right} key to slow down or speed up the passage of time respectively.
