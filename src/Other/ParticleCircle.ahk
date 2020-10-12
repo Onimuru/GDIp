@@ -83,7 +83,7 @@ Exit() {
 }
 
 Update() {
-	Static __Time := 98, __Clone := []
+	Static __Time := 99, __Clone := []
 
 	If (QueryPerformanceCounter_Passive()) {
 		__Time := Mod(__Time + 1*oEllipse.SpeedRatio, 101)
