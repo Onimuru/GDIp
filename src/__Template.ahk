@@ -1,43 +1,37 @@
-﻿;=====         Auto-execute         =========================;
+;=====         Auto-execute         =========================;
 ;===============           Setting            ===============;
 
-#Include, %A_ScriptDir%\..\..\..\AutoHotkey\lib\Color.ahk
-#Include, %A_ScriptDir%\..\..\..\AutoHotkey\lib\General.ahk
-#Include, %A_ScriptDir%\..\..\..\AutoHotkey\lib\ObjectOriented.ahk
-#Include, %A_ScriptDir%\..\..\..\AutoHotkey\lib\Math.ahk
-#Include, %A_ScriptDir%\..\..\lib\GDIp.ahk
-#Include, %A_ScriptDir%\..\..\lib\Geometry.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\Color.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\General.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\ObjectOriented.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\Math.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\GDIp.ahk
+#Include, %A_ScriptDir%\..\..\..\lib\Geometry.ahk
 
 #KeyHistory 0
 #NoEnv
 #Persistent
 #SingleInstance, Force
 
-CoordMode, Mouse, Screen
 ListLines, Off
 Process, Priority, , R
 SetBatchLines, -1
-SetWorkingDir, % A_ScriptDir . "\..\.."
+SetWorkingDir, % A_ScriptDir . "\..\..\.."
 
 ;===============           Variable           ===============;
 
-IniRead, vDebug, % A_WorkingDir . "\..\AutoHotkey\cfg\Settings.ini", Debug, Debug
+IniRead, vDebug, % A_WorkingDir . "\cfg\Settings.ini", Debug, Debug
 Global vDebug
+	, oCanvas := new GDIp.Canvas({"x": A_ScreenWidth - (150*2 + 50 + 10 + 1), "y": 50, "Width": 150*2 + 10, "Height": 150*2 + 10}, "-Caption +AlwaysOnTop +ToolWindow +OwnDialogs +E0x20")
+		, oBrush := [new GDIp.Brush(), new GDIp.LineBrush(new Rectangle(5, 5, oCanvas.Rectangle.Width - 10, oCanvas.Rectangle.Height - 10), [Color.Random(), Color.Random()])]
+		, oPen := [new GDIp.Pen(), new GDIp.Pen(oBrush[1])]
 
-Global oCanvas := new GDIp.Canvas([A_ScreenWidth - 150*2.5 + 5, 150*.5 + 5, 150*2 + 10, 150*2 + 10], "-Caption +AlwaysOnTop +ToolWindow +OwnDialogs +E0x20")
-	, oBrush := [new GDIp.Brush(), new GDIp.LinearGradientBrush([5, 5, oCanvas.Size.Width - 10, oCanvas.Size.Height - 10], [Color.Random(), Color.Random()])], oPen := [new GDIp.Pen(), new GDIp.Pen(oBrush[1])]
-
-	, oBorder := new Rectangle([5, 5, oCanvas.Size.Width - 10, oCanvas.Size.Height - 10])
-
-oCanvas.SpeedRatio := 1.0
-
-;===============            Timer             ===============;
-
-SetTimer, Update, -1
+	, oObject := {"Rectangle": new Rectangle(5, 5, oCanvas.Rectangle.Width - 10, oCanvas.Rectangle.Height - 10)
+		, "SpeedRatio": 1}
 
 ;===============            Other             ===============;
 
-OnExit("Exit")
+OnExit("Exit"), Update()
 
 Exit
 
@@ -54,22 +48,22 @@ Exit
 
 	$F10::ListVars
 
-#IF
+#If
 
 ~$Left::
-	oCanvas.SpeedRatio /= 2
+	oObject.SpeedRatio /= 2
 
 	KeyWait("Left")
 	Return
 
 ~$Right::
-	oCanvas.SpeedRatio *= 2
+	oObject.SpeedRatio *= 2
 
 	KeyWait("Right")
 	Return
 
 ~$Esc::
-	If (KeyWait("Esc", "T0.5")) {
+	If (KeyWait("Esc", "T1")) {
 		Exit()
 	}
 	Return
@@ -87,14 +81,14 @@ Update() {
 	Static __Time := 0
 
 	If (QueryPerformanceCounter_Passive()) {
-		__Time := Mod(__Time + 1*oCanvas.SpeedRatio, 360)
+		__Time := Mod(__Time + 1*oObject.SpeedRatio, 360)
 
 		oCanvas.DrawString(oBrush[0], Round(__Time) . "°", "Bold r4 s10 x10 y10")
-		If (oCanvas.SpeedRatio != 1) {
-			v := Round(oCanvas.SpeedRatio, 2), oCanvas.DrawString(oBrush[0], v . "x", "Bold r4 s10" . "x" . oCanvas.Size.Width - (15 + 6*StrLen(v)) . "y10")
+		If (oObject.SpeedRatio != 1) {
+			v := Round(oObject.SpeedRatio, 2), oCanvas.DrawString(oBrush[0], v . "x", Format("Bold r4 s10 x{} y10", oCanvas.Rectangle.Width - (15 + 6*StrLen(v))))
 		}
 
-		oCanvas.DrawRectangle(oPen[0], oBorder)
+		oCanvas.DrawRectangle(oPen[0], oObject.Rectangle)
 
 		oCanvas.Update()
 	}
