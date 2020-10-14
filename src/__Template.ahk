@@ -85,7 +85,7 @@ Update() {
 
 		oCanvas.DrawString(oBrush[0], Round(__Time) . "°", "Bold r4 s10 x10 y10")
 		If (oObject.SpeedRatio != 1) {
-			v := Round(oObject.SpeedRatio, 2), oCanvas.DrawString(oBrush[0], v . "x", Format("Bold r4 s10 x{} y10", oCanvas.Rectangle.Width - (15 + 6*StrLen(v))))
+			oCanvas.DrawString(oBrush[0], (v := Round(oPolarCurves.SpeedRatio, 2)) . "x", Format("Bold r4 s10 x{} y10", oCanvas.Rectangle.Width - (15 + 6*StrLen(v))))
 		}
 
 		oCanvas.DrawRectangle(oPen[0], oObject.Rectangle)
