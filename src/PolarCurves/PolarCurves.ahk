@@ -1,4 +1,4 @@
-﻿;=====         Auto-execute         =========================;
+;=====         Auto-execute         =========================;
 ;===============           Setting            ===============;
 
 #Include, %A_ScriptDir%\..\..\..\lib\Color.ahk
@@ -90,10 +90,10 @@ Update() {
 	If (QueryPerformanceCounter_Passive()) {
 		__Time := Mod(__Time, 360) + 1*oPolarCurves.SpeedRatio
 
-;		oCanvas.DrawString(oBrush[0], Round(__Time) . "°", "Bold r4 s10 x10 y10")
-;		If (oPolarCurves.SpeedRatio != 1) {
-;			oCanvas.DrawString(oBrush[0], (v := Round(oPolarCurves.SpeedRatio, 2)) . "x", Format("Bold r4 s10 x{} y10", oCanvas.Rectangle.Width - (15 + 6*StrLen(v))))
-;		}
+		oCanvas.DrawString(oBrush[0], Round(__Time) . "°", "Bold r4 s10 x10 y10")
+		If (oPolarCurves.SpeedRatio != 1) {
+			oCanvas.DrawString(oBrush[0], (v := Round(oPolarCurves.SpeedRatio, 2)) . "x", Format("Bold r4 s10 x{} y10", oCanvas.Rectangle.Width - (15 + 6*StrLen(v))))
+		}
 
 		n := oPolarCurves.Coefficient + oPolarCurves.Coefficient*Math.IsEven(oPolarCurves.Coefficient)  ;* An even coefficient generates double the number of petals so account for that here.
 
@@ -104,7 +104,7 @@ Update() {
 				i := A_Index - 1
 					, a := Math.ToRadians(t + (180/oPolarCurves.Coefficient/oPolarCurves.Points)*i), r := oPolarCurves.Magnitude*Math.Sin(a*oPolarCurves.Coefficient)  ;* Calculate the current position of each point based on `__Time` and the space between each point.
 
-				oCanvas.FillEllipse(oBrush[A_Index], {"x": oCanvas.Rectangle.Width/2 + r*Math.Cos(a), "y": oCanvas.Rectangle.Height/2 + r*Math.Sin(a) + 25, "Width": 5, "Height": 5})
+				oCanvas.FillEllipse(oBrush[A_Index], {"x": oCanvas.Rectangle.Width/2 + r*Math.Cos(a), "y": oCanvas.Rectangle.Height/2 + r*Math.Sin(a), "Width": 5, "Height": 5})
 			}
 		}
 
