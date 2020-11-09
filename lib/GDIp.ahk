@@ -1,4 +1,4 @@
-;=====           Function           =========================;
+﻿;=====           Function           =========================;
 
 CreatePoint(oData, ByRef vPoint) {
 	VarSetCapacity(vPoint, 8)
@@ -396,49 +396,6 @@ Class GDIp {
 		Reset() {
 			Return, (ErrorLevel := DllCall("Gdiplus\GdipResetWorldTransform", "UPtr", this.Handle))
 		}
-
-		;-----         Nested Class         -------------------------;
-
-		Class __Camera {
-
-			RotateX(vTheta) {
-				;[ a  b  c ] [ x ]   [ x*a + y*b + z*c ]
-				;[ d  e  f ] [ y ] = [ x*d + y*e + z*f ]
-				;[ g  h  i ] [ z ]   [ x*g + y*h + z*i ]
-
-				;[1      0         0  ]
-				;[0    cos(a)   sin(a)]
-				;[0   -sin(a)   cos(a)]
-
-				a := ((vTheta >= 0) ? Mod(vTheta, 360) : 360 - Mod(-vTheta, -360))*0.017453292519943295769236907684886127134428718885417254560971914
-					, c := Cos(a), s := Sin(a)
-
-				Return (new Point3D(this.X, this.Y*c + this.Z*s, this.Y*-s + this.Z*c))
-			}
-
-			RotateY(vTheta) {
-				;[ cos(a)   0    sin(a)]
-				;[   0      1      0   ]
-				;[-sin(a)   0    cos(a)]
-
-				a := ((vTheta >= 0) ? Mod(vTheta, 360) : 360 - Mod(-vTheta, -360))*0.017453292519943295769236907684886127134428718885417254560971914
-					, c := Cos(a), s := Sin(a)
-
-				Return (new Point3D(this.X*c + this.Z*s, this.Y, this.X*-s + this.Z*c))
-			}
-
-			RotateZ(vTheta) {
-				;[ cos(a)   sin(a)   0]
-				;[-sin(a)   cos(a)   0]
-				;[    0       0      1]
-
-				a := ((vTheta >= 0) ? Mod(vTheta, 360) : 360 - Mod(-vTheta, -360))*0.017453292519943295769236907684886127134428718885417254560971914
-					, c := Cos(a), s := Sin(a)
-
-				Return (new Point3D(this.X*c + this.Y*s, this.X*-s + this.Y*c, this.Z))
-			}
-		}
-
 	}
 
 	Class Brush {
@@ -469,7 +426,7 @@ Class GDIp {
 						Return, (ErrorLevel)
 					}
 
-					Return, ("0x" . Math.ToBase(c, 10, 16))  ;! new Color(c[0, 2], c[2, 4], c[4, 6], c[6, 8])
+					Return, (Math.ToBase(c, 10, 16))  ;! new Color(c[0, 2], c[2, 4], c[4, 6], c[6, 8])
 			}
 		}
 
