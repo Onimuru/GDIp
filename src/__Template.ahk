@@ -1,14 +1,17 @@
+﻿;* 11/11/2020:
+	;* Initial commit.
+
 ;=====         Auto-execute         =========================;
 ;===============           Setting            ===============;
 
-#Include, %A_ScriptDir%\..\..\..\lib\Color.ahk
-#Include, %A_ScriptDir%\..\..\..\lib\General.ahk
-#Include, %A_ScriptDir%\..\..\..\lib\ObjectOriented.ahk
-#Include, %A_ScriptDir%\..\..\..\lib\Math.ahk
-#Include, %A_ScriptDir%\..\..\..\lib\GDIp.ahk
-#Include, %A_ScriptDir%\..\..\..\lib\Geometry.ahk
+#Include, <Color>
+#Include, <General>
+#Include, <ObjectOriented>
+#Include, <Math>
+#Include, <GDIp>
+#Include, <Geometry>
 
-#KeyHistory 0
+#KeyHistory, 0
 #NoEnv
 #Persistent
 #SingleInstance, Force
@@ -20,13 +23,13 @@ SetWorkingDir, % A_ScriptDir . "\..\..\.."
 
 ;===============           Variable           ===============;
 
-IniRead, vDebug, % A_WorkingDir . "\cfg\Settings.ini", Debug, Debug
-Global vDebug
-	, oCanvas := new GDIp.Canvas({"x": A_ScreenWidth - (150*2 + 50 + 10 + 1), "y": 50, "Width": 150*2 + 10, "Height": 150*2 + 10}, "-Caption +AlwaysOnTop +ToolWindow +OwnDialogs +E0x20")
-		, oBrush := [new GDIp.Brush(), new GDIp.LineBrush(new Rectangle(5, 5, oCanvas.Rectangle.Width - 10, oCanvas.Rectangle.Height - 10), [Color.Random(), Color.Random()])]
-		, oPen := [new GDIp.Pen(), new GDIp.Pen(oBrush[1])]
+IniRead, Debug, % A_WorkingDir . "\cfg\Settings.ini", Debug, Debug
+Global Debug
+	, Canvas := new GDIp.Canvas({"x": A_ScreenWidth - (150*2 + 50 + 10 + 1), "y": 50, "Width": 150*2 + 10, "Height": 150*2 + 10}, "-Caption +AlwaysOnTop +ToolWindow +OwnDialogs +E0x20")
+		, Brush := [new GDIp.Brush(), new GDIp.LineBrush(new Rectangle(5, 5, Canvas.Rectangle.Width - 10, Canvas.Rectangle.Height - 10), [Color.Random(), Color.Random()])]
+		, Pen := [new GDIp.Pen(), new GDIp.Pen(Brush[1])]
 
-	, oObject := {"Rectangle": new Rectangle(5, 5, oCanvas.Rectangle.Width - 10, oCanvas.Rectangle.Height - 10)
+	, ScriptObject := {"Rectangle": new Rectangle(5, 5, Canvas.Rectangle.Width - 10, Canvas.Rectangle.Height - 10)
 		, "SpeedRatio": 1}
 
 ;===============            Other             ===============;
@@ -51,13 +54,13 @@ Exit
 #If
 
 ~$Left::
-	oObject.SpeedRatio /= 2
+	ScriptObject.SpeedRatio /= 2
 
 	KeyWait("Left")
 	Return
 
 ~$Right::
-	oObject.SpeedRatio *= 2
+	ScriptObject.SpeedRatio *= 2
 
 	KeyWait("Right")
 	Return
@@ -66,6 +69,7 @@ Exit
 	If (KeyWait("Esc", "T1")) {
 		Exit()
 	}
+
 	Return
 
 ;=====           Function           =========================;
@@ -78,19 +82,19 @@ Exit() {
 }
 
 Update() {
-	Static __Time := 0
+	Static Time := 0
 
 	If (QueryPerformanceCounter_Passive()) {
-		__Time := Mod(__Time + 1*oObject.SpeedRatio, 360)
+		Time := Mod(Time + 1*ScriptObject.SpeedRatio, 360)
 
-		oCanvas.DrawString(oBrush[0], Round(__Time) . "°", "Bold r4 s10 x10 y10")
-		If (oObject.SpeedRatio != 1) {
-			oCanvas.DrawString(oBrush[0], (v := Round(oPolarCurves.SpeedRatio, 2)) . "x", Format("Bold r4 s10 x{} y10", oCanvas.Rectangle.Width - (15 + 6*StrLen(v))))
+		Canvas.DrawString(Brush[0], Round(Time) . "°", "Bold r4 s10 x10 y10")
+		If (ScriptObject.SpeedRatio != 1) {
+			Canvas.DrawString(Brush[0], (v := Round(ScriptObject.SpeedRatio, 2)) . "x", Format("Bold r4 s10 x{} y10", Canvas.Rectangle.Width - (15 + 6*StrLen(v))))
 		}
 
-		oCanvas.DrawRectangle(oPen[0], oObject.Rectangle)
+		Canvas.DrawRectangle(Pen[0], ScriptObject.Rectangle)
 
-		oCanvas.Update()
+		Canvas.Update()
 	}
 
 	SetTimer, Update, -1
@@ -98,7 +102,7 @@ Update() {
 
 ;=====            Class             =========================;
 
-Class __Class {
+Class Class {
 	__New() {
 
 	}
