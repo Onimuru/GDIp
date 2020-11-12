@@ -1,3 +1,6 @@
+;* 11/11/2020:
+	;* Initial commit.
+
 ;=====           Function           =========================;
 
 __Validate(vN, ByRef vNumber1 := "", ByRef vNumber2 := "", ByRef vNumber3 := "", ByRef vNumber4 := "") {
@@ -380,161 +383,195 @@ Class Rectangle {
 
 Class Vector2 {
 
-	;* new Vector2(x [Number || Vector2], (y))
-	__New(vX := 0, vY := "") {
-		If (Math.IsNumeric(vX)) {
-			If (Math.IsNumeric(vY)) {
-				Return, ({"x": vX
-					, "y": vY
+	;* new Vector2(x [Number || Vector2], (y [Number]))
+	__New(x := 0, y := "") {
+		Local
+		Global Math
+
+		If (Math.IsNumeric(x)) {
+			If (Math.IsNumeric(y)) {
+				Return, ({"x": x
+					, "y": y
 
 					, "Base": this.__Vector2})
 			}
 
-			Return, ({"x": vX
-				, "y": vX
+			Return, ({"x": x
+				, "y": x
 
 				, "Base": this.__Vector2})
 		}
 
-		Return, ({"x": vX.x
-			, "y": vX.y
+		Return, ({"x": x.x
+			, "y": x.y
 
 			, "Base": this.__Vector2})
 	}
 
-	;* Vector2.Multiply(v1 [Vector2], v2 [Vector2 || Number])
+	;* Vector2.Multiply(vector1 [Vector2], vector2 [Vector2 || Number])
 	;* Description:
 		;* Multiply a vector by another vector or a scalar.
-	Multiply(oVector2a, oVector2b) {
-		If (IsObject(oVector2b)) {
-			Return, (new Vector2(oVector2a.x*oVector2b.x, oVector2a.y*oVector2b.y))
+	Multiply(vector1, vector2) {
+		Local
+
+		If (IsObject(vector2)) {
+			Return, (new this(vector1.x*vector2.x, vector1.y*vector2.y))
 		}
 
-		Return, (new Vector2(oVector2a.x*oVector2b, oVector2a.y*oVector2b))
+		Return, (new this(vector1.x*vector2, vector1.y*vector2))
 	}
 
-	;* Vector2.Divide(v1 [Vector2], v2 [Vector2 || Number])
+	;* Vector2.Divide(vector1 [Vector2], vector2 [Vector2 || Number])
 	;* Description:
 		;* Divide a vector by another vector or a scalar.
-	Divide(oVector2a, oVector2b) {
-		If (IsObject(oVector2b)) {
-			Return, (new Vector2(oVector2a.x/oVector2b.x, oVector2a.y/oVector2b.y))
+	Divide(vector1, vector2) {
+		Local
+
+		If (IsObject(vector2)) {
+			Return, (new this(vector1.x/vector2.x, vector1.y/vector2.y))
 		}
 
-		Return, (new Vector2(oVector2a.x/oVector2b, oVector2a.y/oVector2b))
+		Return, (new this(vector1.x/vector2, vector1.y/vector2))
 	}
 
-	;* Vector2.Add(v1 [Vector2], v2 [Vector2 || Number])
+	;* Vector2.Add(vector1 [Vector2], vector2 [Vector2 || Number])
 	;* Description:
 		;* Add to a vector another vector or a scalar.
-	Add(oVector2a, oVector2b) {
-		If (IsObject(oVector2b)) {
-			Return, (new Vector2(oVector2a.x + oVector2b.x, oVector2a.y + oVector2b.y))
+	Add(vector1, vector2) {
+		Local
+
+		If (IsObject(vector2)) {
+			Return, (new this(vector1.x + vector2.x, vector1.y + vector2.y))
 		}
 
-		Return, (new Vector2(oVector2a.x + oVector2b, oVector2a.y + oVector2b))
+		Return, (new this(vector1.x + vector2, vector1.y + vector2))
 	}
 
-	;* Vector2.Subtract(v1 [Vector2], v2 [Vector2 || Number])
+	;* Vector2.Subtract(vector1 [Vector2], vector2 [Vector2 || Number])
 	;* Description:
 		;* Subtract from a vector another vector or scalar.
-	Subtract(oVector2a, oVector2b) {
-		If (IsObject(oVector2b)) {
-			Return, (new Vector2(oVector2a.x - oVector2b.x, oVector2a.y - oVector2b.y))
+	Subtract(vector1, vector2) {
+		Local
+
+		If (IsObject(vector2)) {
+			Return, (new this(vector1.x - vector2.x, vector1.y - vector2.y))
 		}
 
-		Return, (new Vector2(oVector2a.x - oVector2b, oVector2a.y - oVector2b))
+		Return, (new this(vector1.x - vector2, vector1.y - vector2))
 	}
 
-	;* Vector2.Clamp(v1 [Vector2], v2 [Vector2 || Number], v3 [Vector2 || Number])
+	;* Vector2.Clamp(vector1 [Vector2], vector2 [Vector2 || Number], vector3 [Vector2 || Number])
 	;* Description:
 		;* Clamp a vector to the given minimum and maximum vectors or values.
 	;* Note:
-		;* Assumes `v2 < v3`.
+		;* Assumes `vector2 < vector3`.
 	;* Parameters:
-		;* v1:
+		;* vector1:
 			;* Input vector.
-		;* v2:
+		;* vector2:
 			;* Minimum vector or number.
-		;* v3:
+		;* vector3:
 			;* Maximum vector or number.
-	Clamp(oVector2, oMinimum, oMaximum) {
-		If (IsObject(oMinimum) && IsObject(oMaximum)) {
-			Return, (new Vector2(Math.Max(oMinimum.x, Math.Min(oMaximum.x, oVector2.x)), Math.Max(oMinimum.y, Math.Min(oMaximum.y, oVector2.y))))
+	Clamp(vector1, vector2, vector3) {
+		Local
+
+		If (IsObject(vector2) && IsObject(vector3)) {
+			Return, (new this(Max(vector2.x, Min(vector3.x, vector1.x)), Max(vector2.y, Min(vector3.y, vector1.y))))
 		}
 
-		Return, (new Vector2(Math.Max(oMinimum, Math.Min(oMaximum, oVector2.x)), Math.Max(oMinimum, Math.Min(oMaximum, oVector2.y))))
+		Return, (new this(Max(vector2, Min(vector3, vector1.x)), Max(vector2, Min(vector3, vector1.y))))
 	}
 
-	;* Vector2.Cross(v1 [Vector2], v2 [Vector2])
+	;* Vector2.Cross(vector1 [Vector2], vector2 [Vector2])
 	;* Description:
-		;* Calculate the cross product of two vectors.
-	Cross(oVector2a, oVector2b) {
-		Return, (oVector2a.x*oVector2b.y - oVector2a.y*oVector2b.x)
+		;* Calculate the cross product (vector) of two vectors (greatest yield for perpendicular vectors).
+	Cross(vector1, vector2) {
+		Local
+
+		Return, (vector1.x*vector2.y - vector1.y*vector2.x)
 	}
 
-	;* Vector2.Distance(v1 [Vector2], v2 [Vector2])
+	;* Vector2.Distance(vector1 [Vector2], vector2 [Vector2])
 	;* Description:
 		;* Calculate the distance between two vectors.
-	Distance(oVector2a, oVector2b) {
-		Return, (Sqrt((oVector2a.x - oVector2b.x)**2 + (oVector2a.y - oVector2b.y)**2))
+	Distance(vector1, vector2) {
+		Local
+
+		Return, (Sqrt((vector1.x - vector2.x)**2 + (vector1.y - vector2.y)**2))
 	}
 
-	;* Vector2.DistanceSquared(v1 [Vector2], v2 [Vector2])
-	DistanceSquared(oVector2a, oVector2b) {
-		Return, ((oVector2a.x - oVector2b.x)**2 + (oVector2a.y - oVector2b.y)**2)
+	;* Vector2.DistanceSquared(vector1 [Vector2], vector2 [Vector2])
+	DistanceSquared(vector1, vector2) {
+		Local
+
+		Return, ((vector1.x - vector2.x)**2 + (vector1.y - vector2.y)**2)
 	}
 
-	;* Vector2.Dot(v1 [Vector2], v2 [Vector2])
+	;* Vector2.Dot(vector1 [Vector2], vector2 [Vector2])
 	;* Description:
-		;* Calculate the dot product of two vectors.
-	Dot(oVector2a, oVector2b) {
-		Return, (oVector2a.x*oVector2b.x + oVector2a.y*oVector2b.y)
+		;* Calculate the dot product (scalar) of two vectors (greatest yield for parallel vectors).
+	Dot(vector1, vector2) {
+		Local
+
+		Return, (vector1.x*vector2.x + vector1.y*vector2.y)
 	}
 
-	;* Vector2.Equals(v1 [Vector2], v2 [Vector2])
+	;* Vector2.Equals(vector1 [Vector2], vector2 [Vector2])
 	;* Description:
 		;* Indicates whether two vectors are equal.
-	Equals(oVector2a, oVector2b) {
-		Return, (oVector2a.x == oVector2b.x && oVector2a.y == oVector2b.y)
+	Equals(vector1, vector2) {
+		Local
+
+		Return, (vector1.x == vector2.x && vector1.y == vector2.y)
 	}
 
-	;* Vector2.Lerp(v1 [Vector2], v2 [Vector2], a [Number])
+	;* Vector2.Lerp(vector1 [Vector2], vector2 [Vector2], a [Number])
 	;* Description:
 		;* Returns a new vector that is the linear blend of the two given vectors.
 	;* Parameters:
-		;* v1:
+		;* vector1:
 			;* The starting vector.
-		;* v2:
+		;* vector2:
 			;* The vector to interpolate towards.
 		;* a:
 			;* Interpolation factor, typically in the closed interval [0, 1].
-	Lerp(oVector2a, oVector2b, vAlpha) {
-		Return, (new Vector2(oVector2a.x + (oVector2b.x - oVector2a.x)*vAlpha, oVector2a.y + (oVector2b.y - oVector2a.y)*vAlpha))
+	Lerp(vector1, vector2, alpha) {
+		Local
+
+		Return, (new this(vector1.x + (vector2.x - vector1.x)*alpha, vector1.y + (vector2.y - vector1.y)*alpha))
 	}
 
-	;* Vector2.Min(v1 [Vector2], v2 [Vector2])
-	Min(oVector2a, oVector2b) {
-		Return, (new Vector2(Math.Min(oVector2a.x, oVector2b.x), Math.Min(oVector2a.y, oVector2b.y)))
+	;* Vector2.Min(vector1 [Vector2], vector2 [Vector2])
+	Min(vector1, vector2) {
+		Local
+
+		Return, (new this(Min(vector1.x, vector2.x), Min(vector1.y, vector2.y)))
 	}
 
-	;* Vector2.Max(v1 [Vector2], v2 [Vector2])
-	Max(oVector2a, oVector2b) {
-		Return, (new Vector2(Math.Max(oVector2a.x, oVector2b.x), Math.Max(oVector2a.y, oVector2b.y)))
+	;* Vector2.Max(vector1 [Vector2], vector2 [Vector2])
+	Max(vector1, vector2) {
+		Local
+
+		Return, (new this(Max(vector1.x, vector2.x), Max(vector1.y, vector2.y)))
 	}
 
-	;* Vector2.Transform(v [Vector2], m [Matrix3])
-	Transform(oVector2, oMatrix3) {
-		x := oVector2.x, y := oVector2.y
-			, m := oMatrix3.Elements
+	;* Vector2.Transform(vector [Vector2], matrix [Matrix3])
+	Transform(vector, matrix) {
+		Local
 
-		Return, (new Vector2(m[0]*x + m[3]*y + m[6], m[1]*x + m[4]*y + m[7]))
+		x := vector.x, y := vector.y
+			, m := matrix.Elements
+
+		Return, (new this(m[0]*x + m[3]*y + m[6], m[1]*x + m[4]*y + m[7]))
 	}
 
 	Class __Vector2 extends __Object {
 
-		__Get(vKey) {
-			Switch (vKey) {
+		__Get(key) {
+			Local
+			Global Math
+
+			Switch (key) {
 
 				;* Vector2.Length
 				;* Description:
@@ -546,83 +583,95 @@ Class Vector2 {
 				Case "LengthSquared":
 					Return, (this.x**2 + this.y**2)
 
-				;* 2DVectorObject[0 || 1]
+				;* Vector2[n]
 				Default:
-					If (Math.IsInteger(vKey)) {
-						Return, ([this.x, this.y][vKey])
+					If (Math.IsInteger(key)) {
+						Return, ([this.x, this.y][key])
 					}
 			}
 		}
 
-		__Set(vKey, vValue) {
-			Switch (vKey) {
+		__Set(key, value) {
+			Local
 
-				;* Vector2.Length := Number
+			Switch (key) {
+
+				;* Vector2.Length := n
 				Case "Length":
-					Return, (this.normalize().multiply(vValue))
+					Return, (this.Normalize().Multiply(value))
 
-				;* Vector2[0 || 1] := Number
+				;* Vector2[n] := n
 				Default:
-					switch (vKey) {
+					switch (key) {
 						Case 0:
-							this.x := vValue
+							this.x := value
 						Case 1:
-							this.y := vValue
+							this.y := value
 					}
 					Return
 			}
 		}
 
-        Multiply(oVector2) {
-			If (IsObject(oVector2)) {
-				this.x *= oVector2.x, this.y *= oVector2.y
+        Multiply(vector) {
+			Local
+
+			If (IsObject(vector)) {
+				this.x *= vector.x, this.y *= vector.y
 			}
 			Else {
-				this.x *= oVector2, this.y *= oVector2
+				this.x *= vector, this.y *= vector
 			}
 
 			Return, (this)
         }
 
-        Divide(oVector2) {
-			If (IsObject(oVector2)) {
-				this.x /= oVector2.x, this.y /= oVector2.y
+        Divide(vector) {
+			Local
+
+			If (IsObject(vector)) {
+				this.x /= vector.x, this.y /= vector.y
 			}
 			Else {
-				this.x /= oVector2, this.y /= oVector2
+				this.x /= vector, this.y /= vector
 			}
 
 			Return, (this)
         }
 
-		Add(oVector2) {
-			If (IsObject(oVector2)) {
-				this.x += oVector2.x, this.y += oVector2.y
+		Add(vector) {
+			Local
+
+			If (IsObject(vector)) {
+				this.x += vector.x, this.y += vector.y
 			}
 			Else {
-				this.x += oVector2, this.y += oVector2
+				this.x += vector, this.y += vector
 			}
 
 			Return, (this)
 		}
 
-		Subtract(oVector2) {
-			If (IsObject(oVector2)) {
-				this.x -= oVector2.x, this.y -= oVector2.y
+		Subtract(vector) {
+			Local
+
+			If (IsObject(vector)) {
+				this.x -= vector.x, this.y -= vector.y
 			}
 			Else {
-				this.x -= oVector2, this.y -= oVector2
+				this.x -= vector, this.y -= vector
 			}
 
 			Return, (this)
 		}
 
-		Clamp(oMinimum, oMaximum) {
-			If (IsObject(oMinimum) && IsObject(oMaximum)) {
-				this.x := Math.Max(oMinimum.x, Math.Min(oMaximum.x, this.x)), this.y := Math.Max(oMinimum.y, Math.Min(oMaximum.y, this.y))
+		Clamp(vector1, vector2) {
+			Local
+
+			If (IsObject(vector1) && IsObject(vector2)) {
+				this.x := Max(vector1.x, Min(vector2.x, this.x)), this.y := Max(vector1.y, Min(vector2.y, this.y))
 			}
 			Else {
-				this.x := Math.Max(oMinimum, Math.Min(oMaximum, this.x)), this.y := Math.Max(oMinimum, Math.Min(oMaximum, this.y))
+				this.x := Max(vector1, Min(vector2, this.x)), this.y := Max(vector1, Min(vector2, this.y))
 			}
 
 			Return, (this)
@@ -632,6 +681,8 @@ Class Vector2 {
 		;* Description:
 			;* Inverts this vector.
 		Negate() {
+			Local
+
 			this.x *= -1, this.y *= -1
 
 			Return, (this)
@@ -641,6 +692,8 @@ Class Vector2 {
 		;* Description:
 			;* This method normalises the vector such that it's length/magnitude is 1. The result is called a unit vector.
         Normalize() {
+			Local
+
 			m := this.Length
 
 			If (m) {
@@ -650,20 +703,29 @@ Class Vector2 {
 			Return, (this)
         }
 
-		Transform(oMatrix3) {
+		Transform(matrix) {
+			Local
+
 			x := this.x, y := this.y
-				, m := oMatrix3.Elements
+				, m := matrix.Elements
 
 			this.x := m[0]*x + m[3]*y + m[6], this.y := m[1]*x + m[4]*y + m[7]
 
 			Return, (this)
 		}
 
-		Copy(oVector2) {
-			this.x := oVector2.x, this.y := oVector2.y
+		Copy(vector) {
+			Local
+
+			this.x := vector.x, this.y := vector.y
+
+			Return, (this)
 		}
 
 		Clone() {
+			Local
+			Global Vector2
+
 			Return, (new Vector2(this))
 		}
 	}
@@ -671,171 +733,205 @@ Class Vector2 {
 
 Class Vector3 {
 
-	;* new Vector3(x [Number || Vector2 || Vector3], (y), (z))
-	__New(vX := 0, vY := "", vZ := "") {
-		If (Math.IsNumeric(vX)) {
-			If (Math.IsNumeric(vY)) {
-				Return, ({"x": vX
-					, "y": vY
-					, "z": vZ
+	;* new Vector3(x [Number || Vector3], (y [Number]), (z [Number]))
+	__New(x := 0, y := "", z := "") {
+		Local
+		Global Math
+
+		If (Math.IsNumeric(x)) {
+			If (Math.IsNumeric(y)) {
+				Return, ({"x": x
+					, "y": y
+					, "z": z
 
 					, "Base": this.__Vector3})
 			}
 
-			Return, ({"x": vX
-				, "y": vX
-				, "z": vX
+			Return, ({"x": x
+				, "y": x
+				, "z": x
 
 				, "Base": this.__Vector3})
 		}
 
-		Return, ({"x": vX.x
-			, "y": vX.y
-			, "z": vX.z
+		Return, ({"x": x.x
+			, "y": x.y
+			, "z": x.z
 
 			, "Base": this.__Vector3})
 	}
 
-	;* Vector3.Multiply(v1 [Vector3], v2 [Vector3 || Number])
+	;* Vector3.Multiply(vector1 [Vector3], vector2 [Vector3 || Number])
 	;* Description:
 		;* Multiply a vector by another vector or a scalar.
-	Multiply(oVector3a, oVector3b) {
-		If (IsObject(oVector3b)) {
-			Return, (new Vector3(oVector3a.x*oVector3b.x, oVector3a.y*oVector3b.y, oVector3a.z*oVector3b.z))
+	Multiply(vector1, vector2) {
+		Local
+
+		If (IsObject(vector2)) {
+			Return, (new this(vector1.x*vector2.x, vector1.y*vector2.y, vector1.z*vector2.z))
 		}
 
-		Return, (new Vector3(oVector3a.x*oVector3b, oVector3a.y*oVector3b, oVector3a.z*oVector3b))
+		Return, (new this(vector1.x*vector2, vector1.y*vector2, vector1.z*vector2))
 	}
 
-	;* Vector3.Divide(v1 [Vector3], v2 [Vector3 || Number])
+	;* Vector3.Divide(vector1 [Vector3], vector2 [Vector3 || Number])
 	;* Description:
 		;* Divide a vector by another vector or a scalar.
-	Divide(oVector3a, oVector3b) {
-		If (IsObject(oVector3b)) {
-			Return, (new Vector3(oVector3a.x/oVector3b.x, oVector3a.y/oVector3b.y, oVector3a.z/oVector3b.z))
+	Divide(vector1, vector2) {
+		Local
+
+		If (IsObject(vector2)) {
+			Return, (new this(vector1.x/vector2.x, vector1.y/vector2.y, vector1.z/vector2.z))
 		}
 
-		Return, (new Vector3(oVector3a.x/oVector3b, oVector3a.y/oVector3b, oVector3a.z/oVector3b))
+		Return, (new this(vector1.x/vector2, vector1.y/vector2, vector1.z/vector2))
 	}
 
-	;* Vector3.Add(v1 [Vector3], v2 [Vector3 || Number])
+	;* Vector3.Add(vector1 [Vector3], vector2 [Vector3 || Number])
 	;* Description:
 		;* Add to a vector another vector or a scalar.
-	Add(oVector3a, oVector3b) {
-		If (IsObject(oVector3b)) {
-			Return, (new Vector3(oVector3a.x + oVector3b.x, oVector3a.y + oVector3b.y, oVector3a.z + oVector3b.z))
+	Add(vector1, vector2) {
+		Local
+
+		If (IsObject(vector2)) {
+			Return, (new this(vector1.x + vector2.x, vector1.y + vector2.y, vector1.z + vector2.z))
 		}
 
-		Return, (new Vector3(oVector3a.x + oVector3b, oVector3a.y + oVector3b, oVector3a.z + oVector3b))
+		Return, (new this(vector1.x + vector2, vector1.y + vector2, vector1.z + vector2))
 	}
 
-	;* Vector3.Subtract(v1 [Vector3], v2 [Vector3 || Number])
+	;* Vector3.Subtract(vector1 [Vector3], vector2 [Vector3 || Number])
 	;* Description:
 		;* Subtract from a vector another vector or scalar.
-	Subtract(oVector3a, oVector3b) {
-		If (IsObject(oVector3b)) {
-			Return, (new Vector3(oVector3a.x - oVector3b.x, oVector3a.y - oVector3b.y, oVector3a.z - oVector3b.z))
+	Subtract(vector1, vector2) {
+		Local
+
+		If (IsObject(vector2)) {
+			Return, (new this(vector1.x - vector2.x, vector1.y - vector2.y, vector1.z - vector2.z))
 		}
 
-		Return, (new Vector3(oVector3a.x - oVector3b, oVector3a.y - oVector3b, oVector3a.z - oVector3b))
+		Return, (new this(vector1.x - vector2, vector1.y - vector2, vector1.z - vector2))
 	}
 
-	;* Vector3.Clamp(v1 [Vector3], v2 [Vector3 || Number], v3 [Vector3 || Number])
+	;* Vector3.Clamp(vector1 [Vector3], vector2 [Vector3 || Number], vector3 [Vector3 || Number])
 	;* Description:
 		;* Clamp a vector to the given minimum and maximum vectors or values.
 	;* Note:
-		;* Assumes `v2 < v3`.
+		;* Assumes `vector2 < vector3`.
 	;* Parameters:
-		;* v1:
+		;* vector1:
 			;* Input vector.
-		;* v2:
+		;* vector2:
 			;* Minimum vector or number.
-		;* v3:
+		;* vector3:
 			;* Maximum vector or number.
-	Clamp(oVector3, oMinimum, oMaximum) {
-		If (IsObject(oMinimum) && IsObject(oMaximum)) {
-			Return, (new Vector3(Math.Max(oMinimum.x, Math.Min(oMaximum.x, oVector3.x)), Math.Max(oMinimum.y, Math.Min(oMaximum.y, oVector3.y)), Math.Max(oMinimum.z, Math.Min(oMaximum.z, oVector3.z))))
+	Clamp(vector1, vector2, vector3) {
+		Local
+
+		If (IsObject(vector2) && IsObject(vector3)) {
+			Return, (new this(Max(vector2.x, Min(vector3.x, vector1.x)), Max(vector2.y, Min(vector3.y, vector1.y)), Max(vector2.z, Min(vector3.z, vector1.z))))
 		}
 
-		Return, (new Vector3(Math.Max(oMinimum, Math.Min(oMaximum, oVector3.x)), Math.Max(oMinimum, Math.Min(oMaximum, oVector3.y)), Math.Max(oMinimum, Math.Min(oMaximum, oVector3.z))))
+		Return, (new this(Max(vector2, Min(vector3, vector1.x)), Max(vector2, Min(vector3, vector1.y)), Max(vector2, Min(vector3, vector1.z))))
 	}
 
-	;* Vector3.Cross(v1 [Vector3], v2 [Vector3])
+	;* Vector3.Cross(vector1 [Vector3], vector2 [Vector3])
 	;* Description:
 		;* Calculate the cross product (vector) of two vectors (greatest yield for perpendicular vectors).
-	Cross(oVector3a, oVector3b) {
-		a := oVector3a, a1 := a.x, a2 := a.y, a3 := a.z
-			, b := oVector3b, b1 := b.x, b2 := b.y, b3 := b.z
+	Cross(vector1, vector2) {
+		Local
+
+		a1 := vector1.x, a2 := vector1.y, a3 := vector1.z
+			, b1 := vector2.x, b2 := vector2.y, b3 := vector2.z
 
 		;[a2*b3 - a3*b2]
 		;[a3*b1 - a1*b3]
 		;[a1*b2 - a2*b1]
 
-		Return, (new Vector3(a2*b3 - a3*b2, a3*b1 - a1*b3, a1*b2 - a2*b1))
+		Return, (new this(a2*b3 - a3*b2, a3*b1 - a1*b3, a1*b2 - a2*b1))
 	}
 
-	;* Vector3.Distance(v1 [Vector3], v2 [Vector3])
+	;* Vector3.Distance(vector1 [Vector3], vector2 [Vector3])
 	;* Description:
 		;* Calculate the distance between two vectors.
-	Distance(oVector3a, oVector3b) {
-		Return, (Sqrt((oVector3a.x - oVector3b.x)**2 + (oVector3a.y - oVector3b.y)**2 + (oVector3a.z - oVector3b.z)**2))
+	Distance(vector1, vector2) {
+		Local
+
+		Return, (Sqrt((vector1.x - vector2.x)**2 + (vector1.y - vector2.y)**2 + (vector1.z - vector2.z)**2))
 	}
 
-	;* Vector3.DistanceSquared(v1 [Vector3], v2 [Vector3])
-	DistanceSquared(oVector3a, oVector3b) {
-		Return, ((oVector3a.x - oVector3b.x)**2 + (oVector3a.y - oVector3b.y)**2 + (oVector3a.z - oVector3b.z)**2)
+	;* Vector3.DistanceSquared(vector1 [Vector3], vector2 [Vector3])
+	DistanceSquared(vector1, vector2) {
+		Local
+
+		Return, ((vector1.x - vector2.x)**2 + (vector1.y - vector2.y)**2 + (vector1.z - vector2.z)**2)
 	}
 
-	;* Vector3.Dot(v1 [Vector3], v2 [Vector3])
+	;* Vector3.Dot(vector1 [Vector3], vector2 [Vector3])
 	;* Description:
 		;* Calculate the dot product (scalar) of two vectors (greatest yield for parallel vectors).
-	Dot(oVector3a, oVector3b) {
-		Return, (oVector3a.x*oVector3b.x + oVector3a.y*oVector3b.y + oVector3a.z*oVector3b.z)  ;? Math.Abs(a.Length)*Math.Abs(b.Length)*Math.Cos(AOB)
+	Dot(vector1, vector2) {
+		Local
+
+		Return, (vector1.x*vector2.x + vector1.y*vector2.y + vector1.z*vector2.z)  ;? Math.Abs(a.Length)*Math.Abs(b.Length)*Math.Cos(AOB)
 	}
 
-	;* Vector3.Equals(v1 [Vector3], v2 [Vector3])
+	;* Vector3.Equals(vector1 [Vector3], vector2 [Vector3])
 	;* Description:
 		;* Indicates whether two vectors are equal.
-	Equals(oVector3a, oVector3b) {
-		Return, (oVector3a.x == oVector3b.x && oVector3a.y == oVector3b.y && oVector3a.z == oVector3b.z)
+	Equals(vector1, vector2) {
+		Local
+
+		Return, (vector1.x == vector2.x && vector1.y == vector2.y && vector1.z == vector2.z)
 	}
 
-	;* Vector3.Lerp(v1 [Vector3], v2 [Vector3], a [Number])
+	;* Vector3.Lerp(vector1 [Vector3], vector2 [Vector3], a [Number])
 	;* Description:
 		;* Returns a new vector that is the linear blend of the two given vectors.
 	;* Parameters:
-		;* v1:[]
+		;* vector1:
 			;* The starting vector.
-		;* v2:
+		;* vector2:
 			;* The vector to interpolate towards.
 		;* a:
 			;* Interpolation factor, typically in the closed interval [0, 1].
-	Lerp(oVector3a, oVector3b, vAlpha) {
-		Return, (new Vector3(oVector3a.x + (oVector3b.x - oVector3a.x)*vAlpha, oVector3a.y + (oVector3b.y - oVector3a.y)*vAlpha, oVector3a.z + (oVector3b.z - oVector3a.z)*vAlpha))
+	Lerp(vector1, vector2, alpha) {
+		Local
+
+		Return, (new this(vector1.x + (vector2.x - vector1.x)*alpha, vector1.y + (vector2.y - vector1.y)*alpha, vector1.z + (vector2.z - vector1.z)*alpha))
 	}
 
-	;* Vector3.Min(v1 [Vector3], v2 [Vector3])
-	Min(oVector3a, oVector3b) {
-		Return, (new Vector3(Math.Min(oVector3a.x, oVector3b.x), Math.Min(oVector3a.y, oVector3b.y), Math.Min(oVector3a.z, oVector3b.z)))
+	;* Vector3.Min(vector1 [Vector3], vector2 [Vector3])
+	Min(vector1, vector2) {
+		Local
+
+		Return, (new this(Min(vector1.x, vector2.x), Min(vector1.y, vector2.y), Min(vector1.z, vector2.z)))
 	}
 
-	;* Vector3.Max(v1 [Vector3], v2 [Vector3])
-	Max(oVector3a, oVector3b) {
-		Return, (new Vector3(Math.Max(oVector3a.x, oVector3b.x), Math.Max(oVector3a.y, oVector3b.y), Math.Max(oVector3a.z, oVector3b.z)))
+	;* Vector3.Max(vector1 [Vector3], vector2 [Vector3])
+	Max(vector1, vector2) {
+		Local
+
+		Return, (new this(Max(vector1.x, vector2.x), Max(vector1.y, vector2.y), Max(vector1.z, vector2.z)))
 	}
 
-	;* Vector3.Transform(v [Vector3], m [Matrix3])
-	Transform(oVector3, oMatrix3) {
-		x := oVector3.x, y := oVector3.y, z := oVector3.z
-			, m := oMatrix3.Elements
+	;* Vector3.Transform(vector [Vector3], matrix [Matrix3])
+	Transform(vector, matrix) {
+		Local
 
-		Return, (new Vector3(m[0]*x + m[3]*y + m[6]*z, m[1]*x + m[4]*y + m[7]*z, m[2]*x + m[5]*y + m[8]*z))
+		x := vector.x, y := vector.y, z := vector.z
+			, m := matrix.Elements
+
+		Return, (new this(m[0]*x + m[3]*y + m[6]*z, m[1]*x + m[4]*y + m[7]*z, m[2]*x + m[5]*y + m[8]*z))
 	}
 
 	Class __Vector3 extends __Object {
 
-		__Get(vKey) {
-			Switch (vKey) {
+		__Get(key) {
+			Local
+			Global Math
+
+			Switch (key) {
 
 				;* Vector3.Length
 				;* Description:
@@ -847,85 +943,97 @@ Class Vector3 {
 				Case "LengthSquared":
 					Return, (this.x**2 + this.y**2 + this.z**2)
 
-				;* Vector3[0 || 1 || 2]
+				;* Vector3[n]
 				Default:
-					If (Math.IsInteger(vKey)) {
-						Return, ([this.x, this.y, this.z][vKey])
+					If (Math.IsInteger(key)) {
+						Return, ([this.x, this.y, this.z][key])
 					}
 			}
 		}
 
-		__Set(vKey, vValue) {
-			Switch (vKey) {
+		__Set(key, value) {
+			Local
 
-				;* Vector3.Length := Number
+			Switch (key) {
+
+				;* Vector3.Length := n
 				Case "Length":
-					Return, (this.normalize().multiply(vValue))
+					Return, (this.Normalize().Multiply(value))
 
-				;* Vector3[0 || 1 || 2] := Number
+				;* Vector3[n] := n
 				Default:
-					switch (vKey) {
+					switch (key) {
 						Case 0:
-							this.x := vValue
+							this.x := value
 						Case 1:
-							this.y := vValue
+							this.y := value
 						Case 2:
-							this.z := vValue
+							this.z := value
 					}
 					Return
 			}
 		}
 
-        Multiply(oVector3) {
-			If (IsObject(oVector3)) {
-				this.x *= oVector3.x, this.y *= oVector3.y, this.z *= oVector3.z
+        Multiply(vector) {
+			Local
+
+			If (IsObject(vector)) {
+				this.x *= vector.x, this.y *= vector.y, this.z *= vector.z
 			}
 			Else {
-				this.x *= oVector3, this.y *= oVector3, this.z *= oVector3
+				this.x *= vector, this.y *= vector, this.z *= vector
 			}
 
 			Return, (this)
         }
 
-        Divide(oVector3) {
-			If (IsObject(oVector3)) {
-				this.x /= oVector3.x, this.y /= oVector3.y, this.z /= oVector3.z
+        Divide(vector) {
+			Local
+
+			If (IsObject(vector)) {
+				this.x /= vector.x, this.y /= vector.y, this.z /= vector.z
 			}
 			Else {
-				this.x /= oVector3, this.y /= oVector3, this.z /= oVector3
+				this.x /= vector, this.y /= vector, this.z /= vector
 			}
 
 			Return, (this)
         }
 
-		Add(oVector3) {
-			If (IsObject(oVector3)) {
-				this.x += oVector3.x, this.y += oVector3.y, this.z += oVector3.z
+		Add(vector) {
+			Local
+
+			If (IsObject(vector)) {
+				this.x += vector.x, this.y += vector.y, this.z += vector.z
 			}
 			Else {
-				this.x += oVector3, this.y += oVector3, this.z += oVector3
+				this.x += vector, this.y += vector, this.z += vector
 			}
 
 			Return, (this)
 		}
 
-		Subtract(oVector3) {
-			If (IsObject(oVector3)) {
-				this.x -= oVector3.x, this.y -= oVector3.y, this.z -= oVector3.z
+		Subtract(vector) {
+			Local
+
+			If (IsObject(vector)) {
+				this.x -= vector.x, this.y -= vector.y, this.z -= vector.z
 			}
 			Else {
-				this.x -= oVector3, this.y -= oVector3, this.z -= oVector3
+				this.x -= vector, this.y -= vector, this.z -= vector
 			}
 
 			Return, (this)
 		}
 
-		Clamp(oMinimum, oMaximum) {
-			If (IsObject(oMinimum) && IsObject(oMaximum)) {
-				this.x := Math.Max(oMinimum.x, Math.Min(oMaximum.x, this.x)), this.y := Math.Max(oMinimum.y, Math.Min(oMaximum.y, this.y)), this.z := Math.Max(oMinimum.z, Math.Min(oMaximum.z, this.z))
+		Clamp(vector1, vector2) {
+			Local
+
+			If (IsObject(vector1) && IsObject(vector2)) {
+				this.x := Max(vector1.x, Min(vector2.x, this.x)), this.y := Max(vector1.y, Min(vector2.y, this.y)), this.z := Max(vector1.z, Min(vector2.z, this.z))
 			}
 			Else {
-				this.x := Math.Max(oMinimum, Math.Min(oMaximum, this.x)), this.y := Math.Max(oMinimum, Math.Min(oMaximum, this.y)), this.z := Math.Max(oMinimum, Math.Min(oMaximum, this.z))
+				this.x := Max(vector1, Min(vector2, this.x)), this.y := Max(vector1, Min(vector2, this.y)), this.z := Max(vector1, Min(vector2, this.z))
 			}
 
 			Return, (this)
@@ -935,6 +1043,8 @@ Class Vector3 {
 		;* Description:
 			;* Inverts this vector.
 		Negate() {
+			Local
+
 			this.x *= -1, this.y *= -1, this.z *= -1
 
 			Return, (this)
@@ -944,6 +1054,8 @@ Class Vector3 {
 		;* Description:
 			;* This method normalises the vector such that it's length/magnitude is 1. The result is called a unit vector.
         Normalize() {
+			Local
+
 			m := this.Length
 
 			If (m) {
@@ -953,20 +1065,29 @@ Class Vector3 {
 			Return, (this)
         }
 
-		Transform(oMatrix3) {
+		Transform(matrix) {
+			Local
+
 			x := this.x, y := this.y, z := this.z
-				, m := oMatrix3.Elements
+				, m := matrix.Elements
 
 			this.x := m[0]*x + m[3]*y + m[6]*z, this.y := m[1]*x + m[4]*y + m[7]*z, this.z := m[2]*x + m[5]*y + m[8]*z
 
 			Return, (this)
 		}
 
-		Copy(oVector3) {
-			this.x := oVector3.x, this.y := oVector3.y, this.z := oVector3.z
+		Copy(vector) {
+			Local
+
+			this.x := vector.x, this.y := vector.y, this.z := vector.z
+
+			Return, (this)
 		}
 
 		Clone() {
+			Local
+			Global Vector3
+
 			Return, (new Vector3(this))
 		}
 	}
@@ -975,13 +1096,37 @@ Class Vector3 {
 Class Matrix3 {
 
 	__New() {
+		Local
+
 		Return, ({"Elements": [1, 0, 0, 0, 1, 0, 0, 0, 1]
 			, "Base": this.__Matrix3})
 	}
 
-	Multiply(oMatrix3a, oMatrix3b) {
-		a := oMatrix3a.Elements, a11 := a[0], a12 := a[1], a13 := a[2], a21 := a[3], a22 := a[4], a23 := a[5], a31 := a[6], a32 := a[7], a33 := a[8]
-			, b := oMatrix3b.Elements, b11 := b[0], b12 := b[1], b13 := b[2], b21 := b[3], b22 := b[4], b23 := b[5], b31 := b[6], b32 := b[7], b33 := b[8]
+	;* Matrix3.Equals(matrix1 [Matrix3], matrix2 [Matrix3])
+	;* Description:
+		;* Indicates whether two matrices are the same.
+	Equals(matrix1, matrix2) {
+		Local
+
+		m1 := matrix1.Elements
+			, m2 := matrix2.Elements
+
+		While (A_Index < 9) {
+			i := A_Index - 1
+
+			If (m1[i] != m2[i]) {
+				Return, (0)
+			}
+		}
+
+		Return, (1)
+	}
+
+	Multiply(matrix1, matrix2) {
+		Local
+
+		m1 := matrix1.Elements, a11 := m1[0], a12 := m1[1], a13 := m1[2], a21 := m1[3], a22 := m1[4], a23 := m1[5], a31 := m1[6], a32 := m1[7], a33 := m1[8]
+			, m2 := matrix2.Elements, b11 := m2[0], b12 := m2[1], b13 := m2[2], b21 := m2[3], b22 := m2[4], b23 := m2[5], b31 := m2[6], b32 := m2[7], b33 := m2[8]
 
 		;[a11*b11 + a12*b21 + a13*b31   a11*b12 + a12*b22 + a13*b32   a11*b13 + a12*b23 + a13*b33]
 		;[a21*b11 + a22*b21 + a23*b31   a21*b12 + a22*b22 + a23*b32   a21*b13 + a22*b23 + a23*b33]
@@ -994,81 +1139,109 @@ Class Matrix3 {
 			, "Base": this.__Matrix3})
 	}
 
-	RotateX(vTheta) {
-		c := Math.Cos(vTheta), s := Math.Sin(vTheta)
+	;* Matrix3.RotateX(theta [Radians])
+	;* Description:
+		;* Creates a x-rotation matrix.
+	RotateX(theta) {
+		Local
+
+		c := Cos(theta), s := Sin(theta)
 
 		;[1      0         0  ]
-		;[0    cos(a)   sin(a)]
-		;[0   -sin(a)   cos(a)]
+		;[0    cos(θ)   sin(θ)]
+		;[0   -sin(θ)   cos(θ)]
 
 		Return, ({"Elements": [1, 0, 0, 0, c, s, 0, -s, c]
 			, "Base": this.__Matrix3})
 	}
 
-	RotateY(vTheta) {
-		c := Math.Cos(vTheta), s := Math.Sin(vTheta)
+	;* Matrix3.RotateY(theta [Radians])
+	;* Description:
+		;* Creates a y-rotation matrix.
+	RotateY(theta) {
+		Local
 
-		;[cos(a)   0   -sin(a)]
+		c := Cos(theta), s := Sin(theta)
+
+		;[cos(θ)   0   -sin(θ)]
 		;[  0      1      0   ]
-		;[sin(a)   0    cos(a)]
+		;[sin(θ)   0    cos(θ)]
 
 		Return, ({"Elements": [c, 0, -s, 0, 1, 0, s, 0, c]
 			, "Base": this.__Matrix3})
 	}
 
-	RotateZ(vTheta) {
-		c := Cos(vTheta), s := Sin(vTheta)
+	;* Matrix3.RotateZ(theta [Radians])
+	;* Description:
+		;* Creates a z-rotation matrix.
+	RotateZ(theta) {
+		Local
 
-		;[ cos(a)   sin(a)   0]
-		;[-sin(a)   cos(a)   0]
+		c := Cos(theta), s := Sin(theta)
+
+		;[ cos(θ)   sin(θ)   0]
+		;[-sin(θ)   cos(θ)   0]
 		;[    0       0      1]
 
 		Return, ({"Elements": [c, s, 0, -s, c, 0, 0, 0, 1]
 			, "Base": this.__Matrix3})
 	}
 
-	Class __Matrix3 {
+	Class __Matrix3 extends __Object {
 
-		Set(oElements) {
-			this.elements := oElements
+		Set(elements) {
+			Local
+
+			this.Elements := elements
 
 			Return, (this)
 
 		}
 
-		RotateX(vTheta) {
-			c := Math.Cos(vTheta), s := Math.Sin(vTheta)
+		RotateX(theta) {
+			Local
 
-			this.Elements := [1.0, 0.0, 0.0, 0.0, c, s, 0.0, -s, c]
+			c := Cos(theta), s := Sin(theta)
+				, m := this.Elements, a12 := m[1], a13 := m[2], a22 := m[4], a23 := m[5], a32 := m[7], a33 := m[8]
 
-			Return, (this)
-		}
-
-		RotateY(vTheta) {
-			c := Cos(vTheta), s := Sin(vTheta)
-
-			this.Elements := [c, 0.0, -s, 0.0, 1.0, 0.0, s, 0.0, c]
+			this.Elements[1] := a12*c + a13*-s, this.Elements[2] := a12*s + a13*c, this.Elements[4] := a22*c + a23*-s, this.Elements[5] := a22*s + a23*c, this.Elements[7] := a32*c + a33*-s, this.Elements[8] := a32*s + a33*c
 
 			Return, (this)
 		}
 
-		RotateZ(vTheta) {
-			c := Cos(vTheta), s := Sin(vTheta)
+		RotateY(theta) {
+			Local
 
-			this.Elements := [c, s, 0.0, -s, c, 0.0, 0.0, 0.0, 1.0]
+			c := Cos(theta), s := Sin(theta)
+				, m := this.Elements, a11 := m[0], a13 := m[2], a21 := m[3], a23 := m[5], a31 := m[6], a33 := m[8]
+
+			this.Elements[0] := a11*c + a13*s, this.Elements[2] := a11*-s + a13*c, this.Elements[3] := a21*c + a23*s, this.Elements[5] := a21*-s + a23*c, this.Elements[6] := a31*c + a33*s, this.Elements[8] := a31*-s + a33*c
 
 			Return, (this)
 		}
 
-		Print() {
-			e := this.Elements
+		RotateZ(theta) {
+			Local
 
-			Loop, % 9 {
-				i := A_Index - 1
-					, r .= ((A_Index == 1) ? ("[") : (["`n "][Mod(i, 3)])) . [" "][!(e[i] >= 0)] . e[i] . ((i < 8) ? (", ") : (" ]"))
-			}
+			c := Cos(theta), s := Sin(theta)
+				, m := this.Elements, a11 := m[0], a12 := m[1], a21 := m[3], a22 := m[4], a31 := m[6], a32 := m[7]
 
-			Return, (r)
+			this.Elements[0] := a11*c + a12*-s, this.Elements[1] := a11*s + a12*c, this.Elements[3] := a21*c + a22*-s, this.Elements[4] := a21*s + a22*c, this.Elements[6] := a31*c + a32*-s, this.Elements[7] := a31*s + a32*c
+
+			Return, (this)
 		}
+
+;		Print() {
+;			Local
+;
+;			e := this.Elements
+;
+;			Loop, % 9 {
+;				i := A_Index - 1
+;					, r .= ((A_Index == 1) ? ("[") : (["`n "][Mod(i, 3)])) . [" "][!(e[i] >= 0)] . e[i] . ((i < 8) ? (", ") : (" ]"))
+;			}
+;
+;			Return, (r)
+;		}
 	}
 }
