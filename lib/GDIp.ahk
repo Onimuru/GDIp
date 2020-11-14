@@ -1,4 +1,11 @@
-﻿;=====           Function           =========================;
+;* 13/11/2020:
+	;* Changed `Canvas.Smoothing` default to 4.
+	;* Changed `Canvas.Interpolation` default to 7.
+	;! Changed `Canvas.Rectangle` to `Canvas.Position`
+;* 11/11/2020:
+	;* Initial commit.
+
+;=====           Function           =========================;
 
 CreatePoint(oData, ByRef vPoint) {
 	VarSetCapacity(vPoint, 8)
@@ -99,12 +106,12 @@ Class GDIp {
 		}
 
 		;* new GDIp.Canvas(RectangleObject, Options, Name, Smoothing, Interpolation, HideOnCreation)
-		__New(oRectangle, vOptions, vName := "gCanvas", vSmoothing := 0, vInterpolation := 0, vHide := 0) {
+		__New(oRectangle, vOptions, vName := "gCanvas", vSmoothing := 4, vInterpolation := 7, vHide := 0) {
 			VarSetCapacity(s, 20, 0), NumPut(40, s, 0, "UInt"), NumPut(oRectangle.Width, s, 4, "UInt"), NumPut(oRectangle.Height, s, 8, "UInt"), NumPut(1, s, 12, "UShort"), NumPut(32, s, 14, "UShort"), NumPut(0, s, 16, "UInt")
 
 			ObjRawSet(this, "HBM", DllCall("CreateDIBSection", "UPtr", new GDI.DC(), "UPtr", &s, "UInt", 0, "UPtr*", 0, "UPtr", 0, "UInt", 0, "UPtr")), ObjRawSet(this, "HDC", DllCall("CreateCompatibleDC", "UPtr", 0)), ObjRawSet(this, "OBM", DllCall("SelectObject", "UPtr", this.HDC, "UPtr", this.HBM))
 
-			ObjRawSet(this, "Rectangle", oRectangle), ObjRawSet(this, "Name", vName)
+			ObjRawSet(this, "Position", oRectangle), ObjRawSet(this, "Name", vName)
 			DllCall("Gdiplus\GdipCreateFromHDC", "UPtr", this.HDC, "UPtr*", p), ObjRawSet(this, "Handle", p), DllCall("Gdiplus\GdipSetSmoothingMode", "UPtr", this.Handle, "Int", vSmoothing), DllCall("Gdiplus\GdipSetInterpolationMode", "UPtr", this.Handle, "Int", vInterpolation)
 
 			ObjRawSet(this, "Camera", {"Base": this.__Camera
@@ -221,8 +228,8 @@ Class GDIp {
 
 		;-----            String            -----;
 
-		DrawString(oBrush, vString, vOptions := "", vFontName := "Arial") {
-			Static __Options := "undefined", __Font, __StringFormat, __Rect := CreateRect([0, 0, 0, 0], __Rect)
+		DrawString(oBrush, vString, vOptions := "", vFontName := "Arial", measureString := 0) {
+			Static __Options := "undefined", __Font, __StringFormat, __Rect1 := CreateRect([0, 0, 0, 0], __Rect1), __Rect2 := VarSetCapacity(__Rect2, 16, 0)
 
 			If (__Options != vOptions) {
 				If (!o := new GDIp.FontFamily(vFontName)) {
@@ -250,7 +257,7 @@ Class GDIp {
 					i := A_Index - 1
 
 					RegExMatch(vOptions, "i)((?<=" . ["X", "Y", "W", "H"][i] . ")\d+)", r)
-					NumPut(Round(r), __Rect, i*4, "Float")
+					NumPut(Round(r), __Rect1, i*4, "Float")
 				}
 
 				RegExMatch(vOptions, "i)((?<=H)[a-z]+)", r)  ;? hValue (horizontal alignment): 0 = Left, 1 = Center, 2 = Right
@@ -270,19 +277,26 @@ Class GDIp {
 
 				__Options := vOptions
 			}
-			Return, (ErrorLevel := DllCall("Gdiplus\GdipDrawString", "UPtr", this.Handle, "WStr", vString, "Int", -1, "UPtr", __Font.Handle, "UPtr", &__Rect, "UPtr", __StringFormat.Handle, "UPtr", oBrush.Handle))
-		}
 
-		MeasureString(oData, vString, oFont, oStringFormat) {
-			Static __Rect := VarSetCapacity(__Rect, 16, 0)
+			If (measureString) {
+				If (ErrorLevel := DllCall("gdiplus\GdipMeasureString", "UPtr", this.Handle, "WStr", vString, "Int", -1, "UPtr", __Font.Handle, "UPtr", &__Rect1, "UPtr", __StringFormat.Handle, "UPtr", &__Rect2, "UInt*", c, "UInt*", l)) {
+					Return, (ErrorLevel)
+				}
 
-			CreateRect(oData, b)
-
-			If (ErrorLevel := DllCall("gdiplus\GdipMeasureString", "UPtr", this.Handle, "WStr", vString, "Int", -1, "UPtr", oFont.Handle, "UPtr", &b, "UPtr", oStringFormat.Handle, "UPtr", &__Rect, "UInt*", c, "UInt*", l)) {
-				Return, (ErrorLevel)
+				Return, (&__Rect2 ? [NumGet(__Rect2, 0, "Float"), NumGet(__Rect2, 4, "Float"), NumGet(__Rect2, 8, "Float"), NumGet(__Rect2, 12, "Float"), c, l] : 0)
 			}
-			Return, (&__Rect ? [NumGet(__Rect, 0, "Float"), NumGet(__Rect, 4, "Float"), NumGet(__Rect, 8, "Float"), NumGet(__Rect, 12, "Float"), c, l] : 0)
+
+			Return, (ErrorLevel := DllCall("Gdiplus\GdipDrawString", "UPtr", this.Handle, "WStr", vString, "Int", -1, "UPtr", __Font.Handle, "UPtr", &__Rect1, "UPtr", __StringFormat.Handle, "UPtr", oBrush.Handle))
 		}
+
+;		MeasureString(vString, oFont, oStringFormat, ByRef RectF) {
+;			Static __Rect2 := VarSetCapacity(__Rect2, 16, 0)
+;
+;			If (ErrorLevel := DllCall("gdiplus\GdipMeasureString", "UPtr", this.Handle, "WStr", vString, "Int", -1, "UPtr", oFont.Handle, "UPtr", &RectF, "UPtr", oStringFormat.Handle, "UPtr", &__Rect2, "UInt*", c, "UInt*", l)) {
+;				Return, (ErrorLevel)
+;			}
+;			Return, (&__Rect2 ? [NumGet(__Rect2, 0, "Float"), NumGet(__Rect2, 4, "Float"), NumGet(__Rect2, 8, "Float"), NumGet(__Rect2, 12, "Float"), c, l] : 0)
+;		}
 
 		;-------------------------           Control            -----;
 
@@ -308,7 +322,7 @@ Class GDIp {
 			}
 
 			If (!oRectangle.Width || !oRectangle.Height) {
-				oRectangle := new Rectangle(oRectangle.x, oRectangle.y, this.Rectangle.Width, this.Rectangle.Height)
+				oRectangle := new Rectangle(oRectangle.x, oRectangle.y, this.Position.Width, this.Position.Height)
 			}
 
 			If (ErrorLevel := DllCall("UpdateLayeredWindow", "UPtr", this.HWND, "UPtr", 0, "UPtr", (oRectangle.x == "" && oRectangle.y == "") ? (0) : (&__Point), "Int64*", oRectangle.Width | oRectangle.Height << 32, "UPtr", this.HDC, "Int64*", 0, "UInt", 0, "UInt*", vAlpha << 16 | 1 << 24, "UInt", 2)) {
@@ -515,7 +529,7 @@ Class GDIp {
 					If (ErrorLevel := DllCall("Gdiplus\GdipGetPenColor", "UPtr", this.Handle, "UInt*", c)) {
 						Return, (ErrorLevel)
 					}
-					Return, ("0x" . Math.ToBase(c, 10, 16))
+					Return, (Math.ToBase(c, 10, 16))
 				Case "Width":
 					If (ErrorLevel := DllCall("Gdiplus\GdipGetPenWidth", "UPtr", this.Handle, "Float*", c)) {
 						Return, (ErrorLevel)
