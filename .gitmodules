@@ -1,0 +1,27 @@
+[submodule "lib/Assert.ahk"]
+	path = lib/Assert.ahk
+	url = https://github.com/Onimuru/Assert.ahk
+[submodule "lib/Assert"]
+	path = lib/Assert
+	url = https://github.com/Onimuru/Assert
+[submodule "lib/Color"]
+	path = lib/Color
+	url = https://github.com/Onimuru/Color
+[submodule "lib/Console"]
+	path = lib/Console
+	url = https://github.com/Onimuru/Console
+[submodule "lib/General"]
+	path = lib/General
+	url = https://github.com/Onimuru/General
+[submodule "lib/Math"]
+	path = lib/Math
+	url = https://github.com/Onimuru/Math
+[submodule "lib/ObjectOriented"]
+	path = lib/ObjectOriented
+	url = https://github.com/Onimuru/ObjectOriented
+[submodule "lib/String"]
+	path = lib/String
+	url = https://github.com/Onimuru/String
+[submodule "lib/Structure"]
+	path = lib/Structure
+	url = https://github.com/Onimuru/Structure
