@@ -1,4 +1,10 @@
-﻿;============== Function ======================================================;
+﻿;==============  Include  ======================================================;
+
+#Include, %A_LineFile%\..\Core.ahk
+
+#Include, %A_LineFile%\..\Math\Math.ahk
+
+;============== Function ======================================================;
 
 __Validate(n, ByRef number1 := "", ByRef number2 := "", ByRef number3 := "", ByRef number4 := "") {
 	Loop, % n {
@@ -151,7 +157,7 @@ Class Vec2 {
 	;* new Vec2([Array || Object|| Vec2 || Vec3] point)
 	__New(params*) {
 		switch (Type(params[1])) {
-			case "Number": {
+			case "Integer, Float": {
 				return ({"x": params[1], "y": (Math.IsNumeric(params[2])) ? (params[2]) : (params[1])
 
 					, "Base": this.__Vec2})
@@ -185,7 +191,7 @@ Class Vec2 {
 		;* Divide a vector by another vector or a scalar.
 	Divide(vector, scalar) {
 		switch (Type(scalar)) {
-			case "Number": {
+			case "Integer, Float": {
 				return (new this(vector.x/scalar, vector.y/scalar))
 			}
 			case "Vec2", "Vec3": {
@@ -199,7 +205,7 @@ Class Vec2 {
 					return (new this(vector.x/x, vector.y/y))
 				}
 
-				throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Number."))
+				throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Integer, Float."))
 			}
 		}
 	}
@@ -209,7 +215,7 @@ Class Vec2 {
 		;* Multiply a vector by another vector or a scalar.
 	Multiply(vector, scalar) {
 		switch (Type(scalar)) {
-			case "Number": {
+			case "Integer, Float": {
 				return (new this(vector.x*scalar, vector.y*scalar))
 			}
 			case "Vec2", "Vec3": {
@@ -223,7 +229,7 @@ Class Vec2 {
 					return (new this(vector.x*x, vector.y*y))
 				}
 
-				throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Number."))
+				throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Integer, Float."))
 			}
 		}
 	}
@@ -233,7 +239,7 @@ Class Vec2 {
 		;* Add to a vector another vector or a scalar.
 	Add(vector, scalar) {
 		switch (Type(scalar)) {
-			case "Number": {
+			case "Integer, Float": {
 				return (new this(vector.x + scalar, vector.y + scalar))
 			}
 			case "Vec2", "Vec3": {
@@ -247,7 +253,7 @@ Class Vec2 {
 					return (new this(vector.x + x, vector.y + y))
 				}
 
-				throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Number."))
+				throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Integer, Float."))
 			}
 		}
 	}
@@ -257,7 +263,7 @@ Class Vec2 {
 		;* Subtract from a vector another vector or scalar.
 	Subtract(vector, scalar) {
 		switch (Type(scalar)) {
-			case "Number": {
+			case "Integer, Float": {
 				return (new this(vector.x - scalar, vector.y - scalar))
 			}
 			case "Vec2", "Vec3": {
@@ -271,7 +277,7 @@ Class Vec2 {
 					return (new this(vector.x - x, vector.y - y))
 				}
 
-				throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Number."))
+				throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Integer, Float."))
 			}
 		}
 	}
@@ -418,7 +424,7 @@ Class Vec2 {
 
         Divide(scalar) {
 			switch (Type(scalar)) {
-				case "Number": {
+				case "Integer, Float": {
 					this.x /= scalar, this.y /= scalar
 				}
 				case "Vec2", "Vec3": {
@@ -434,7 +440,7 @@ Class Vec2 {
 						return (this)
 					}
 
-					throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Number."))
+					throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Integer, Float."))
 				}
 			}
 
@@ -443,7 +449,7 @@ Class Vec2 {
 
         Multiply(scalar) {
 			switch (Type(scalar)) {
-				case "Number": {
+				case "Integer, Float": {
 					this.x *= scalar, this.y *= scalar
 				}
 				case "Vec2", "Vec3": {
@@ -459,7 +465,7 @@ Class Vec2 {
 						return (this)
 					}
 
-					throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Number."))
+					throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Integer, Float."))
 				}
 			}
 
@@ -468,7 +474,7 @@ Class Vec2 {
 
         Add(scalar) {
 			switch (Type(scalar)) {
-				case "Number": {
+				case "Integer, Float": {
 					this.x += scalar, this.y += scalar
 				}
 				case "Vec2", "Vec3": {
@@ -484,7 +490,7 @@ Class Vec2 {
 						return (this)
 					}
 
-					throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Number."))
+					throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Integer, Float."))
 				}
 			}
 
@@ -493,7 +499,7 @@ Class Vec2 {
 
         Subtract(scalar) {
 			switch (Type(scalar)) {
-				case "Number": {
+				case "Integer, Float": {
 					this.x -= scalar, this.y -= scalar
 				}
 				case "Vec2", "Vec3": {
@@ -509,7 +515,7 @@ Class Vec2 {
 						return (this)
 					}
 
-					throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Number."))
+					throw (Exception("ArgumentException", -1, "This parameter must be of type: Object, Vec2, Vec3 or Integer, Float."))
 				}
 			}
 
@@ -960,7 +966,7 @@ Class Rect {
 	;* new Rect([Object] rect)
 	__New(params*) {
 		switch (Type(params[1])) {
-			case "Number": {
+			case "Integer", "Float": {
 				switch (params.Count()) {
 					case 4: {
 						return {"x": params[1], "y": params[2]
@@ -993,7 +999,7 @@ Class Rect {
 						, "Base": this.__Rect}
 				}
 
-				throw (Exception("ArgumentException", -1, Format("{} is invalid. This object must be constructed from type:`n`tNumber, Array, Object, Vec2, Vec3 or Rect.", Type(x))))
+				throw (Exception("ArgumentException", -1, Format("{} is invalid. This object must be constructed from type:`n`tInteger, Array, Object, Vec2, Vec3 or Rect.", Type(x))))
 			}
 		}
 	}
@@ -1049,7 +1055,7 @@ Class Ellipse {
 		Local
 
 		switch (Type(params[1])) {
-			case "Number": {
+			case "Integer, Float": {
 				switch (params.Count()) {
 					case 4: {
 						width := params[3], height := params[4]
@@ -1161,7 +1167,7 @@ Class Ellipse {
 					}
 				}
 
-				throw (Exception("ArgumentException", -1, Format("{} is invalid. This object must be constructed from type:`n`tNumber, Array, Vec2, Vec3 or Rect.", Type(x))))
+				throw (Exception("ArgumentException", -1, Format("{} is invalid. This object must be constructed from type:`n`tInteger, Float, Array, Vec2, Vec3 or Rect.", Type(x))))
 			}
 		}
 	}
@@ -1227,7 +1233,7 @@ Class Ellipse {
 
 			Set {
 				switch (Type(value)) {
-					case "Number": {
+					case "Integer, Float": {
 						ObjRawSet(this, "__Radius", value)
 					}
 					case "Object": {
@@ -1348,7 +1354,7 @@ Class Ellipse {
 
 			Set {
 				switch (Type(value)) {
-					case "Number": {
+					case "Integer, Float": {
 						ObjRawSet(this, "__Radius", value), ObjSetBase(this, Ellipse.__Circle)
 					}
 					case "Object": {
@@ -1608,9 +1614,9 @@ Class Matrix3 {
 oCoordA := [51.51, -0.13] ;London
 oCoordB := [-41.29, -174.78] ;Wellington
 oCoordC := [-35.28, -149.13] ;Canberra
-MsgBox % LatLonGetDist(oCoordA.1, oCoordA.2, oCoordB.1, oCoordB.2) ;18807.714928
-MsgBox % LatLonGetDist(oCoordA.1, oCoordA.2, oCoordC.1, oCoordC.2) ;16965.064315
-MsgBox % LatLonGetDist(oCoordB.1, oCoordB.2, oCoordC.1, oCoordC.2) ;2326.586058
+;MsgBox % LatLonGetDist(oCoordA.1, oCoordA.2, oCoordB.1, oCoordB.2) ;18807.714928
+;MsgBox % LatLonGetDist(oCoordA.1, oCoordA.2, oCoordC.1, oCoordC.2) ;16965.064315
+;MsgBox % LatLonGetDist(oCoordB.1, oCoordB.2, oCoordC.1, oCoordC.2) ;2326.586058
 
 ;distance between two points on a sphere (e.g. Earth, the globe)
 ;note: radians = degrees * (pi/180) = degrees * 0.01745329252

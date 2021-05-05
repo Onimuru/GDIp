@@ -1,0 +1,8 @@
+.vscode
+*/__Template
+bin/*
+build
+cfg
+doc
+res
+test
