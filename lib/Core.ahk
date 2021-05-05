@@ -30,8 +30,6 @@ FreeLibrary(libraryName) {  ;: https://www.autohotkey.com/boards/viewtopic.php?p
 				throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 			}
 
-;			MsgBox("FREE")
-
 			return (1)
 		}
 	}
@@ -46,8 +44,6 @@ LoadLibrary(libraryName) {
 		if (!ptr := DllCall("Kernel32\LoadLibrary", "Str", libraryName, "Ptr")) {
 			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 		}
-
-;		MsgBox("LOAD")
 
 		loaded[libraryName] := {"Count": 0
 			, "Ptr": ptr}

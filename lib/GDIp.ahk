@@ -14,7 +14,7 @@ GetDC(hWnd := 0) {
 	Static instance := {"__Class": "__DC"
 			, "__Delete": Func("ReleaseDC")}
 
-	(DC := (new instance())).Handle := hDC
+	(DC := new instance()).Handle := hDC
 		, DC.WindowHandle := hWnd
 
 	return (DC)
@@ -29,7 +29,47 @@ ReleaseDC(DC) {
 		throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 	}
 
-	return (0)
+	return (True)
+}
+
+UpdateLayeredWindow(hWnd, DC, x := "", y := "", width := "", height := "", alpha := 0xFF) {
+	if (x == "" || y == "" || width == "" || height == "") {
+		Static rect := CreateRect(0, 0, 0, 0, "UInt")
+
+		if (DllCall("Dwmapi\DwmGetWindowAttribute", "Ptr", hWnd, "UInt", 9, "Ptr", rect.Ptr, "UInt", 16, "UInt")) {
+			if (!DllCall("User32\GetWindowRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt")) {
+				throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
+			}
+		}
+
+		if (x == "") {
+			x := rect.NumGet(0, "Int")
+
+			if (width == "") {
+				width := Abs(rect.NumGet(8, "Int") - x)
+			}
+		}
+		else if (width == "") {
+			width := Abs(rect.NumGet(8, "Int") - rect.NumGet(0, "Int"))
+		}
+
+		if (y == "") {
+			y := rect.NumGet(4, "Int")
+
+			if (height == "") {
+				height := Abs(rect.NumGet(12, "Int") - y)
+			}
+		}
+		else if (height == "") {
+			height := Abs(rect.NumGet(12, "Int") - rect.NumGet(4, "Int"))
+		}
+	}
+
+	if (!DllCall("User32\UpdateLayeredWindow", "Ptr", hWnd, "Ptr", 0, "Int64*", x | y << 32, "Int64*", width | height << 32, "Ptr", DC.Handle, "Int64*", 0, "UInt", 0, "UInt*", alpha << 16 | 1 << 24, "UInt", 0x00000002, "UInt")) {
+		throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
+	}
+
+	return (True)
 }
 
 ;===============  Class  =======================================================;
@@ -98,15 +138,15 @@ Class GDI {
 				throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 			}
 
-			return (0)
+			return (False)
 		}
 
 		MaskBlt(destinationDC, destinationPoint, size, sourceDC, sourcePoint, mask, offsetPoint, rasterOperation := 0x00CC0020) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-maskblt
-			return (1)
+			return (False)
 		}
 
 		PlgBlt(destinationDC, destinationPoint, size, sourceDC, sourcePoint, mask, offsetPoint, rasterOperation := 0x00CC0020) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-plgblt
-			return (1)
+			return (False)
 		}
 
 		Class __Bitmap {
@@ -230,8 +270,12 @@ Class GDI {
 						if (!this.OriginalObjects.HasKey(class)) {  ;* Save the handle to any original, default objects that are replaced.
 							this.OriginalObjects[class] := handle
 						}
+
+						return (True)
 					}
 				}
+
+				return (False)
 			}
 
 			Reset(class := "") {
@@ -251,10 +295,11 @@ Class GDI {
 						}
 					}
 
-					this.OriginalObjects := {}
-
-					return (0)
+					return (True
+						, this.OriginalObjects := {})
 				}
+
+				return (False)
 			}
 		}
 	}
@@ -271,19 +316,20 @@ Class GDIp {
 	;--------------- Method -------------------------------------------------------;
 
 	Startup() {
+		Local
+
 		if (!this.Token) {
 			LoadLibrary("Gdiplus")
 
-			if (error := DllCall("Gdiplus\GdiplusStartup", "Ptr*", pToken, "Ptr", CreateGDIplusStartupInput().Ptr, "Ptr", 0, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusinit/nf-gdiplusinit-gdiplusstartup
-				throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
+			if (error := DllCall("Gdiplus\GdiplusStartup", "Ptr*", pToken := 0, "Ptr", CreateGDIplusStartupInput().Ptr, "Ptr", 0, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusinit/nf-gdiplusinit-gdiplusstartup
+				throw (Exception(FormatStatus(error)))
 			}
 
-			this.Token := pToken
-
-			return (1)
+			return (True
+				, this.Token := pToken)
 		}
 
-		return (0)
+		return (False)
 	}
 
 	Shutdown() {
@@ -292,10 +338,10 @@ Class GDIp {
 
 			FreeLibrary("Gdiplus")
 
-			return (1)
+			return (True)
 		}
 
-		return (0)
+		return (False)
 	}
 
 	;------------ Nested Class ----------------------------------------------------;
@@ -321,7 +367,8 @@ Class GDIp {
 				, instance.DC.SelectObject(instance.Bitmap)  ;* Select the DIB into the memory DC.
 			instance.Graphics := new GDIp.Graphics(instance.DC, smoothing, interpolatiom)
 
-			return (instance, instance.Update(x, y, width, height))
+			return (instance
+				, instance.Update(x, y, width, height))
 		}
 
 		Class __Canvas {
@@ -357,7 +404,6 @@ Class GDIp {
 					DetectHiddenWindows, On
 
 					WinGetTitle, title, % "ahk_id" . this.Handle
-					ObjRawSet(this, "Title", title)
 
 					DetectHiddenWindows, % detect
 
@@ -366,7 +412,6 @@ Class GDIp {
 
 				Set {
 					WinSetTitle, % this.Handle, , % value
-					ObjRawSet(this, "Title", value)
 
 					return (value)
 				}
@@ -389,7 +434,7 @@ Class GDIp {
 			}
 
 			Update(x := "", y := "", width := "", height := "", alpha := "") {
-				Static point := CreatePoint(0, 0)
+				Static point := CreatePoint(0, 0, "UInt"), size := CreateSize(0, 0), blend := CreateBlendFunction(0xFF)
 
 				if (x != "") {
 					point.NumPut(0, "UInt", this.x := x)
@@ -398,8 +443,6 @@ Class GDIp {
 				if (y != "") {
 					point.NumPut(4, "UInt", this.y := y)
 				}
-
-				Static size := CreateSize(0, 0)
 
 				if (width != "") {
 					size.NumPut(0, "UInt", this.Width := width)
@@ -410,8 +453,6 @@ Class GDIp {
 				}
 
 				if (alpha != "") {
-					Static blend := CreateBlendFunction(0xFF)
-
 					blend.NumPut(2, "UChar", this.Alpha := alpha)
 				}
 
@@ -419,7 +460,7 @@ Class GDIp {
 					throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 				}
 
-				return (1)
+				return (True)
 			}
 		}
 	}
@@ -432,41 +473,255 @@ Class GDIp {
 			}
 		}
 
-		;* new GDIp.Bitmap([Array] size[, format, stride, [Structure] scan0])
-		;* new GDIp.Bitmap([Array] rect)
-		;* new GDIp.Bitmap(hWnd)
-		;* new GDIp.Bitmap(file)
-		__New(source, params*) {
+		;* new GDIp.Bitmap(width, height[, format, stride, [Struct] scan0])
+		__New(width, height, format := 0x26200A, stride := 0, scan0 := 0) {
 			Local
 
-			switch (Class(source)) {
-				case "__Array": {
-					switch (source.Length) {
-						case 2: {
-							DllCall("Gdiplus\GdipCreateBitmapFromScan0", "UInt", source[0], "UInt", source[1], "UInt", Round(params[2]), "UInt", (params[1]) ? (params[1]) : (0x26200A), "Ptr", (params[3]) ? (params[3]) : (0), "Ptr*", pBitmap := 0)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-bitmap(int_int_int_pixelformat_byte)
+			if (error := DllCall("Gdiplus\GdipCreateBitmapFromScan0", "UInt", width, "UInt", height, "UInt", stride, "UInt", format, "Ptr", scan0, "Ptr*", pBitmap := 0, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-bitmap(int_int_int_pixelformat_byte)
+				throw (Exception(FormatStatus(error)))
+			}
 
-							instance := {"Ptr": pBitmap
-								, "Base": this.__Bitmap}
-						}
-						case 4: {
-							instance := this.CreateFromScreen(source)
-						}
-					}
+			return ({"Ptr": pBitmap
+				, "Base": this.__Bitmap})
+		}
+
+		CreateFromFile(file) {
+			Local
+
+			if (error := DllCall("Gdiplus\GdipCreateBitmapFromFile", "Ptr", &file, "Ptr*", pBitmap := 0, "Int")) {
+				throw (Exception(FormatStatus(error)))
+			}
+
+			return ({"Ptr": pBitmap
+				, "Base": this.__Bitmap})
+		}
+
+		Class __Bitmap {  ;? http://paulbourke.net/dataformats/bitmaps/
+
+			__Delete() {
+				if (!this.HasKey("Ptr")) {
+					MsgBox("GDIp.Bitmap.__Delete()")
 				}
-				Default: {
-					if (DllCall("IsWindow", "Ptr", RegExReplace(source, "i)ahk_id\s?"), "UInt")) {
-						instance := this.CreateFromHWnd(source)
-					}
-					else if (FileExist(source)) {
-						instance := this.CreateFromFile(source)
-					}
-					else {
-						MsgBox("GDIp.Bitmap.__New(): " . Class(source))
-					}
+
+				DllCall("Gdiplus\GdipDisposeImage", "Ptr", this.Ptr)
+			}
+
+			Width[] {
+				Get {
+					return (this.GetWidth())
 				}
 			}
 
-			return (instance)
+			Height[] {
+				Get {
+					return (this.GetHeight())
+				}
+			}
+
+			Pixel[params*] {
+				Get {
+					return (this.GetPixel(params[1], params[2]))
+				}
+
+				Set {
+					params.Push(value)
+					this.SetPixel(params*)
+
+					return (value)
+				}
+			}
+
+			PixelFormat[] {
+				Get {
+					return (this.GetPixelFormat())
+				}
+			}
+
+			GetWidth() {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipGetImageWidth", "Ptr", this.Ptr, "UInt*", width := 0, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (width)
+			}
+
+			GetHeight() {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipGetImageHeight", "Ptr", this.Ptr, "UInt*", height := 0, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (height)
+			}
+
+
+			GetPixel(x, y) {
+				Local
+
+				if (this.HasKey("BitmapData")) {
+					color := NumGet(this.BitmapData.Scan0 + x*4 + y*this.BitmapData.Stride, "UInt")
+				}
+				else {
+					DllCall("Gdiplus\GdipBitmapGetPixel", "Ptr", this.Ptr, "Int", x, "Int", y, "UInt*", color := 0)
+				}
+
+				return (Format("0x{:X}", color))
+			}
+
+			SetPixel(params*) {
+				Local color := params.RemoveAt(params.MaxIndex())
+
+				if (this.HasKey("BitmapData")) {
+					switch (params.Length(), stride := this.BitmapData.NumGet(8, "Int"), scan0 := this.BitmapData.NumGet(16, "Ptr")) {  ;* The Stride data member is negative if the pixel data is stored bottom-up.
+						case 2: {
+							Numput(color, scan0 + Math.Max(params[1], 0)*4 + Math.Max(params[2], 0)*stride, "UInt")
+						}
+						case 4: {
+							reset := Math.Max(params[1], 0)
+								, y := Math.Max(params[2], 0), width := Math.Clamp(params[3], 0, this.BitmapData.NumGet(0, "UInt")) - reset, height := Math.Clamp(params[4], 0, this.BitmapData.NumGet(4, "UInt")) - y
+						}
+						Default: {
+							reset := 0
+								, y := 0, width := this.BitmapData.NumGet(0, "UInt"), height := this.BitmapData.NumGet(4, "UInt")
+						}
+					}
+
+					loop, % height {
+						x := reset
+
+						loop, % width {
+							Numput(color, scan0 + 4*x++ + y*stride, "UInt")
+						}
+
+						y++
+					}
+				}
+				else {
+					Static GdipBitmapSetPixel := DllCall("Kernel32\GetProcAddress", "Ptr", handle := DllCall("Kernel32\LoadLibrary", "Str", "Gdiplus", "Ptr"), "AStr", "GdipBitmapSetPixel", "Ptr") + !DllCall("Kernel32\FreeLibrary", "Ptr", handle, "UInt")
+
+					switch (params.Length(), pBitmap := this.Ptr) {
+						case 2: {
+							DllCall(GdipBitmapSetPixel, "Ptr", pBitmap, "Int", Math.Clamp(params[1], 0), "Int", Math.Clamp(params[2], 0), "Int", color)
+						}
+						case 4: {
+							reset := Math.Max(params[1], 0)
+								, y := Math.Max(params[2], 0), width := Math.Clamp(params[3], 0, this.Width) - reset, height := Math.Clamp(params[4], 0, this.Height) - y
+						}
+						Default: {
+							reset := 0
+								, y := 0, width := this.Width, height := this.Height
+						}
+					}
+
+					loop, % height {
+						x := reset
+
+						loop, % width {
+							DllCall(GdipBitmapSetPixel, "Ptr", pBitmap, "Int", x++, "Int", y, "UInt", color)
+						}
+
+						y++
+					}
+				}
+
+				return (True)
+			}
+
+			GetPixelFormat() {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipGetImagePixelFormat", "Ptr", this.Ptr, "UInt*", pixelFormat := 0, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (pixelFormat)
+			}
+
+			;* bitmap.LockBits([x, y, width, height, pixelFormat, flags])
+			;* Parameters:
+				;* flags:
+					;? 0x0001: ImageLockModeRead
+					;? 0x0002: ImageLockModeWrite
+					;? 0x0004: ImageLockModeUserInputBuf
+			LockBits(x := 0, y := 0, width := 0, height := 0, pixelFormat := "", flags := 0x0003) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
+				if (!this.HasKey("BitmapData")) {
+					if (!width) {
+						width := this.Width
+					}
+
+					if (!height) {
+						height := this.Height
+					}
+
+					Static bitmapData := CreateBitmapData()
+
+					if (error := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", CreateRect(x, y, width, height, "UInt").Ptr, "UInt", flags, "Int", (pixelFormat == "") ? (this.PixelFormat) : (pixelFormat), "Ptr", bitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+						throw (Exception(FormatStatus(error)))
+					}
+
+					return (True
+						, this.BitmapData := bitmapData)  ;~ LockBits returning too much data: https://github.com/dotnet/runtime/issues/28600.
+				}
+
+				return (False)
+			}
+
+			UnlockBits() {
+				if (this.HasKey("BitmapData")) {
+					if (error := DllCall("Gdiplus\GdipBitmapUnlockBits", "Ptr", this.Ptr, "Ptr", this.BitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+						throw (Exception(FormatStatus(error)))
+					}
+
+					return (True
+						, this.Delete("BitmapData"))
+				}
+
+				return (False)
+			}
+
+			SaveToFile(file) {
+				if (error := DllCall("Gdiplus\GdipGetImageEncodersSize", "UInt*", number := 0, "UInt*", size := 0), "Int") {  ;: https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-retrieving-the-class-identifier-for-an-encoder-use
+					throw (Exception(FormatStatus(error)))
+				}
+
+				if (error := DllCall("Gdiplus\GdipGetImageEncoders", "UInt", number, "UInt", size, "Ptr", (imageCodecInfo := new Structure(size)).Ptr, "Int")) {  ;* Fill a buffer with the available encoders.
+					throw (Exception(FormatStatus(error)))
+				}
+
+				RegExMatch(file, "\.\w+$", extension)
+
+				loop, % number {
+					if (InStr(StrGet(imageCodecInfo.NumGet(A_PtrSize*3 + (offset := (48 + A_PtrSize*7)*(A_Index - 1)) + 32, "Ptr"), "UTF-16"), "*" . extension)) {
+						pCodec := imageCodecInfo.Ptr + offset  ;* Get the pointer to the matching encoder.
+
+						break
+					}
+				}
+
+				if (!pCodec) {
+					throw (Exception("Could not find a matching encoder for the specified file format."))
+				}
+
+				if (error := DllCall("Gdiplus\GdipSaveImageToFile", "Ptr", this.Ptr, "Ptr", &file, "Ptr", pCodec, "UInt", 0, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (True)
+			}
+
+			Clone() {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipCloneImage", "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int")) {  ;* The new bitmap will have the same PixelFormat.
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return ({"Ptr": pBitmap
+					, "Base": this.Base})
+			}
 		}
 	}
 
@@ -483,26 +738,21 @@ Class GDIp {
 
 			switch (Class(source)) {
 				case "__CompatibleDC", "__DC": {
-					GDIp.LastStatus := DllCall("Gdiplus\GdipCreateFromHDC", "Ptr", source.Handle, "Ptr*", pGraphics := 0)
+					if (error := DllCall("Gdiplus\GdipCreateFromHDC", "Ptr", source.Handle, "Ptr*", pGraphics := 0, "Int")) {
+						throw (Exception(FormatStatus(error)))
+					}
 				}
 				case "__Bitmap": {
-					GDIp.LastStatus := DllCall("Gdiplus\GdipGetImageGraphicsContext", "Ptr", source.Ptr, "Ptr*", pGraphics := 0)
-				}
-				Default: {
-					MsgBox("Graphics.__New(): " . (Clipboard := Class(source)))
+					if (error := DllCall("Gdiplus\GdipGetImageGraphicsContext", "Ptr", source.Ptr, "Ptr*", pGraphics := 0, "Int")) {
+						throw (Exception(FormatStatus(error)))
+					}
 				}
 			}
 
-			if (GDIp.LastStatus) {
-				return (GDIp.LastStatus)
-			}
+			(instance := {"Ptr": pGraphics, "Base": this.__Graphics}).SetSmoothingMode(smoothing)
+				, instance.SetInterpolationMode(interpolation)
 
-			DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", pGraphics, "Int", smoothing)
-			DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", pGraphics, "Int", interpolation)
-
-			return ({"Ptr": pGraphics
-
-				, "Base": this.__Graphics})
+			return (instance)
 		}
 
 		Class __Graphics {
@@ -517,24 +767,48 @@ Class GDIp {
 
 			;-------------- Property ------------------------------------------------------;
 
-			;* Graphics.CompositingMode := value
-			;* Parameters:
-				;* value:
-					;? 0: SourceOver (blend)
-					;? 1: SourceCopy (overwrite)
 			CompositingMode[] {
 				Set {
-					if (error := DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", this.Ptr, "Int", Math.Clamp(value, 0, 1), "Int")) {
-						throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
-					}
-
-					return (value)
+					return (value, this.SetCompositingMode(value))
 				}
 			}
 
-			;* Graphics.InterpolationMode := value
+			InterpolationMode[] {
+				Set {
+					return (value, this.SetInterpolationMode(value))
+				}
+			}
+
+			SmoothingMode[] {
+				Set {
+					return (value, this.SetSmoothingMode(value))
+				}
+			}
+
+			TextRenderingHint[] {
+				Set {
+					return (value, this.SetTextRenderingHint(value))
+				}
+			}
+
+			;* graphics.SetCompositingMode(mode)
 			;* Parameters:
-				;* value:
+				;* mode:
+					;? 0: SourceOver (blend)
+					;? 1: SourceCopy (overwrite)
+			SetCompositingMode(mode := 0) {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (True)
+			}
+
+			;* graphics.SetInterpolationMode(mode)
+			;* Parameters:
+				;* mode:
 					;? 0: Default
 					;? 1: LowQuality
 					;? 2: HighQuality
@@ -543,51 +817,51 @@ Class GDIp {
 					;? 5: NearestNeighbor
 					;? 6: HighQualityBilinear
 					;? 7: HighQualityBicubic
-			InterpolationMode[] {
-				Set {
-					if (error := DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", this.Ptr, "Int", Math.Clamp(value, 0, 7), "Int")) {
-						throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
-					}
+			SetInterpolationMode(mode := 0) {
+				Local
 
-					return (value)
+				if (error := DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
+					throw (Exception(FormatStatus(error)))
 				}
+
+				return (True)
 			}
 
-			;* Graphics.SmoothingMode := value
+			;* graphics.SetSmoothingMode(mode)
 			;* Parameters:
-				;* value:
+				;* mode:
 					;? 0: Default
 					;? 1: HighSpeed
 					;? 2: HighQuality
 					;? 3: None
 					;? 4: AntiAlias
-			SmoothingMode[] {
-				Set {
-					if (error := DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", this.Ptr, "Int", Math.Clamp(value, 0, 4), "Int")) {
-						throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
-					}
+			SetSmoothingMode(mode := 0) {
+				Local
 
-					return (value)
+				if (error := DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
+					throw (Exception(FormatStatus(error)))
 				}
+
+				return (True)
 			}
 
-			;* graphics.SmoothingMode := value
+			;* graphics.SetTextRenderingHint(hint)
 			;* Parameters:
-				;* value:
+				;* hint:
 					;? 0: SystemDefault
 					;? 1: SingleBitPerPixelGridFit
 					;? 2: SingleBitPerPixel
 					;? 3: AntiAliasGridFit
 					;? 4: AntiAlias
 					;? 5: ClearTypeGridFit
-			TextRendering[] {
-				Set {
-					if (error := DllCall("Gdiplus\GdipSetTextRenderingHint", "Ptr", this.Ptr, "Int", Math.Clamp(value, 0, 5), "Int")) {
-						throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
-					}
+			SetTextRenderingHint(hint := 0) {
+				Local
 
-					return (value)
+				if (error := DllCall("Gdiplus\GdipSetTextRenderingHint", "Ptr", this.Ptr, "Int", hint, "Int")) {
+					throw (Exception(FormatStatus(error)))
 				}
+
+				return (True)
 			}
 
 			;--------------- Method -------------------------------------------------------;
@@ -600,22 +874,20 @@ Class GDIp {
 				width := pen.Width
 
 				if (error := DllCall("Gdiplus\GdipDrawRectangle", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", rect.x, "Float", rect.y, "Float", rect.Width - width, "Float", rect.Height - width, "Int")) {
-					throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
+					throw (Exception(FormatStatus(error)))
 				}
 
-				return (0)
+				return (True)
 			}
 
 			;------------------------------------------------------  Control  --------------;
 
-			;* Note:
-				;* Using clipping regions you can clear a particular area on the graphics rather than clearing the entire graphics.
 			Clear(color := 0x00000000) {
 				if (error := DllCall("Gdiplus\GdipGraphicsClear", "Ptr", this.Ptr, "UInt", color, "Int")) {
-					throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
+					throw (Exception(FormatStatus(error)))
 				}
 
-				return (0)
+				return (True)
 			}
 		}
 	}
@@ -631,8 +903,8 @@ Class GDIp {
 		__New(source := 0xFFFFFFFF, width := 1) {
 			Local
 
-			if (error := (IsObject(source)) ? (DllCall("Gdiplus\GdipCreatePen2", "Ptr", source.Ptr, "Float", width, "Int", 2, "Ptr*", pPen := 0, "Int")) : (DllCall("Gdiplus\GdipCreatePen1", "UInt", source, "Float", width, "Int", 2, "Ptr*", pPen := 0, "Int"))) {
-				throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
+			if (error := (Class(source) == "__Brush") ? (DllCall("Gdiplus\GdipCreatePen2", "Ptr", source.Ptr, "Float", width, "Int", 2, "Ptr*", pPen := 0, "Int")) : (DllCall("Gdiplus\GdipCreatePen1", "UInt", source, "Float", width, "Int", 2, "Ptr*", pPen := 0, "Int"))) {
+				throw (Exception(FormatStatus(error)))
 			}
 
 			return ({"Ptr": pPen
@@ -649,59 +921,87 @@ Class GDIp {
 				DllCall("Gdiplus\GdipDeletePen", "Ptr", this.Ptr)
 			}
 
-			Brush[] {
+			BrushFill[] {
 				Set {
-					if (error := DllCall("Gdiplus\GdipSetPenBrushFill", "Ptr", this.Ptr, "Ptr", value.Ptr, "Int")) {
-						throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
-					}
-
-					return (value)
+					return (value, this.SetBrushFill(value))
 				}
 			}
 
 			Color[] {
 				Get {
-					Local
-
-					if (error := DllCall("Gdiplus\GdipGetPenColor", "Ptr", this.Ptr, "UInt*", color := 0, "Int")) {
-						throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
-					}
-
-					return (Format("0x{:X}", color))
+					return (this.GetColor())
 				}
 
 				Set {
-					if (error := DllCall("Gdiplus\GdipSetPenColor", "Ptr", this.Ptr, "UInt", value, "Int")) {
-						throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
-					}
-
-					return (value)
+					return (value, this.SetColor(value))
 				}
 			}
 
 			Width[] {
 				Get {
-					Local
-
-					if (error := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", this.Ptr, "Float*", width := 0, "Int")) {
-						throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
-					}
-
-					return (~~width)
+					return (this.GetWidth())
 				}
 
 				Set {
-					if (error := DllCall("Gdiplus\GdipSetPenWidth", "Ptr", this.Ptr, "Float", value, "Int")) {
-						throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
-					}
-
-					return (value)
+					return (value, this.SetWidth(value))
 				}
 			}
 
+			SetBrushFill() {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipSetPenBrushFill", "Ptr", this.Ptr, "Ptr", value.Ptr, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (True)
+			}
+
+			GetColor() {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipGetPenColor", "Ptr", this.Ptr, "UInt*", color := 0, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (Format("0x{:X}", color))
+			}
+
+			SetColor(color := 0xFFFFFFFF) {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipSetPenColor", "Ptr", this.Ptr, "UInt", color, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (True)
+			}
+
+			GetWidth() {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", this.Ptr, "Float*", width := 0, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (~~width)
+			}
+
+			SetWidth(width := 1) {
+				Local
+
+				if (error := DllCall("Gdiplus\GdipSetPenWidth", "Ptr", this.Ptr, "Float", width, "Int")) {
+					throw (Exception(FormatStatus(error)))
+				}
+
+				return (True)
+			}
+
 			Clone() {
+				Local
+
 				if (error := DllCall("Gdiplus\GdipClonePen", "Ptr", this.Ptr, "Ptr*", pPen, "Int")) {
-					throw (Exception(Format("0x{:X}", error), 0, FormatStatus(error)))
+					throw (Exception(FormatStatus(error)))
 				}
 
 				return ({"Ptr": pPen
