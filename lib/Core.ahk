@@ -101,7 +101,7 @@ FormatStatus(status) {
 
 	Static GDIp := {"1": "GenericError", "2": "InvalidParameter", "3": "OutOfMemory", "4": "ObjectBusy", "5": "InsufficientBuffer", "6": "NotImplemented", "7": "Win32Error", "8": "WrongState", "9": "Aborted", "10": "FileNotFound", "11": "ValueOverflow", "12": "AccessDenied", "13": "UnknownImageFormat", "14": "FontFamilyNotFound", "15": "FontStyleNotFound", "16": "NotTrueTypeFont", "17": "UnsupportedGdiplusVersion", "18": "GdiplusNotInitialized", "19": "PropertyNotFound", "20": "PropertyNotSupported", "21": "ProfileNotFound"}  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplustypes/ne-gdiplustypes-status
 
-	return (GDIp[status])  ;* Account for the newline and carriage return characters.
+	return (GDIp[status])
 }
 
 ;======================================================  General  ==============;
