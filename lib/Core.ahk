@@ -1,9 +1,4 @@
-﻿;==============  Include  ======================================================;
-
-#Include, %A_LineFile%\..\ObjectOriented\ObjectOriented.ahk
-#Include, %A_LineFile%\..\Structure\Structure.ahk
-
-;============== Function ======================================================;
+﻿;============== Function ======================================================;
 ;======================================================  Library  ==============;
 
 FreeLibrary(libraryName) {  ;: https://www.autohotkey.com/boards/viewtopic.php?p=48392#p48392
@@ -104,7 +99,7 @@ FormatStatus(status) {
 	return (GDIp[status])
 }
 
-;======================================================  General  ==============;
+;====================================================== Identity ==============;
 
 Class(variable) {
     if (IsObject(variable) && ObjGetCapacity(variable) == "") {
@@ -128,3 +123,14 @@ Type(variable) {  ;: https://www.autohotkey.com/boards/viewtopic.php?f=6&t=2306
 
     return ([variable].GetCapacity(0) != "") ? ("String") : ((InStr(variable, ".")) ? ("Float") : ("Integer"))
 }
+
+;==============  Include  ======================================================;
+
+#Include, %A_LineFile%\..\ObjectOriented\ObjectOriented.ahk
+#Include, %A_LineFile%\..\Structure\Structure.ahk
+
+#Include, %A_LineFile%\..\Math\Math.ahk
+
+#Include, %A_LineFile%\..\Core\User32.ahk
+#Include, %A_LineFile%\..\Core\GDI.ahk
+#Include, %A_LineFile%\..\Core\GDIp.ahk
