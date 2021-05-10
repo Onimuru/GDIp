@@ -1,4 +1,25 @@
-﻿Class GDI {
+﻿/*
+;* RasterOperation codes (https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt)
+	;? 0x00000042: BLACKNESS - Fills the destination rectangle using the color associated with palette index 0.
+	;? 0x40000000: CAPTUREBLT - Includes any window that are layered on top of your window in the resulting image.
+	;? 0x00550009: DSTINVERT - Inverts the destination rectangle.
+	;? 0x00C000CA: MERGECOPY - Merges the color of the source rectangle with the brush currently selected in hDest, by using the AND operator.
+	;? 0x00BB0226: MERGEPAINT - Merges the color of the inverted source rectangle with the colors of the destination rectangle by using the OR operator.
+	;? 0x80000000: NOMIRRORBITMAP - Prevents the bitmap from being mirrored.
+	;? 0x00330008: NOTSRCCOPY - Copies the inverted source rectangle to the destination.
+	;? 0x001100A6: NOTSRCERASE - Combines the colors of the source and destination rectangles by using the OR operator and then inverts the resultant color.
+	;? 0x00F00021: PATCOPY - Copies the brush selected in hdcDest, into the destination bitmap.
+	;? 0x005A0049: PATINVERT - Combines the colors of the brush currently selected in hDest, with the colors of the destination rectangle by using the XOR operator.
+	;? 0x00FB0A09: PATPAINT - Combines the colors of the brush currently selected in hDest, with the colors of the inverted source rectangle by using the OR operator. The result of this operation is combined with the color of the destination rectangle by using the OR operator.
+	;? 0x008800C6: SRCAND - Combines the colors of the source and destination rectangles by using the AND operator.
+	;? 0x00CC0020: SRCCOPY - Copies the source rectangle directly to the destination rectangle.
+	;? 0x00440328: SRCERASE - Combines the inverted color of the destination rectangle with the colors of the source rectangle by using the AND operator.
+	;? 0x00660046: SRCINVERT - Combines the colors of the source and destination rectangles by using the XOR operator.
+	;? 0x00EE0086: SRCPAINT - Combines the colors of the source and destination rectangles by using the OR operator.
+	;? 0x00FF0062: WHITENESS - Fills the destination rectangle using the color associated with index 1 in the physical palette.
+*/
+
+Class GDI {
 
 	CreateCompatibleDC(DC := "") {
 		if (!hDC := DllCall("Gdi32\CreateCompatibleDC", "Ptr", DC.Handle, "Ptr")) {
@@ -125,45 +146,28 @@
 		}
 	}
 
-	;* GDI.BitBlt([DC] destinationDC[, x1, y1, width, height, [DC] sourceDC, x2, y2, rasterOperation])
+	;* GDI.BitBlt([__DC] destinationDC[, x1, y1, width, height, [__DC] sourceDC, x2, y2, operation])
 	;* Parameter:
-		;* rasterOperation:
-			;? 0x00000042: BLACKNESS
-			;? 0x40000000: CAPTUREBLT
-			;? 0x00550009: DSTINVERT
-			;? 0x00C000CA: MERGECOPY
-			;? 0x00BB0226: MERGEPAINT
-			;? 0x80000000: NOMIRRORBITMAP
-			;? 0x00330008: NOTSRCCOPY
-			;? 0x001100A6: NOTSRCERASE
-			;? 0x00F00021: PATCOPY
-			;? 0x005A0049: PATINVERT
-			;? 0x00FB0A09: PATPAINT
-			;? 0x008800C6: SRCAND
-			;? 0x00CC0020: SRCCOPY
-			;? 0x00440328: SRCERASE
-			;? 0x00660046: SRCINVERT
-			;? 0x00EE0086: SRCPAINT
-			;? 0x00FF0062: WHITENESS
-	BitBlt(destinationDC, x1, y1, width, height, sourceDC, x2, y2, rasterOperation := 0x00CC0020) {
-		if (!DllCall("Gdi32\BitBlt", "Ptr", destinationDC.Handle, "Int", x1, "Int", y1, "Int", width, "Int", height, "Ptr", sourceDC.Handle, "Int", x2, "Int", y2, "UInt", rasterOperation)) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt
+		;* operation: RasterOperation codes.
+	BitBlt(destinationDC, x1, y1, width, height, sourceDC, x2, y2, operation := 0x00CC0020) {
+		if (!DllCall("Gdi32\BitBlt", "Ptr", destinationDC.Handle, "Int", x1, "Int", y1, "Int", width, "Int", height, "Ptr", sourceDC.Handle, "Int", x2, "Int", y2, "UInt", operation)) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt
 			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 		}
 
 		return (False)
 	}
 
-	MaskBlt(destinationDC, destinationPoint, size, sourceDC, sourcePoint, mask, offsetPoint, rasterOperation := 0x00CC0020) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-maskblt
+	MaskBlt(destinationDC, destinationPoint, size, sourceDC, sourcePoint, mask, offsetPoint, operation := 0x00CC0020) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-maskblt
 		return (False)
 	}
 
-	PlgBlt(destinationDC, destinationPoint, size, sourceDC, sourcePoint, mask, offsetPoint, rasterOperation := 0x00CC0020) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-plgblt
+	PlgBlt(destinationDC, destinationPoint, size, sourceDC, sourcePoint, mask, offsetPoint, operation := 0x00CC0020) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-plgblt
 		return (False)
 	}
 
-	;* DC.DeviceCaps(DC, index)
+	;* DC.DeviceCaps([__DC] DC, index)
 	;* Parameter:
-		;* index:
+		;* index (https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getdevicecaps):
 			;? 0x00: DRIVERVERSION
 			;? 0x02: TECHNOLOGY
 			;? 0x04: HORZSIZE
@@ -205,7 +209,7 @@
 	GetDeviceCaps(DC, index) {
 		Local
 
-		information := DllCall("Gdi32\GetDeviceCaps", "Ptr", DC.Handle, "Int", index, "Int")
+		information := DllCall("Gdi32\GetDeviceCaps", "Ptr", DC.Handle, "Int", index, "Int")  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getdevicecaps
 
 		switch (index) {  ;? http://msaccessgurus.com/VBA/Code/API_GetDeviceCaps_ppi.htm
 			case 0x02: {

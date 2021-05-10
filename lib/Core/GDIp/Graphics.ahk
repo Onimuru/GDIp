@@ -1,4 +1,47 @@
-﻿CreateGraphicsFromDC(DC) {
+﻿/*
+;* CompositingMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-compositingmode)
+	;? 0: CompositingModeSourceOver - Specifies that when a color is rendered, it overwrites the background color.
+	;? 1: CompositingModeSourceCopy - Specifies that when a color is rendered, it is blended with the background color. The blend is determined by the alpha component of the color being rendered.
+
+;* FlushIntention enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-flushintention)
+	;? 0: FlushIntentionFlush - Flush all batched rendering operations and return immediately.
+	;? 1: FlushIntentionSync - Flush all batched rendering operations and wait for them to complete.
+
+;* InterpolationMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-interpolationmode)
+	;? 0: InterpolationModeDefault
+	;? 1: InterpolationModeLowQuality
+	;? 2: InterpolationModeHighQuality
+	;? 3: InterpolationModeBilinear
+	;? 4: InterpolationModeBicubic
+	;? 5: InterpolationModeNearestNeighbor
+	;? 6: InterpolationModeHighQualityBilinear
+	;? 7: InterpolationModeHighQualityBicubic
+
+;* SmoothingMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-smoothingmode)
+	;? 0: SmoothingModeDefault
+	;? 1: SmoothingModeHighSpeed
+	;? 2: SmoothingModeHighQuality
+	;? 3: SmoothingModeNone
+	;? 4: SmoothingModeAntiAlias
+
+;* TextRenderingHint enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-textrenderinghint)
+	;? 0: TextRenderingHintSystemDefault
+	;? 1: TextRenderingHintSingleBitPerPixelGridFit
+	;? 2: TextRenderingHintSingleBitPerPixel
+	;? 3: TextRenderingHintAntiAliasGridFit
+	;? 4: TextRenderingHintAntiAlias
+	;? 5: TextRenderingHintClearTypeGridFit
+
+;* Unit enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-unit)
+	;? 0 = UnitWorld - World coordinate (non-physical unit).
+	;? 1 = UnitDisplay - Variable (only for PageTransform).
+	;? 2 = UnitPixel - Each unit is one device pixel.
+	;? 3 = UnitPoint - Each unit is a printer's point, or 1/72 inch.
+	;? 4 = UnitInch
+	;? 5 = UnitDocument - Each unit is 1/300 inch.
+*/
+
+CreateGraphicsFromDC(DC) {
 	Local
 
 	if (status := DllCall("Gdiplus\GdipCreateFromHDC", "Ptr", DC.Handle, "Ptr*", pGraphics := 0, "Int")) {
@@ -51,15 +94,13 @@ Class __Graphics {
 		}
 	}
 
-	;* graphics.SetCompositingMode(compositingMode)
+	;* graphics.SetCompositingMode(mode)
 	;* Parameter:
-		;* compositingMode:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-compositingmode
-			;? 0: CompositingModeSourceOver - Specifies that when a color is rendered, it overwrites the background color.
-			;? 1: CompositingModeSourceCopy - Specifies that when a color is rendered, it is blended with the background color. The blend is determined by the alpha component of the color being rendered.
-	SetCompositingMode(compositingMode) {
+		;* mode: CompositingMode enumeration.
+	SetCompositingMode(mode) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", this.Ptr, "Int", compositingMode, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -74,21 +115,13 @@ Class __Graphics {
 		}
 	}
 
-	;* graphics.SetInterpolationMode(interpolationMode)
+	;* graphics.SetInterpolationMode(mode)
 	;* Parameter:
-		;* interpolationMode:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-interpolationmode
-			;? 0: InterpolationModeDefault
-			;? 1: InterpolationModeLowQuality
-			;? 2: InterpolationModeHighQuality
-			;? 3: InterpolationModeBilinear
-			;? 4: InterpolationModeBicubic
-			;? 5: InterpolationModeNearestNeighbor
-			;? 6: InterpolationModeHighQualityBilinear
-			;? 7: InterpolationModeHighQualityBicubic
-	SetInterpolationMode(interpolationMode) {
+		;* mode: InterpolationMode enumeration.
+	SetInterpolationMode(mode) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", this.Ptr, "Int", interpolationMode, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -103,18 +136,13 @@ Class __Graphics {
 		}
 	}
 
-	;* graphics.SetSmoothingMode(smoothingMode)
+	;* graphics.SetSmoothingMode(mode)
 	;* Parameter:
-		;* smoothingMode:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-smoothingmode
-			;? 0: SmoothingModeDefault
-			;? 1: SmoothingModeHighSpeed
-			;? 2: SmoothingModeHighQuality
-			;? 3: SmoothingModeNone
-			;? 4: SmoothingModeAntiAlias
-	SetSmoothingMode(smoothingMode) {
+		;* mode: SmoothingMode enumeration.
+	SetSmoothingMode(mode) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", this.Ptr, "Int", smoothingMode, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -129,19 +157,13 @@ Class __Graphics {
 		}
 	}
 
-	;* graphics.SetTextRenderingHint(textRenderingHint)
+	;* graphics.SetTextRenderingHint(hint)
 	;* Parameter:
-		;* textRenderingHint:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-textrenderinghint
-			;? 0: TextRenderingHintSystemDefault
-			;? 1: TextRenderingHintSingleBitPerPixelGridFit
-			;? 2: TextRenderingHintSingleBitPerPixel
-			;? 3: TextRenderingHintAntiAliasGridFit
-			;? 4: TextRenderingHintAntiAlias
-			;? 5: TextRenderingHintClearTypeGridFit
-	SetTextRenderingHint(textRenderingHint) {
+		;* hint: TextRenderingHint enumeration.
+	SetTextRenderingHint(hint) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetTextRenderingHint", "Ptr", this.Ptr, "Int", textRenderingHint, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetTextRenderingHint", "Ptr", this.Ptr, "Int", hint, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -173,15 +195,13 @@ Class __Graphics {
 		return (True)
 	}
 
-	;* graphics.Flush(flushIntention)
+	;* graphics.Flush(intention)
 	;* Parameter:
-		;* flushIntention - Specifies whether the method should return immediately or wait for existing operations to complete:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-flushintention
-			;? 0: FlushIntentionFlush - Flush all batched rendering operations and return immediately.
-			;? 1: FlushIntentionSync - Flush all batched rendering operations and wait for them to complete.
-	Flush(flushIntention) {
+		;* intention: FlushIntention enumeration.
+	Flush(intention) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipFlush", "Ptr", this.Ptr, "Int", flushIntention, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFlush", "Ptr", this.Ptr, "Int", intention, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -240,6 +260,8 @@ Class __Graphics {
 	;------------------------------------------------------- Bitmap ---------------;
 
 	;* graphics.DrawBitmap([__Bitmap] bitmap[, [__Rect] destinationRect, [__Rect] sourceRect, unit, imageAttributes])
+	;* Parameter:
+		;* unit: Unit enumeration.
 	DrawBitmap(bitmap, destinationRect := "", sourceRect := "", unit := 2, imageAttributes := "") {
 		Local
 

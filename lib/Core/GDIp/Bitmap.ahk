@@ -1,8 +1,67 @@
-﻿;* GDIp.GdipCreateBitmap(width, height[, pixelFormat, stride, [Struct] scan0])
-CreateBitmap(width, height, pixelFormat := 0x26200A, stride := 0, scan0 := 0) {
+﻿/*
+;* ImageFlags enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imageflags)
+	;? 0x00000000: ImageFlagsNone
+	;? 0x00000001: ImageFlagsScalable
+	;? 0x00000002: ImageFlagsHasAlpha
+	;? 0x00000004: ImageFlagsHasTranslucent
+	;? 0x00000008: ImageFlagsPartiallyScalable
+	;? 0x00000010: ImageFlagsColorSpaceRGB
+	;? 0x00000020: ImageFlagsColorSpaceCMYK
+	;? 0x00000040: ImageFlagsColorSpaceGRAY
+	;? 0x00000080: ImageFlagsColorSpaceYCBCR
+	;? 0x00000100: ImageFlagsColorSpaceYCCK
+	;? 0x00001000: ImageFlagsHasRealDPI
+	;? 0x00002000: ImageFlagsHasRealPixelSize
+	;? 0x00010000: ImageFlagsReadOnly
+	;? 0x00020000: ImageFlagsCaching
+
+;* ImageLockMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imagelockmode)
+	;? 0x0001: ImageLockModeRead
+	;? 0x0002: ImageLockModeWrite
+	;? 0x0004: ImageLockModeUserInputBuf
+
+;* PixelFormat enumeration (https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-emfplus/47cbe48e-d13c-450b-8a23-6aa95488428e)
+	;? 0x00030101: PixelFormat1bppIndexed
+	;? 0x00030402: PixelFormat4bppIndexed
+	;? 0x00030803: PixelFormat8bppIndexed
+	;? 0x00101004: PixelFormat16bppGrayScale
+	;? 0x00021005: PixelFormat16bppRGB555
+	;? 0x00021006: PixelFormat16bppRGB565
+	;? 0x00061007: PixelFormat16bppARGB1555
+	;? 0x00021808: PixelFormat24bppRGB
+	;? 0x00022009: PixelFormat32bppRGB
+	;? 0x0026200A: PixelFormat32bppARGB
+	;? 0x000E200B: PixelFormat32bppPARGB
+	;? 0x0010300C: PixelFormat48bppRGB
+	;? 0x0034400D: PixelFormat64bppARGB
+	;? 0x001A400E: PixelFormat64bppPARGB
+
+;* RotateFlipType enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-rotatefliptype)
+	;? 0: RotateNoneFlipNone
+	;? 1: Rotate90FlipNone
+	;? 2: Rotate180FlipNone
+	;? 3: Rotate270FlipNone
+	;? 4: RotateNoneFlipX
+	;? 5: Rotate90FlipX
+	;? 6: Rotate180FlipX
+	;? 7: Rotate270FlipX
+	;? 6: RotateNoneFlipY
+	;? 7: Rotate90FlipY
+	;? 4: Rotate180FlipY
+	;? 5: Rotate270FlipY
+	;? 2: RotateNoneFlipXY
+	;? 3: Rotate90FlipXY
+	;? 0: Rotate180FlipXY
+	;? 1: Rotate270FlipXY
+*/
+
+;* GDIp.GdipCreateBitmap(width, height[, format, stride, [Struct] scan0])
+;* Parameter:
+	;* format: PixelFormat enumeration.
+CreateBitmap(width, height, format := 0x26200A, stride := 0, scan0 := 0) {
 	Local
 
-	if (status := DllCall("Gdiplus\GdipCreateBitmapFromScan0", "UInt", width, "UInt", height, "UInt", stride, "UInt", pixelFormat, "Ptr", scan0, "Ptr*", pBitmap := 0, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-bitmap(int_int_int_pixelformat_byte)
+	if (status := DllCall("Gdiplus\GdipCreateBitmapFromScan0", "UInt", width, "UInt", height, "UInt", stride, "UInt", format, "Ptr", scan0, "Ptr*", pBitmap := 0, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-bitmap(int_int_int_pixelformat_byte)
 		throw (Exception(FormatStatus(status)))
 	}
 
@@ -101,7 +160,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	__Delete() {
 		if (!this.HasKey("Ptr")) {
-			MsgBox("GDIp.Bitmap.__Delete()")
+			MsgBox("Bitmap.__Delete()")
 		}
 
 		DllCall("Gdiplus\GdipDisposeImage", "Ptr", this.Ptr)
@@ -149,29 +208,15 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	;* bitmap.GetFlags()
 	;* Return:
-		;* imageFlags:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imageflags
-			;? 0x00000000: ImageFlagsNone
-			;? 0x00000001: ImageFlagsScalable
-			;? 0x00000002: ImageFlagsHasAlpha
-			;? 0x00000004: ImageFlagsHasTranslucent
-			;? 0x00000008: ImageFlagsPartiallyScalable
-			;? 0x00000010: ImageFlagsColorSpaceRGB
-			;? 0x00000020: ImageFlagsColorSpaceCMYK
-			;? 0x00000040: ImageFlagsColorSpaceGRAY
-			;? 0x00000080: ImageFlagsColorSpaceYCBCR
-			;? 0x00000100: ImageFlagsColorSpaceYCCK
-			;? 0x00001000: ImageFlagsHasRealDPI
-			;? 0x00002000: ImageFlagsHasRealPixelSize
-			;? 0x00010000: ImageFlagsReadOnly
-			;? 0x00020000: ImageFlagsCaching
+		;* flags: ImageFlags enumeration.
 	GetFlags() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipGetImageFlags", "Ptr", this.Ptr, "UInt*", imageFlags := 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetImageFlags", "Ptr", this.Ptr, "UInt*", flags := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (Format("0x{:08X}", imageFlags))
+		return (Format("0x{:08X}", flags))
 	}
 
 	Pixel[params*] {
@@ -185,6 +230,21 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 			return (value)
 		}
+	}
+
+	GetPixel(x, y) {
+		Local
+
+		if (this.HasKey("BitmapData")) {
+			color := NumGet(this.BitmapData.Scan0 + x*4 + y*this.BitmapData.Stride, "UInt")
+		}
+		else {
+			Static GdipBitmapGetPixel := DllCall("Kernel32\GetProcAddress", "Ptr", handle := DllCall("Kernel32\LoadLibrary", "Str", "Gdiplus", "Ptr"), "AStr", "GdipBitmapGetPixel", "Ptr") + !DllCall("Kernel32\FreeLibrary", "Ptr", handle, "UInt")
+
+			DllCall(GdipBitmapGetPixel, "Ptr", this.Ptr, "Int", x, "Int", y, "UInt*", color)  ;~ No error handling.
+		}
+
+		return (Format("0x{:08X}", color))
 	}
 
 	SetPixel(params*) {
@@ -206,9 +266,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 			}
 
 			loop, % height {
-				x := reset
-
-				loop, % width {
+				loop, % (width, x := reset) {
 					Numput(color, scan0 + 4*x++ + y*stride, "UInt")
 				}
 
@@ -233,9 +291,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 			}
 
 			loop, % (height, pBitmap := this.Ptr) {
-				x := reset
-
-				loop, % width {
+				loop, % (width, x := reset) {
 					DllCall(GdipBitmapSetPixel, "Ptr", pBitmap, "Int", x++, "Int", y, "UInt", color)
 				}
 
@@ -254,44 +310,15 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	;* bitmap.GetPixelFormat()
 	;* Return:
-		;* pixelFormat:  ;: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-emfplus/47cbe48e-d13c-450b-8a23-6aa95488428e
-			;? 0x00030101: PixelFormat1bppIndexed
-			;? 0x00030402: PixelFormat4bppIndexed
-			;? 0x00030803: PixelFormat8bppIndexed
-			;? 0x00101004: PixelFormat16bppGrayScale
-			;? 0x00021005: PixelFormat16bppRGB555
-			;? 0x00021006: PixelFormat16bppRGB565
-			;? 0x00061007: PixelFormat16bppARGB1555
-			;? 0x00021808: PixelFormat24bppRGB
-			;? 0x00022009: PixelFormat32bppRGB
-			;? 0x0026200A: PixelFormat32bppARGB
-			;? 0x000E200B: PixelFormat32bppPARGB
-			;? 0x0010300C: PixelFormat48bppRGB
-			;? 0x0034400D: PixelFormat64bppARGB
-			;? 0x001A400E: PixelFormat64bppPARGB
+		;* format: PixelFormat enumeration.
 	GetPixelFormat() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipGetImagePixelFormat", "Ptr", this.Ptr, "UInt*", pixelFormat := 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetImagePixelFormat", "Ptr", this.Ptr, "UInt*", format := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (Format("0x{:08X}", pixelFormat))
-	}
-
-	GetPixel(x, y) {
-		Local
-
-		if (this.HasKey("BitmapData")) {
-			color := NumGet(this.BitmapData.Scan0 + x*4 + y*this.BitmapData.Stride, "UInt")
-		}
-		else {
-			Static GdipBitmapGetPixel := DllCall("Kernel32\GetProcAddress", "Ptr", handle := DllCall("Kernel32\LoadLibrary", "Str", "Gdiplus", "Ptr"), "AStr", "GdipBitmapGetPixel", "Ptr") + !DllCall("Kernel32\FreeLibrary", "Ptr", handle, "UInt")
-
-			DllCall(GdipBitmapGetPixel, "Ptr", this.Ptr, "Int", x, "Int", y, "UInt*", color := 0)  ;~ No error handling.
-		}
-
-		return (Format("0x{:08X}", color))
+		return (Format("0x{:08X}", format))
 	}
 
 	;--------------- Method -------------------------------------------------------;
@@ -317,13 +344,11 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 			, "Base": this.Base})
 	}
 
-	;* bitmap.LockBits([x, y, width, height, pixelFormat, imageLockMode])
+	;* bitmap.LockBits([x, y, width, height, format, lockMode])
 	;* Parameter:
-		;* imageLockMode:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imagelockmode
-			;? 0x0001: ImageLockModeRead
-			;? 0x0002: ImageLockModeWrite
-			;? 0x0004: ImageLockModeUserInputBuf
-	LockBits(x := 0, y := 0, width := 0, height := 0, pixelFormat := "", imageLockMode := 0x0003) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
+		;* format: PixelFormat enumeration.
+		;* lockMode: ImageLockMode enumeration.
+	LockBits(x := 0, y := 0, width := 0, height := 0, format := "", lockMode := 0x0003) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
 		if (!this.HasKey("BitmapData")) {
 			if (!width) {
 				width := this.Width
@@ -335,12 +360,13 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 			Static bitmapData := CreateBitmapData()
 
-			if (status := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", CreateRect(x, y, width, height, "UInt").Ptr, "UInt", flags, "Int", (pixelFormat == "") ? (this.PixelFormat) : (pixelFormat), "Ptr", bitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+			if (status := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", CreateRect(x, y, width, height, "UInt").Ptr, "UInt", lockMode, "UInt", (format == "") ? (this.PixelFormat) : (format), "Ptr", bitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
 				throw (Exception(FormatStatus(status)))
 			}
 
-			return (True
-				, this.BitmapData := bitmapData)  ;~ LockBits returning too much data: https://github.com/dotnet/runtime/issues/28600.
+			this.BitmapData := bitmapData  ;~ LockBits returning too much data: https://github.com/dotnet/runtime/issues/28600.
+
+			return (True)
 		}
 
 		return (False)
@@ -352,36 +378,21 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 				throw (Exception(FormatStatus(status)))
 			}
 
-			return (True
-				, this.Delete("BitmapData"))
+			this.Delete("BitmapData")
+
+			return (True)
 		}
 
 		return (False)
 	}
 
-	;* bitmap.RotateFlip(rotateFlipType)
+	;* bitmap.RotateFlip(rotateType)
 	;* Parameter:
-		;* rotateFlipType:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-rotatefliptype
-			;? 0: RotateNoneFlipNone
-			;? 1: Rotate90FlipNone
-			;? 2: Rotate180FlipNone
-			;? 3: Rotate270FlipNone
-			;? 4: RotateNoneFlipX
-			;? 5: Rotate90FlipX
-			;? 6: Rotate180FlipX
-			;? 7: Rotate270FlipX
-			;? 6: RotateNoneFlipY
-			;? 7: Rotate90FlipY
-			;? 4: Rotate180FlipY
-			;? 5: Rotate270FlipY
-			;? 2: RotateNoneFlipXY
-			;? 3: Rotate90FlipXY
-			;? 0: Rotate180FlipXY
-			;? 1: Rotate270FlipXY
-	RotateFlip(rotateFlipType) {
+		;* rotateType: RotateFlipType enumeration.
+	RotateFlip(rotateType) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipImageRotateFlip", "Ptr", this.Ptr, "Int", rotateFlipType, "Int")) {
+		if (status := DllCall("Gdiplus\GdipImageRotateFlip", "Ptr", this.Ptr, "Int", rotateType, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 

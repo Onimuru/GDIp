@@ -1,5 +1,5 @@
 ﻿;* ** Useful Links **
-;* GDIp enums: https://github.com/mono/libgdiplus/blob/main/src/gdipenums.h || http://caca.zoy.org/browser/libpipi/trunk/win32/gdiplus/include/GdiplusEnums.h?rev=3074
+;* GDIp enums: https://github.com/mono/libgdiplus/blob/main/src/gdipenums.h || http://caca.zoy.org/browser/libpipi/trunk/win32/gdiplus/include/GdiplusEnums.h?rev=3074 || http://www.jose.it-berater.org/gdiplus/reference/gdiplusenumerations.htm
 
 GetRotatedTranslation(width, height, angle, ByRef xTranslation, ByRef yTranslation) {
 	angle := (angle >= 0) ? (Mod(angle, 360)) : (360 - Mod(-angle, -360))

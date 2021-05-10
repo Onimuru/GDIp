@@ -1,4 +1,7 @@
-﻿GetDC(hWnd := 0) {
+﻿;* ** Useful Links **
+;* GDIp enums: https://github.com/lstratman/Win32Interop/blob/master/User32/Enums.cs
+
+GetDC(hWnd := 0) {
 	if (!hDC := DllCall("User32\GetDC", "Ptr", hWnd, "Ptr")) {
 		throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 	}
@@ -12,9 +15,9 @@
 	return (DC)
 }
 
-;* GetDCEx(hwnd[, flags, rgnClip])
+;* GetDCEx(hwnd[, DCX, rgnClip])
 ;* Parameter:
-	;* flags:
+	;* DCX:
 		;? 0x000001: DCX_WINDOW
 		;? 0x000002: DCX_CACHE
 		;? 0x000020: DCX_PARENTCLIP
@@ -28,8 +31,8 @@
 		;? 0x000200: DCX_INTERSECTUPDATE
 		;? 0x100000: DCX_NORECOMPUTE
 		;? 0x200000: DCX_VALIDATE
-GetDCEx(hwnd, flags := 0, rgnClip := 0) {
-	if (!hDC := DllCall("User32\GetDCEx", "Ptr", hwnd, "Ptr", rgnClip, "UInt", flags, "Ptr")) {
+GetDCEx(hwnd, DCX := 0, rgnClip := 0) {
+	if (!hDC := DllCall("User32\GetDCEx", "Ptr", hwnd, "Ptr", rgnClip, "UInt", DCX, "Ptr")) {
 		throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 	}
 
