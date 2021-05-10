@@ -59,22 +59,22 @@ Class __Brush {
 	}
 
 
-	;* brush.GetType()
+	;* brush.GetBrushType()
 	;* Return:
-		;? 0: Brush
-		;? 1: HatchBrush
-		;? 2: TextureBrush
-		;? 3: Path gradient
-		;? 4: Linear gradient
-		;? -1: Error
-	GetType() {
+		;* brushType: ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-brushtype
+			;? 0: BrushTypeSolidColor
+			;? 1: BrushTypeHatchFill
+			;? 2: BrushTypeTextureFill
+			;? 3: BrushTypePathGradient
+			;? 4: BrushTypeLinearGradient
+	GetBrushType() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipGetBrushType", "Ptr", this.Ptr, "Int*", result := 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetBrushType", "Ptr", this.Ptr, "Int*", brushType := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (result)
+		return (brushType)
 	}
 }
 
@@ -82,61 +82,61 @@ Class __Brush {
 
 ;* GDIp.CreateHatchBrush(frontColor, backColor[, hatchStyle])
 ;* Parameter:
-	;* hatchStyle:
-		;? 0: Horizontal
-		;? 1: Vertical
-		;? 2: ForwardDiagonal
-		;? 3: BackwardDiagonal
-		;? 4: Cross
-		;? 5: DiagonalCross
-		;? 6: 05Percent
-		;? 7: 10Percent
-		;? 8: 20Percent
-		;? 9: 25Percent
-		;? 10: 30Percent
-		;? 11: 40Percent
-		;? 12: 50Percent
-		;? 13: 60Percent
-		;? 14: 70Percent
-		;? 15: 75Percent
-		;? 16: 80Percent
-		;? 17: 90Percent
-		;? 18: LightDownwardDiagonal
-		;? 19: LightUpwardDiagonal
-		;? 20: DarkDownwardDiagonal
-		;? 21: DarkUpwardDiagonal
-		;? 22: WideDownwardDiagonal
-		;? 23: WideUpwardDiagonal
-		;? 24: LightVertical
-		;? 25: LightHorizontal
-		;? 26: NarrowVertical
-		;? 27: NarrowHorizontal
-		;? 28: DarkVertical
-		;? 29: DarkHorizontal
-		;? 30: DashedDownwardDiagonal
-		;? 31: DashedUpwardDiagonal
-		;? 32: DashedHorizontal
-		;? 33: DashedVertical
-		;? 34: SmallConfetti
-		;? 35: LargeConfetti
-		;? 36: ZigZag
-		;? 37: Wave
-		;? 38: DiagonalBrick
-		;? 39: HorizontalBrick
-		;? 40: Weave
-		;? 41: Plaid
-		;? 42: Divot
-		;? 43: DottedGrid
-		;? 44: DottedDiamond
-		;? 45: Shingle
-		;? 46: Trellis
-		;? 47: Sphere
-		;? 48: SmallGrid
-		;? 49: SmallCheckerBoard
-		;? 50: LargeCheckerBoard
-		;? 51: OutlinedDiamond
-		;? 52: SolidDiamond
-		;? 53: Total
+	;* hatchStyle:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-hatchstyle
+		;? 00: HatchStyleHorizontal || HatchStyleMin
+		;? 01: HatchStyleVertical
+		;? 02: HatchStyleForwardDiagonal
+		;? 03: HatchStyleBackwardDiagonal
+		;? 04: HatchStyleCross || HatchStyleLargeGrid
+		;? 05: HatchStyleDiagonalCross
+		;? 06: HatchStyle05Percent
+		;? 07: HatchStyle10Percent
+		;? 08: HatchStyle20Percent
+		;? 09: HatchStyle25Percent
+		;? 10: HatchStyle30Percent
+		;? 11: HatchStyle40Percent
+		;? 12: HatchStyle50Percent
+		;? 13: HatchStyle60Percent
+		;? 14: HatchStyle70Percent
+		;? 15: HatchStyle75Percent
+		;? 16: HatchStyle80Percent
+		;? 17: HatchStyle90Percent
+		;? 18: HatchStyleLightDownwardDiagonal
+		;? 19: HatchStyleLightUpwardDiagonal
+		;? 20: HatchStyleDarkDownwardDiagonal
+		;? 21: HatchStyleDarkUpwardDiagonal
+		;? 22: HatchStyleWideDownwardDiagonal
+		;? 23: HatchStyleWideUpwardDiagonal
+		;? 24: HatchStyleLightVertical
+		;? 25: HatchStyleLightHorizontal
+		;? 26: HatchStyleNarrowVertical
+		;? 27: HatchStyleNarrowHorizontal
+		;? 28: HatchStyleDarkVertical
+		;? 29: HatchStyleDarkHorizontal
+		;? 30: HatchStyleDashedDownwardDiagonal
+		;? 31: HatchStyleDashedUpwardDiagonal
+		;? 32: HatchStyleDashedHorizontal
+		;? 33: HatchStyleDashedVertical
+		;? 34: HatchStyleSmallConfetti
+		;? 35: HatchStyleLargeConfetti
+		;? 36: HatchStyleZigZag
+		;? 37: HatchStyleWave
+		;? 38: HatchStyleDiagonalBrick
+		;? 39: HatchStyleHorizontalBrick
+		;? 40: HatchStyleWeave
+		;? 41: HatchStylePlaid
+		;? 42: HatchStyleDivot
+		;? 43: HatchStyleDottedGrid
+		;? 44: HatchStyleDottedDiamond
+		;? 45: HatchStyleShingle
+		;? 46: HatchStyleTrellis
+		;? 47: HatchStyleSphere
+		;? 48: HatchStyleSmallGrid
+		;? 49: HatchStyleSmallCheckerBoard
+		;? 50: HatchStyleLargeCheckerBoard
+		;? 51: HatchStyleOutlinedDiamond
+		;? 52: HatchStyleSolidDiamond || HatchStyleMax
+		;? 53: HatchStyleTotal
 CreateHatchBrush(frontColor, backColor, hatchStyle := 0) {
 	Local
 
@@ -198,12 +198,12 @@ Class __Hatchbrush extends GDIp.__Brush {
 
 ;* GDIp.CreateLineBrush(x1, y1, x2, y2, color1, color2[, wrapMode])
 ;* Parameter:
-	;* wrapMode:
-		;? 0: Tiling without flipping.
-		;? 1: Tiles are flipped horizontally as you move from one tile to the next in a row.
-		;? 2: Tiles are flipped vertically as you move from one tile to the next in a column.
-		;? 3: Tiles are flipped horizontally as you move along a row and flipped vertically as you move along a column.
-		;? 4: No tiling takes place.
+	;* wrapMode:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-wrapmode
+		;? 0: WrapModeTile - Tiling without flipping.
+		;? 1: WrapModeTileFlipX - Tiles are flipped horizontally as you move from one tile to the next in a row.
+		;? 2: WrapModeTileFlipY - Tiles are flipped vertically as you move from one tile to the next in a column.
+		;? 3: WrapModeTileFlipXY - Tiles are flipped horizontally as you move along a row and flipped vertically as you move along a column.
+		;? 4: WrapModeClamp - No tiling takes place.
 CreateLineBrush(x1, y1, x2, y2, color1, color2, wrapMode := 0) {
 	Static point1 := CreatePoint(0, 0, "Float"), point2 := CreatePoint(0, 0, "Float")
 

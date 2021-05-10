@@ -41,6 +41,115 @@ Class __Graphics {
 		DllCall("Gdiplus\GdipDeleteGraphics", "Ptr", this.Ptr)
 	}
 
+	;-------------- Property ------------------------------------------------------;
+
+	CompositingMode[] {
+		Set {
+			this.SetCompositingMode(value)
+
+			return (value)
+		}
+	}
+
+	;* graphics.SetCompositingMode(compositingMode)
+	;* Parameter:
+		;* compositingMode:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-compositingmode
+			;? 0: CompositingModeSourceOver - Specifies that when a color is rendered, it overwrites the background color.
+			;? 1: CompositingModeSourceCopy - Specifies that when a color is rendered, it is blended with the background color. The blend is determined by the alpha component of the color being rendered.
+	SetCompositingMode(compositingMode) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", this.Ptr, "Int", compositingMode, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	InterpolationMode[] {
+		Set {
+			this.SetInterpolationMode(value)
+
+			return (value)
+		}
+	}
+
+	;* graphics.SetInterpolationMode(interpolationMode)
+	;* Parameter:
+		;* interpolationMode:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-interpolationmode
+			;? 0: InterpolationModeDefault
+			;? 1: InterpolationModeLowQuality
+			;? 2: InterpolationModeHighQuality
+			;? 3: InterpolationModeBilinear
+			;? 4: InterpolationModeBicubic
+			;? 5: InterpolationModeNearestNeighbor
+			;? 6: InterpolationModeHighQualityBilinear
+			;? 7: InterpolationModeHighQualityBicubic
+	SetInterpolationMode(interpolationMode) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", this.Ptr, "Int", interpolationMode, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	SmoothingMode[] {
+		Set {
+			this.SetSmoothingMode(value)
+
+			return (value)
+		}
+	}
+
+	;* graphics.SetSmoothingMode(smoothingMode)
+	;* Parameter:
+		;* smoothingMode:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-smoothingmode
+			;? 0: SmoothingModeDefault
+			;? 1: SmoothingModeHighSpeed
+			;? 2: SmoothingModeHighQuality
+			;? 3: SmoothingModeNone
+			;? 4: SmoothingModeAntiAlias
+	SetSmoothingMode(smoothingMode) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", this.Ptr, "Int", smoothingMode, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	TextRenderingHint[] {
+		Set {
+			this.SetTextRenderingHint(value)
+
+			return (value)
+		}
+	}
+
+	;* graphics.SetTextRenderingHint(textRenderingHint)
+	;* Parameter:
+		;* textRenderingHint:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-textrenderinghint
+			;? 0: TextRenderingHintSystemDefault
+			;? 1: TextRenderingHintSingleBitPerPixelGridFit
+			;? 2: TextRenderingHintSingleBitPerPixel
+			;? 3: TextRenderingHintAntiAliasGridFit
+			;? 4: TextRenderingHintAntiAlias
+			;? 5: TextRenderingHintClearTypeGridFit
+	SetTextRenderingHint(textRenderingHint) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetTextRenderingHint", "Ptr", this.Ptr, "Int", textRenderingHint, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	;--------------- Method -------------------------------------------------------;
+
 	;* graphics.CreatePtr(width, height)
 	CreatePtr(width, height) {
 		Local
@@ -52,106 +161,6 @@ Class __Graphics {
 		return (pBitmap)
 	}
 
-	;-------------- Property ------------------------------------------------------;
-
-	CompositingMode[] {
-		Set {
-			return (value, this.SetCompositingMode(value))
-		}
-	}
-
-	;* graphics.SetCompositingMode(mode)
-	;* Parameter:
-		;* mode:
-			;? 0: SourceOver (blend)
-			;? 1: SourceCopy (overwrite)
-	SetCompositingMode(mode := 0) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return (True)
-	}
-
-	InterpolationMode[] {
-		Set {
-			return (value, this.SetInterpolationMode(value))
-		}
-	}
-
-	;* graphics.SetInterpolationMode(mode)
-	;* Parameter:
-		;* mode:
-			;? 0: Default
-			;? 1: LowQuality
-			;? 2: HighQuality
-			;? 3: Bilinear
-			;? 4: Bicubic
-			;? 5: NearestNeighbor
-			;? 6: HighQualityBilinear
-			;? 7: HighQualityBicubic
-	SetInterpolationMode(mode := 0) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return (True)
-	}
-
-	SmoothingMode[] {
-		Set {
-			return (value, this.SetSmoothingMode(value))
-		}
-	}
-
-	;* graphics.SetSmoothingMode(mode)
-	;* Parameter:
-		;* mode:
-			;? 0: Default
-			;? 1: HighSpeed
-			;? 2: HighQuality
-			;? 3: None
-			;? 4: AntiAlias
-	SetSmoothingMode(mode := 0) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return (True)
-	}
-
-	TextRenderingHint[] {
-		Set {
-			return (value, this.SetTextRenderingHint(value))
-		}
-	}
-
-	;* graphics.SetTextRenderingHint(hint)
-	;* Parameter:
-		;* hint:
-			;? 0: SystemDefault
-			;? 1: SingleBitPerPixelGridFit
-			;? 2: SingleBitPerPixel
-			;? 3: AntiAliasGridFit
-			;? 4: AntiAlias
-			;? 5: ClearTypeGridFit
-	SetTextRenderingHint(hint := 0) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipSetTextRenderingHint", "Ptr", this.Ptr, "Int", hint, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return (True)
-	}
-
-	;--------------- Method -------------------------------------------------------;
 	;------------------------------------------------------  Control  --------------;
 
 	Clear(color := 0x00000000) {
@@ -164,25 +173,25 @@ Class __Graphics {
 		return (True)
 	}
 
-	;* graphics.SetTextRenderingHint(hint)
+	;* graphics.Flush(flushIntention)
 	;* Parameter:
-		;* intent:
-			;? 0: Flush all batched rendering operations and return immediately
-			;? 1: Flush all batched rendering operations and wait for them to complete
-	Flush(intent) {
+		;* flushIntention - Specifies whether the method should return immediately or wait for existing operations to complete:  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-flushintention
+			;? 0: FlushIntentionFlush - Flush all batched rendering operations and return immediately.
+			;? 1: FlushIntentionSync - Flush all batched rendering operations and wait for them to complete.
+	Flush(flushIntention) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipFlush", "Ptr", this.Ptr, "Int", intent, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFlush", "Ptr", this.Ptr, "Int", flushIntention, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
 		return (True)
 	}
 
-	;--------------------------------------------------  World Transform  ----------;
+	;-----------------------------------------------------  Transform  -------------;
 
-	;* graphics.Translate(x, y)
-	Translate(x, y) {
+	;* graphics.TranslateTransform(x, y)
+	TranslateTransform(x, y) {
 		Local
 
 		if (status := DllCall("Gdiplus\GdipTranslateWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", 1, "Int")) {
@@ -192,40 +201,36 @@ Class __Graphics {
 		return (True)
 	}
 
-	;* graphics.Rotate(angle[, x, y]))
-	Rotate(angle, x := "", y := "") {
+	;* graphics.RotateTransform(angle[, x, y]))
+	RotateTransform(angle, x := "", y := "") {
 		if (x == "" || y == "") {
 			if (status := DllCall("Gdiplus\GdipRotateWorldTransform", "Ptr", this.Ptr, "Float", angle, "Int", 1, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 		}
 		else {
-			if (status := DllCall("Gdiplus\GdipTranslateWorldTransform", "Ptr", this.Ptr, "Float", -x, "Float", -y, "Int", 1, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
+			this.TranslateTransform(x, y)
 
 			if (status := DllCall("Gdiplus\GdipRotateWorldTransform", "Ptr", this.Ptr, "Float", angle, "Int", 1, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 
-			if (status := DllCall("Gdiplus\GdipTranslateWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", 1, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
+			this.TranslateTransform(-x, -y)
 		}
 
 		return (True)
 	}
 
-	Reset() {
-		if (status := DllCall("Gdiplus\GdipResetWorldTransform", "Ptr", this.Ptr, "Int")) {
+	ScaleTransform(x, y) {
+		if (status := DllCall("Gdiplus\GdipScaleWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", 1, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
 		return (True)
 	}
 
-	Scale(x, y) {
-		if (status := DllCall("Gdiplus\GdipScaleWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", 1, "Int")) {
+	ResetTransform() {
+		if (status := DllCall("Gdiplus\GdipResetWorldTransform", "Ptr", this.Ptr, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -234,6 +239,7 @@ Class __Graphics {
 
 	;------------------------------------------------------- Bitmap ---------------;
 
+	;* graphics.DrawBitmap([__Bitmap] bitmap[, [__Rect] destinationRect, [__Rect] sourceRect, unit, imageAttributes])
 	DrawBitmap(bitmap, destinationRect := "", sourceRect := "", unit := 2, imageAttributes := "") {
 		Local
 
@@ -248,9 +254,20 @@ Class __Graphics {
 		return (True)
 	}
 
+	;* graphics.DrawCachedBitmap([__CachedBitmap] cachedBitmap[, [__Vec2] object])
+	DrawCachedBitmap(cachedBitmap, object := "") {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", cachedBitmap.Ptr, "Int", object.x, "Int", object.y, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
 	;-------------------------------------------------------- Fill ----------------;
 
-	;* graphics.FillEllipse([Brush] brush, [Rect] object)
+	;* graphics.FillEllipse([__Brush] brush, [__Rect] object)
 	FillEllipse(brush, object) {
 		Local
 
@@ -261,7 +278,7 @@ Class __Graphics {
 		return (True)
 	}
 
-	;* graphics.FillPie([Brush] brush, [Rect] object, startAngle, sweepAngle)
+	;* graphics.FillPie([__Brush] brush, [__Rect] object, startAngle, sweepAngle)
 	FillPie(brush, object, startAngle, sweepAngle) {
 		Local
 
@@ -272,7 +289,7 @@ Class __Graphics {
 		return (True)
 	}
 
-	;* graphics.FillRectangle([Brush] brush, [Rect] object)
+	;* graphics.FillRectangle([__Brush] brush, [__Rect] object)
 	FillRectangle(brush, object) {
 		Local
 
@@ -285,6 +302,7 @@ Class __Graphics {
 
 	;-------------------------------------------------------- Draw ----------------;
 
+	;* graphics.DrawArc([__Pen] pen, [__Rect] object, startAngle, sweepAngle)
 	DrawArc(pen, object, startAngle, sweepAngle) {
 		Local
 
@@ -295,17 +313,18 @@ Class __Graphics {
 		return (True)
 	}
 
-	DrawBezier(pen, objects1, objects2, objects3, objects4) {
+	;* graphics.DrawBezier([__Pen] pen, [__Vec2] object1, [__Vec2] object2, [__Vec2] object3, [__Vec2] object4)
+	DrawBezier(pen, object1, object2, object3, object4) {
 		Local
 
-		if (status := DllCall("gdiplus\GdipDrawBezier", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", objects1.x, "Float", objects1.y, "Float", objects2.x, "Float", objects2.y, "Float", objects3.x, "Float", objects3.y, "Float", objects4.x, "Float", objects4.y, "Int")) {
+		if (status := DllCall("gdiplus\GdipDrawBezier", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object1.x, "Float", object1.y, "Float", object2.x, "Float", object2.y, "Float", object3.x, "Float", object3.y, "Float", object4.x, "Float", object4.y, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
 		return (True)
 	}
 
-	;* graphics.DrawEllipse(([Pen] pen, [Rect] object)
+	;* graphics.DrawEllipse([__Pen] pen, [__Rect] object)
 	DrawEllipse(pen, object) {
 		Local
 
@@ -316,7 +335,7 @@ Class __Graphics {
 		return (True)
 	}
 
-	;* graphics.DrawRectangle([Pen] pen, [Rect] object)
+	;* graphics.DrawRectangle([__Pen] pen, [__Rect] object)
 	DrawRectangle(pen, object) {
 		Local
 
@@ -327,7 +346,7 @@ Class __Graphics {
 		return (True)
 	}
 
-	;* graphics.DrawLine([Pen] pen, [Vec2] object1, [Vec2] object2)
+	;* graphics.DrawLine([__Pen] pen, [__Vec2] object1, [__Vec2] object2)
 	DrawLine(pen, object1, object2) {
 		Local
 

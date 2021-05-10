@@ -1,5 +1,5 @@
 ﻿;* GDIp.CreateCanvas(x, y, width, height[, guiOptions, showOptions, smoothing, interpolation])
-CreateCanvas(x, y, width, height, guiOptions := "", showOptions := "NA", title := "", smoothing := 4, interpolatiom := 7) {
+CreateCanvas(x, y, width, height, guiOptions := "", showOptions := "NA", title := "", smoothing := 4, interpolation := 7) {
 	Gui, % Format("{}: New", title), % Format("{} +hWndhWnd +E0x80000", RegExReplace(guiOptions, "\+E0x80000"))  ;* Create a layered window (`"+E0x80000"` must be used for `UpdateLayeredWindow` to work).
 	Gui, Show, % showOptions, % title
 
@@ -11,7 +11,7 @@ CreateCanvas(x, y, width, height, guiOptions := "", showOptions := "NA", title :
 		, instance.DC.SelectObject(instance.Bitmap)  ;* Select the DIB into the memory DC.
 
 	(instance.Graphics := this.CreateGraphicsFromDC(instance.DC)).SetSmoothingMode(smoothing)
-		, instance.Graphics.SetInterpolationMode(interpolatiom)
+		, instance.Graphics.SetInterpolationMode(interpolation)
 
 	instance.Update(x, y, width, height)
 
