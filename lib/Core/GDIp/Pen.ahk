@@ -1,41 +1,41 @@
 ﻿/*
 ;* DashCap enum (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-dashcap)
-	;? 0: DashCapFlat
-	;? 2: DashCapRound
-	;? 3: DashCapTriangle
+	;? 0 = DashCapFlat
+	;? 2 = DashCapRound
+	;? 3 = DashCapTriangle
 
 ;* DashStyle enum (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-dashstyle)
-	;? 0: DashStyleSolid
-	;? 1: DashStyleDash
-	;? 2: DashStyleDot
-	;? 3: DashStyleDashDot
-	;? 4: DashStyleDashDotDot
-	;? 5: DashStyleCustom
+	;? 0 = DashStyleSolid
+	;? 1 = DashStyleDash
+	;? 2 = DashStyleDot
+	;? 3 = DashStyleDashDot
+	;? 4 = DashStyleDashDotDot
+	;? 5 = DashStyleCustom
 
 ;* LineCap enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-linecap)
-	;? 0x00: LineCapFlat
-	;? 0x01: LineCapSquare
-	;? 0x02: LineCapRound
-	;? 0x03: LineCapTriangle
-	;? 0x10: LineCapNoAnchor
-	;? 0x11: LineCapSquareAnchor
-	;? 0x12: LineCapRoundAnchor
-	;? 0x13: LineCapDiamondAnchor
-	;? 0x14: LineCapArrowAnchor
-	;? 0xFF: LineCapCustom
-	;? 0xF0: LineCapAnchorMask
+	;? 0x00 = LineCapFlat
+	;? 0x01 = LineCapSquare
+	;? 0x02 = LineCapRound
+	;? 0x03 = LineCapTriangle
+	;? 0x10 = LineCapNoAnchor
+	;? 0x11 = LineCapSquareAnchor
+	;? 0x12 = LineCapRoundAnchor
+	;? 0x13 = LineCapDiamondAnchor
+	;? 0x14 = LineCapArrowAnchor
+	;? 0xFF = LineCapCustom
+	;? 0xF0 = LineCapAnchorMask
 
 ;* PenAlignment enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-penalignment)
-	;? 0: PenAlignmentCenter - Specifies that the pen is aligned on the center of the line that is drawn.
-	;? 1: PenAlignmentInset - Specifies, when drawing a polygon, that the pen is aligned on the inside of the edge of the polygon.
+	;? 0 = PenAlignmentCenter - Specifies that the pen is aligned on the center of the line that is drawn.
+	;? 1 = PenAlignmentInset - Specifies, when drawing a polygon, that the pen is aligned on the inside of the edge of the polygon.
 
 ;* PenType enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-pentype)
-	;? 0: PenTypeSolidColor
-	;? 1: PenTypeHatchFill
-	;? 2: PenTypeTextureFill
-	;? 3: PenTypePathGradient
-	;? 4: PenTypeLinearGradient
-	;? -1: PenTypeUnknown
+	;? 0 = PenTypeSolidColor
+	;? 1 = PenTypeHatchFill
+	;? 2 = PenTypeTextureFill
+	;? 3 = PenTypePathGradient
+	;? 4 = PenTypeLinearGradient
+	;? -1 = PenTypeUnknown
 
 ;* Unit enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-unit)
 	;? 0 = UnitWorld - World coordinate (non-physical unit).
@@ -48,7 +48,7 @@
 
 ;* GDIp.CreatePen([color, width, unit])
 ;* Parameter:
-	;* unit: Unit enumeration.
+	;* unit - Unit enumeration.
 CreatePen(color := 0xFFFFFFFF, width := 1, unit := 2) {
 	Local
 
@@ -62,7 +62,7 @@ CreatePen(color := 0xFFFFFFFF, width := 1, unit := 2) {
 
 ;* GDIp.CreatePenFromBrush([__Brush] brush[, width, unit])
 ;* Parameter:
-	;* unit: Unit enumeration.
+	;* unit - Unit enumeration.
 CreatePenFromBrush(brush, width := 1, unit := 2) {
 	Local
 
@@ -164,7 +164,7 @@ Class __Pen {
 
 	;* pen.GetUnit()
 	;* Return:
-		;* unit: Unit enumeration.
+		;* unit - Unit enumeration.
 	GetUnit() {
 		Local
 
@@ -177,7 +177,7 @@ Class __Pen {
 
 	;* pen.SetUnit()
 	;* Parameter:
-		;* unit: Unit enumeration.
+		;* unit - Unit enumeration.
 	SetUnit(unit) {
 		Local
 
@@ -229,7 +229,7 @@ Class __Pen {
 
 	;* pen.GetType()
 	;* Return:
-		;* type: PenType enumeration.
+		;* type - PenType enumeration.
 	GetType() {
 		Local
 
@@ -254,7 +254,7 @@ Class __Pen {
 
 	;* pen.GetAlignment()
 	;* Return:
-		;* alignment: PenAlignment enumeration.
+		;* alignment - PenAlignment enumeration.
 	GetAlignment() {
 		Local
 
@@ -267,7 +267,7 @@ Class __Pen {
 
 	;* pen.SetAlignment()
 	;* Parameter:
-		;* alignment: PenAlignment enumeration.
+		;* alignment - PenAlignment enumeration.
 	SetAlignment(alignment) {
 		Local
 
@@ -322,7 +322,7 @@ Class __Pen {
 
 	;* pen.GetStartCap()
 	;* Return:
-		;* lineCap: LineCap enumeration.
+		;* lineCap - LineCap enumeration.
 	GetStartCap() {
 		Local
 
@@ -335,7 +335,7 @@ Class __Pen {
 
 	;* pen.SetStartCap(lineCap)
 	;* Parameter:
-		;* lineCap: LineCap enumeration.
+		;* lineCap - LineCap enumeration.
 	SetStartCap(lineCap) {
 		Local
 
@@ -360,7 +360,7 @@ Class __Pen {
 
 	;* pen.GetEndCap()
 	;* Return:
-		;* lineCap: LineCap enumeration.
+		;* lineCap - LineCap enumeration.
 	GetEndCap() {
 		Local
 
@@ -373,7 +373,7 @@ Class __Pen {
 
 	;* pen.SetEndCap(lineCap)
 	;* Parameter:
-		;* lineCap: LineCap enumeration.
+		;* lineCap - LineCap enumeration.
 	SetEndCap(lineCap) {
 		Local
 
@@ -398,7 +398,7 @@ Class __Pen {
 
 	;* pen.GetDashCap()
 	;* Return:
-		;* dashCap: DashCap enumeration.
+		;* dashCap - DashCap enumeration.
 	GetDashCap() {
 		Local
 
@@ -411,7 +411,7 @@ Class __Pen {
 
 	;* pen.SetDashCap(dashCap)
 	;* Parameter:
-		;* dashCap: DashCap enumeration.
+		;* dashCap - DashCap enumeration.
 	SetDashCap(dashCap) {
 		Local
 
@@ -424,9 +424,9 @@ Class __Pen {
 
 	;* pen.SetLineCap(startCap, endCap, dashCap)
 	;* Parameter:
-		;* startCap: LineCap enumeration.
-		;* endCap: LineCap enumeration.
-		;* dashCap: DashCap enumeration.
+		;* startCap - LineCap enumeration.
+		;* endCap - LineCap enumeration.
+		;* dashCap - DashCap enumeration.
 	SetLineCap(startCap, endCap, dashCap) {
 		Local
 
@@ -483,7 +483,7 @@ Class __Pen {
 
 	;* pen.GetDashStyle()
 	;* Return:
-		;* style: DashStyle enumeration.
+		;* style - DashStyle enumeration.
 	GetDashStyle() {
 		Local
 
@@ -496,7 +496,7 @@ Class __Pen {
 
 	;* pen.SetDashStyle()
 	;* Parameter:
-		;* style: DashStyle enumeration.
+		;* style - DashStyle enumeration.
 	SetDashStyle(style) {
 		Local
 
@@ -577,7 +577,7 @@ Class __Pen {
 	MultiplyTransform(matrix, matrixOrder := 0) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipMultiplyPenTransform", "Ptr", this.Ptr, "Ptr", matrix.Handle, "Int", matrixOrder, "Int")) {
+		if (status := DllCall("Gdiplus\GdipMultiplyPenTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 

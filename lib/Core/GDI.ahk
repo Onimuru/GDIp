@@ -89,11 +89,11 @@ Class GDI {
 
 	;* GDI.Bitmap.CreateBitmap(width, height[, bitCount, planes, [ByRef] pBits])
 	CreateBitmap(width, height, bitCount := 32, planes := 1, ByRef pBits := 0) {
-		if (!handle := DllCall("Gdi32\CreateBitmap", "Int", width, "Int", height, "UInt", planes, "UInt", bitCount, "Ptr", pBits, "Ptr")) {
+		if (!hBitmap := DllCall("Gdi32\CreateBitmap", "Int", width, "Int", height, "UInt", planes, "UInt", bitCount, "Ptr", pBits, "Ptr")) {
 			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 		}
 
-		return ({"Handle": handle   ;~ DDB (monochrome)
+		return ({"Handle": hBitmap   ;~ DDB (monochrome)
 			, "Base": this.__Bitmap})
 	}
 
@@ -103,11 +103,11 @@ Class GDI {
 			DC := GetDC()
 		}
 
-		if (!handle := DllCall("Gdi32\CreateCompatibleBitmap", "Ptr", DC.Handle, "Int", width, "Int", height, "Ptr")) {
+		if (!hBitmap := DllCall("Gdi32\CreateCompatibleBitmap", "Ptr", DC.Handle, "Int", width, "Int", height, "Ptr")) {
 			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 		}
 
-		return ({"Handle": handle  ;~ DDB
+		return ({"Handle": hBitmap  ;~ DDB
 			, "Base": this.__Bitmap})
 	}
 
@@ -117,15 +117,15 @@ Class GDI {
 			DC := GetDC()
 		}
 
-		if (!handle := DllCall("Gdi32\CreateDIBSection", "Ptr", DC.Handle, "Ptr", bitmapInfo.Ptr, "UInt", usage, "Ptr*", pBits, "Ptr", hSection, "UInt", offset, "Ptr")) {
+		if (!hBitmap := DllCall("Gdi32\CreateDIBSection", "Ptr", DC.Handle, "Ptr", bitmapInfo.Ptr, "UInt", usage, "Ptr*", pBits, "Ptr", hSection, "UInt", offset, "Ptr")) {
 			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 		}
 
-		return ({"Handle": handle  ;~ DIB
+		return ({"Handle": hBitmap  ;~ DIB
 			, "Base": this.__Bitmap})
 	}
 
-	Class __Bitmap {
+	Class __Bitmap {  ;* hBitmaps are word aligned, so a 24 bpp image will use 32 bits of space.
 
 		__Delete() {
 			if (!this.Handle) {

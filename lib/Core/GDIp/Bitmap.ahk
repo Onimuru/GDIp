@@ -1,63 +1,63 @@
 ﻿/*
 ;* ImageFlags enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imageflags)
-	;? 0x00000000: ImageFlagsNone
-	;? 0x00000001: ImageFlagsScalable
-	;? 0x00000002: ImageFlagsHasAlpha
-	;? 0x00000004: ImageFlagsHasTranslucent
-	;? 0x00000008: ImageFlagsPartiallyScalable
-	;? 0x00000010: ImageFlagsColorSpaceRGB
-	;? 0x00000020: ImageFlagsColorSpaceCMYK
-	;? 0x00000040: ImageFlagsColorSpaceGRAY
-	;? 0x00000080: ImageFlagsColorSpaceYCBCR
-	;? 0x00000100: ImageFlagsColorSpaceYCCK
-	;? 0x00001000: ImageFlagsHasRealDPI
-	;? 0x00002000: ImageFlagsHasRealPixelSize
-	;? 0x00010000: ImageFlagsReadOnly
-	;? 0x00020000: ImageFlagsCaching
+	;? 0x00000000 = ImageFlagsNone
+	;? 0x00000001 = ImageFlagsScalable
+	;? 0x00000002 = ImageFlagsHasAlpha
+	;? 0x00000004 = ImageFlagsHasTranslucent
+	;? 0x00000008 = ImageFlagsPartiallyScalable
+	;? 0x00000010 = ImageFlagsColorSpaceRGB
+	;? 0x00000020 = ImageFlagsColorSpaceCMYK
+	;? 0x00000040 = ImageFlagsColorSpaceGRAY
+	;? 0x00000080 = ImageFlagsColorSpaceYCBCR
+	;? 0x00000100 = ImageFlagsColorSpaceYCCK
+	;? 0x00001000 = ImageFlagsHasRealDPI
+	;? 0x00002000 = ImageFlagsHasRealPixelSize
+	;? 0x00010000 = ImageFlagsReadOnly
+	;? 0x00020000 = ImageFlagsCaching
 
 ;* ImageLockMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imagelockmode)
-	;? 0x0001: ImageLockModeRead
-	;? 0x0002: ImageLockModeWrite
-	;? 0x0004: ImageLockModeUserInputBuf
+	;? 0x0001 = ImageLockModeRead
+	;? 0x0002 = ImageLockModeWrite
+	;? 0x0004 = ImageLockModeUserInputBuf
 
 ;* PixelFormat enumeration (https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-emfplus/47cbe48e-d13c-450b-8a23-6aa95488428e)
-	;? 0x00030101: PixelFormat1bppIndexed
-	;? 0x00030402: PixelFormat4bppIndexed
-	;? 0x00030803: PixelFormat8bppIndexed
-	;? 0x00101004: PixelFormat16bppGrayScale
-	;? 0x00021005: PixelFormat16bppRGB555
-	;? 0x00021006: PixelFormat16bppRGB565
-	;? 0x00061007: PixelFormat16bppARGB1555
-	;? 0x00021808: PixelFormat24bppRGB
-	;? 0x00022009: PixelFormat32bppRGB
-	;? 0x0026200A: PixelFormat32bppARGB
-	;? 0x000E200B: PixelFormat32bppPARGB
-	;? 0x0010300C: PixelFormat48bppRGB
-	;? 0x0034400D: PixelFormat64bppARGB
-	;? 0x001A400E: PixelFormat64bppPARGB
+	;? 0x00030101 = PixelFormat1bppIndexed
+	;? 0x00030402 = PixelFormat4bppIndexed
+	;? 0x00030803 = PixelFormat8bppIndexed
+	;? 0x00101004 = PixelFormat16bppGrayScale
+	;? 0x00021005 = PixelFormat16bppRGB555
+	;? 0x00021006 = PixelFormat16bppRGB565
+	;? 0x00061007 = PixelFormat16bppARGB1555
+	;? 0x00021808 = PixelFormat24bppRGB
+	;? 0x00022009 = PixelFormat32bppRGB
+	;? 0x0026200A = PixelFormat32bppARGB
+	;? 0x000E200B = PixelFormat32bppPARGB
+	;? 0x0010300C = PixelFormat48bppRGB
+	;? 0x0034400D = PixelFormat64bppARGB
+	;? 0x001A400E = PixelFormat64bppPARGB
 
 ;* RotateFlipType enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-rotatefliptype)
-	;? 0: RotateNoneFlipNone
-	;? 1: Rotate90FlipNone
-	;? 2: Rotate180FlipNone
-	;? 3: Rotate270FlipNone
-	;? 4: RotateNoneFlipX
-	;? 5: Rotate90FlipX
-	;? 6: Rotate180FlipX
-	;? 7: Rotate270FlipX
-	;? 6: RotateNoneFlipY
-	;? 7: Rotate90FlipY
-	;? 4: Rotate180FlipY
-	;? 5: Rotate270FlipY
-	;? 2: RotateNoneFlipXY
-	;? 3: Rotate90FlipXY
-	;? 0: Rotate180FlipXY
-	;? 1: Rotate270FlipXY
+	;? 0 = RotateNoneFlipNone
+	;? 1 = Rotate90FlipNone
+	;? 2 = Rotate180FlipNone
+	;? 3 = Rotate270FlipNone
+	;? 4 = RotateNoneFlipX
+	;? 5 = Rotate90FlipX
+	;? 6 = Rotate180FlipX
+	;? 7 = Rotate270FlipX
+	;? 6 = RotateNoneFlipY
+	;? 7 = Rotate90FlipY
+	;? 4 = Rotate180FlipY
+	;? 5 = Rotate270FlipY
+	;? 2 = RotateNoneFlipXY
+	;? 3 = Rotate90FlipXY
+	;? 0 = Rotate180FlipXY
+	;? 1 = Rotate270FlipXY
 */
 
 ;* GDIp.GdipCreateBitmap(width, height[, format, stride, [Struct] scan0])
 ;* Parameter:
-	;* format: PixelFormat enumeration.
+	;* format - PixelFormat enumeration.
 CreateBitmap(width, height, format := 0x26200A, stride := 0, scan0 := 0) {
 	Local
 
@@ -69,10 +69,12 @@ CreateBitmap(width, height, format := 0x26200A, stride := 0, scan0 := 0) {
 		, "Base": this.__Bitmap})
 }
 
-CreateBitmapFromFile(file) {
+CreateBitmapFromFile(file, useICM := 0) {
 	Local
 
-	if (status := DllCall("Gdiplus\GdipCreateBitmapFromFile", "Ptr", &file, "Ptr*", pBitmap := 0, "Int")) {
+	if (status := (useICM)
+		? (DllCall("Gdiplus\GdipCreateBitmapFromFileICM", "Ptr", &file, "Ptr*", pBitmap := 0, "Int"))
+		: (DllCall("Gdiplus\GdipCreateBitmapFromFile", "Ptr", &file, "Ptr*", pBitmap := 0, "Int"))) {
 		throw (Exception(FormatStatus(status)))
 	}
 
@@ -80,46 +82,10 @@ CreateBitmapFromFile(file) {
 		, "Base": this.__Bitmap})
 }
 
-CreateBitmapFromGraphics(gaphics, width, height) {
+CreateBitmapFromGraphics(graphics, width, height) {
 	Local
 
 	if (status := DllCall("Gdiplus\GdipCreateBitmapFromGraphics", "Int", width, "Int", height, "Ptr", graphics.Ptr, "Ptr*", pBitmap := 0, "Int")) {
-		throw (Exception(FormatStatus(status)))
-	}
-
-	return ({"Ptr": pBitmap
-		, "Base": this.__Bitmap})
-}
-
-CreateBitmapFromHWnd(hWnd, client := True) {
-	hWnd := RegExReplace(hWnd, "i)ahk_id\s?")
-
-	if (DllCall("User32\IsIconic", "Ptr", hWnd, "UInt")) {
-		DllCall("User32\ShowWindow", "ptr", hWnd, "Int", 4)  ;* Restore the window if it is minimized as it must be visible for capture.
-	}
-
-	Static rect := CreateRect(0, 0, 0, 0, "Int")
-
-	if (client) {
-		if (!DllCall("User32\GetClientRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt")) {
-			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
-		}
-	}
-	else if (DllCall("Dwmapi\DwmGetWindowAttribute", "Ptr", hWnd, "UInt", 9, "UPtr", rect.Ptr, "UInt", 16, "UInt")) {
-		if (!DllCall("User32\GetWindowRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt")) {
-			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
-		}
-	}
-
-	DC := GDI.CreateCompatibleDC()
-	bitmap := GDI.CreateDIBSection(CreateBitmapInfoHeader(rect.NumGet(8, "Int"), -rect.NumGet(12, "Int")), DC)
-		, DC.SelectObject(bitmap)
-
-	if (!DllCall("User32\PrintWindow", "Ptr", hWnd, "Ptr", DC.Handle, "UInt", 2 + client, "UInt")) {
-		throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
-	}
-
-	if (status := DllCall("Gdiplus\GdipCreateBitmapFromHBITMAP", "Ptr", DC.Reset("__Bitmap"), "Ptr", 0, "Ptr*", pBitmap := 0, "Int")) {
 		throw (Exception(FormatStatus(status)))
 	}
 
@@ -147,6 +113,42 @@ CreateBitmapFromScreen(params*) {
 		, DC.SelectObject(bitmap)
 
 	GDI.BitBlt(DC, 0, 0, width, height, GetDC(), x, y, 0x00CC0020 | 0x40000000)  ;? 0x00CC0020 = SRCCOPY, 0x40000000 = CAPTUREBLT
+
+	if (status := DllCall("Gdiplus\GdipCreateBitmapFromHBITMAP", "Ptr", DC.Reset("__Bitmap"), "Ptr", 0, "Ptr*", pBitmap := 0, "Int")) {
+		throw (Exception(FormatStatus(status)))
+	}
+
+	return ({"Ptr": pBitmap
+		, "Base": this.__Bitmap})
+}
+
+CreateBitmapFromWindow(hWnd, client := True) {
+	hWnd := RegExReplace(hWnd, "i)ahk_id\s?")
+
+	if (DllCall("User32\IsIconic", "Ptr", hWnd, "UInt")) {
+		DllCall("User32\ShowWindow", "ptr", hWnd, "Int", 4)  ;* Restore the window if it is minimized as it must be visible for capture.
+	}
+
+	Static rect := CreateRect(0, 0, 0, 0, "Int")
+
+	if (client) {
+		if (!DllCall("User32\GetClientRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt")) {
+			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
+		}
+	}
+	else if (DllCall("Dwmapi\DwmGetWindowAttribute", "Ptr", hWnd, "UInt", 9, "UPtr", rect.Ptr, "UInt", 16, "UInt")) {
+		if (!DllCall("User32\GetWindowRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt")) {
+			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
+		}
+	}
+
+	DC := GDI.CreateCompatibleDC()
+	bitmap := GDI.CreateDIBSection(CreateBitmapInfoHeader(rect.NumGet(8, "Int"), -rect.NumGet(12, "Int")), DC)
+		, DC.SelectObject(bitmap)
+
+	if (!DllCall("User32\PrintWindow", "Ptr", hWnd, "Ptr", DC.Handle, "UInt", 2 + client, "UInt")) {
+		throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
+	}
 
 	if (status := DllCall("Gdiplus\GdipCreateBitmapFromHBITMAP", "Ptr", DC.Reset("__Bitmap"), "Ptr", 0, "Ptr*", pBitmap := 0, "Int")) {
 		throw (Exception(FormatStatus(status)))
@@ -208,7 +210,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	;* bitmap.GetFlags()
 	;* Return:
-		;* flags: ImageFlags enumeration.
+		;* flags - ImageFlags enumeration.
 	GetFlags() {
 		Local
 
@@ -333,10 +335,15 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 		return (hBitmap)
 	}
 
-	Clone() {
+	;* bitmap.Clone([x, y, width, height, format])
+	;* Parameter:
+		;* format - PixelFormat enumeration.
+	Clone(x := "", y := "", width := "", height := "", format := "") {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipCloneImage", "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int")) {  ;* The new bitmap will have the same PixelFormat.
+		if (status := (x == "" || y == "" || width == "" || height == "")
+			? (DllCall("Gdiplus\GdipCloneImage", "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int"))  ;* The new bitmap will have the same PixelFormat.
+			: (DllCall("Gdiplus\GdipCloneBitmapArea", "Float", x, "Float", y, "Float", width, "Float", height, "UInt", (format) ? (format) : (this.GetPixelFormat()), "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int"))) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -346,8 +353,8 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	;* bitmap.LockBits([x, y, width, height, format, lockMode])
 	;* Parameter:
-		;* format: PixelFormat enumeration.
-		;* lockMode: ImageLockMode enumeration.
+		;* format - PixelFormat enumeration.
+		;* lockMode - ImageLockMode enumeration.
 	LockBits(x := 0, y := 0, width := 0, height := 0, format := "", lockMode := 0x0003) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
 		if (!this.HasKey("BitmapData")) {
 			if (!width) {
@@ -388,7 +395,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	;* bitmap.RotateFlip(rotateType)
 	;* Parameter:
-		;* rotateType: RotateFlipType enumeration.
+		;* rotateType - RotateFlipType enumeration.
 	RotateFlip(rotateType) {
 		Local
 
@@ -408,9 +415,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 			throw (Exception(FormatStatus(status)))
 		}
 
-		RegExMatch(file, "\.\w+$", extension)
-
-		loop, % number {
+		loop, % (number, RegExMatch(file, "\.\w+$", extension)) {
 			if (InStr(StrGet(imageCodecInfo.NumGet(A_PtrSize*3 + (offset := (48 + A_PtrSize*7)*(A_Index - 1)) + 32, "Ptr"), "UTF-16"), "*" . extension)) {
 				pCodec := imageCodecInfo.Ptr + offset  ;* Get the pointer to the matching encoder.
 

@@ -1,5 +1,5 @@
 ﻿;* ** Useful Links **
-;* GDIp enums: https://github.com/mono/libgdiplus/blob/main/src/gdipenums.h || http://caca.zoy.org/browser/libpipi/trunk/win32/gdiplus/include/GdiplusEnums.h?rev=3074 || http://www.jose.it-berater.org/gdiplus/reference/gdiplusenumerations.htm
+;* GDIp enums: https://github.com/mono/libgdiplus/blob/main/src/gdipenums.h
 
 GetRotatedTranslation(width, height, angle, ByRef xTranslation, ByRef yTranslation) {
 	angle := (angle >= 0) ? (Mod(angle, 360)) : (360 - Mod(-angle, -360))
@@ -67,61 +67,96 @@ Class GDIp {
 
 	#Include, %A_LineFile%\..\GDIp\Bitmap.ahk
 
+	CreateImageAttributes() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipCreateImageAttributes", "Ptr*", pImageAttributes := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"Ptr": pImageAttributes
+			, "Base": this.__ImageAttributes})
+	}
+
+	Class __ImageAttributes {
+
+		__Delete() {
+			if (!this.Ptr) {
+				MsgBox("FontFamily.__Delete()")
+			}
+
+			DllCall("Gdiplus\GdipDisposeImageAttributes", "Ptr", this.Ptr)
+		}
+
+		;--------------- Method -------------------------------------------------------;
+
+		Clone() {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipCloneImageAttributes", "Ptr", this.Ptr, "Ptr*", pImageAttributes := 0, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return ({"Ptr": pImageAttributes
+				, "Base": this.Base})
+		}
+	}
+
 	#Include, %A_LineFile%\..\GDIp\Graphics.ahk
 
 	#Include, %A_LineFile%\..\GDIp\Brush.ahk
 
 	#Include, %A_LineFile%\..\GDIp\Pen.ahk
 
-	;* GDIp.CreateFont([__FontFamily] fontFamily, size[, fontStyle, unit])
+	;* GDIp.CreateFont([__FontFamily] fontFamily, size[, style, unit])
 	;* Parameter:
-		;* fontStyle:  ;: https://docs.microsoft.com/en-us/dotnet/api/system.drawing.fontstyle?view=net-5.0
+		;* style:  ;: https://docs.microsoft.com/en-us/dotnet/api/system.drawing.fontstyle?view=net-5.0
 			;? 0: FontStyleRegular
 			;? 1: FontStyleBold
 			;? 2: FontStyleItalic
 			;? 4: FontStyleUnderline
 			;? 8: FontStyleStrikeout
-	CreateFont(fontFamily, size, fontStyle := 0, unit := 2) {
+	CreateFont(fontFamily, size, style := 0, unit := 2) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipCreateFont", "Ptr", fontFamily.Handle, "Float", size, "Int", fontStyle, "UInt", unit, "Ptr*", hFont := 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipCreateFont", "Ptr", fontFamily.Ptr, "Float", size, "Int", style, "UInt", unit, "Ptr*", pFont := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return ({"Handle": hFont
+		return ({"Ptr": pFont
 			, "Base": this.__Font})
 	}
 
 	Class __Font {
 
 		__Delete() {
-			if (!this.Handle) {
+			if (!this.Ptr) {
 				MsgBox("Font.__Delete()")
 			}
 
-			DllCall("Gdiplus\GdipDeleteFont", "Ptr", this.Handle)
+			DllCall("Gdiplus\GdipDeleteFont", "Ptr", this.Ptr)
 		}
 	}
 
 	CreateFontFamilyFromName(name := "Fira Code Retina") {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipCreateFontFamilyFromName", "Str", name, "Ptr", 0, "Ptr*", hFontFamily := 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipCreateFontFamilyFromName", "Str", name, "Ptr", 0, "Ptr*", pFontFamily := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return ({"Handle": hFontFamily
+		return ({"Ptr": pFontFamily
 			, "Base": this.__FontFamily})
 	}
 
 	Class __FontFamily {
 
 		__Delete() {
-			if (!this.Handle) {
+			if (!this.Ptr) {
 				MsgBox("FontFamily.__Delete()")
 			}
 
-			DllCall("Gdiplus\GdipDeleteFontFamily", "Ptr", this.Handle)
+			DllCall("Gdiplus\GdipDeleteFontFamily", "Ptr", this.Ptr)
 		}
 	}
 
@@ -141,22 +176,22 @@ Class GDIp {
 	CreateStringFormat(stringFormatFlags := 0, language := 0) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipCreateStringFormat", "UInt", stringFormatFlags, "Int", language, "Ptr*", hStringFormat := 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipCreateStringFormat", "UInt", stringFormatFlags, "Int", language, "Ptr*", pStringFormat := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return ({"Handle": hStringFormat
+		return ({"Ptr": pStringFormat
 			, "Base": this.__StringFormat})
 	}
 
 	Class __StringFormat {
 
 		__Delete() {
-			if (!this.Handle) {
+			if (!this.Ptr) {
 				MsgBox("StringFormat.__Delete()")
 			}
 
-			DllCall("Gdiplus\GdipDeleteStringFormat", "Ptr", this.Handle)
+			DllCall("Gdiplus\GdipDeleteStringFormat", "Ptr", this.Ptr)
 		}
 
 		StringAlignment[] {
@@ -176,7 +211,7 @@ Class GDIp {
 		SetAlign(stringAlignment) {
 			Local
 
-			if (status := DllCall("Gdiplus\GdipSetStringFormatAlign", "Ptr", this.Handle, "Int", stringAlignment, "Int")) {
+			if (status := DllCall("Gdiplus\GdipSetStringFormatAlign", "Ptr", this.Ptr, "Int", stringAlignment, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 
@@ -200,7 +235,7 @@ Class GDIp {
 		SetLineAlign(stringAlignment) {
 			Local
 
-			if (status := DllCall("Gdiplus\GdipSetStringFormatLineAlign", "Ptr", this.Handle, "Int", stringAlignment, "Int")) {
+			if (status := DllCall("Gdiplus\GdipSetStringFormatLineAlign", "Ptr", this.Ptr, "Int", stringAlignment, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 

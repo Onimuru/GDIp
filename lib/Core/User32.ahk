@@ -1,9 +1,9 @@
 ﻿;* ** Useful Links **
-;* GDIp enums: https://github.com/lstratman/Win32Interop/blob/master/User32/Enums.cs
+;* User32 enums: https://github.com/lstratman/Win32Interop/blob/master/User32/Enums.cs
 
 GetDC(hWnd := 0) {
 	if (!hDC := DllCall("User32\GetDC", "Ptr", hWnd, "Ptr")) {
-		throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
+		throw (Exception(Format("0x{:X}", A_LastError), , FormatMessage(A_LastError)))
 	}
 
 	Static instance := {"__Class": "__DC"
@@ -33,7 +33,7 @@ GetDC(hWnd := 0) {
 		;? 0x200000: DCX_VALIDATE
 GetDCEx(hwnd, DCX := 0, rgnClip := 0) {
 	if (!hDC := DllCall("User32\GetDCEx", "Ptr", hwnd, "Ptr", rgnClip, "UInt", DCX, "Ptr")) {
-		throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
+		throw (Exception(Format("0x{:X}", A_LastError), , FormatMessage(A_LastError)))
 	}
 
 	Static instance := {"__Class": "__DC"
@@ -51,7 +51,22 @@ ReleaseDC(DC) {
 	}
 
 	if (!DllCall("User32\ReleaseDC", "Ptr", DC.WindowHandle, "Ptr", DC.Handle, "Int")) {
-		throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
+		throw (Exception(Format("0x{:X}", A_LastError), , FormatMessage(A_LastError)))
+	}
+
+	return (True)
+}
+
+GetDesktopWindow() {
+	return (DllCall("User32\GetDesktopWindow", "Ptr"))
+}
+
+;* Parameter:
+	;* flags:
+		;? 1 = PW_CLIENTONLY
+PrintWindow(hWnd, DC, flags := 2) {
+	if (!DllCall("User32\PrintWindow", "Ptr", hWnd, "Ptr", DC.Handle, "UInt", flag, "Int"s)) {
+		throw (Exception(Format("0x{:X}", A_LastError), , FormatMessage(A_LastError)))
 	}
 
 	return (True)
