@@ -3,6 +3,13 @@
 	;? 0 = CompositingModeSourceOver - Specifies that when a color is rendered, it overwrites the background color.
 	;? 1 = CompositingModeSourceCopy - Specifies that when a color is rendered, it is blended with the background color. The blend is determined by the alpha component of the color being rendered.
 
+;* CompositingQuality enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-compositingquality)
+	;? 0 = CompositingQualityDefault
+	;? 1 = CompositingQualityHighSpeed
+	;? 2 = CompositingQualityHighQuality
+	;? 3 = CompositingQualityGammaCorrected
+	;? 4 = CompositingQualityAssumeLinear
+
 ;* FillMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fillmode)
 	;? 0 = FillModeAlternate
 	;? 1 = FillModeWinding
@@ -20,6 +27,10 @@
 	;? 5 = InterpolationModeNearestNeighbor
 	;? 6 = InterpolationModeHighQualityBilinear
 	;? 7 = InterpolationModeHighQualityBicubic
+
+;* MatrixOrder enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-matrixorder)
+	;? 0 = MatrixOrderPrepend
+	;? 1 = MatrixOrderAppend
 
 ;* SmoothingMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-smoothingmode)
 	;? 0 = SmoothingModeDefault
@@ -43,6 +54,7 @@
 	;? 3 = UnitPoint - Each unit is a printer's point, or 1/72 inch.
 	;? 4 = UnitInch
 	;? 5 = UnitDocument - Each unit is 1/300 inch.
+	;? 6 = UnitMillimeter
 */
 
 CreateGraphicsFromDC(DC) {
@@ -67,10 +79,12 @@ CreateGraphicsFromBitmap(bitmap) {
 		, "Base": this.__Graphics})
 }
 
-CreateGraphicsFromHWND(hWnd, useICM := 0) {
+CreateGraphicsFromWindow(hWnd, useICM := False) {
 	Local
 
-	if (status := DllCall("Gdiplus\" . (useICM) ? ("GdipCreateFromHWNDICM") : ("GdipCreateFromHWND"), "Ptr", hWnd, "Ptr*", pGraphics := 0, "Int")) {
+	if (status := (useICM)
+		? (DllCall("Gdiplus\GdipCreateFromHWNDICM", "Ptr", hWnd, "Ptr*", pGraphics := 0, "Int"))
+		: (DllCall("Gdiplus\GdipCreateFromHWND", "Ptr", hWnd, "Ptr*", pGraphics := 0, "Int"))) {
 		throw (Exception(FormatStatus(status)))
 	}
 
@@ -81,7 +95,7 @@ CreateGraphicsFromHWND(hWnd, useICM := 0) {
 Class __Graphics {
 
 	__Delete() {
-		if (!this.Ptr) {
+		if (!this.HasKey("Ptr")) {
 			MsgBox("Graphics.__Delete()")
 		}
 
@@ -91,6 +105,10 @@ Class __Graphics {
 	;-------------- Property ------------------------------------------------------;
 
 	CompositingMode[] {
+		Get {
+			return (this.GetCompositingMode())
+		}
+
 		Set {
 			this.SetCompositingMode(value)
 
@@ -98,13 +116,64 @@ Class __Graphics {
 		}
 	}
 
-	;* graphics.SetCompositingMode(mode)
-	;* Parameter:
-		;* mode - See CompositingMode enumeration.
-	SetCompositingMode(mode) {
+	;* graphics.GetCompositingMode()
+	;* Return:
+		;* * - See CompositingMode enumeration.
+	GetCompositingMode() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", this.Ptr, "UInt", mode, "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetCompositingMode", "Ptr", this.Ptr, "UInt*", compositingMode := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (compositingMode)
+	}
+
+	;* graphics.SetCompositingMode(compositingMode)
+	;* Parameter:
+		;* compositingMode - See CompositingMode enumeration.
+	SetCompositingMode(compositingMode) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", this.Ptr, "UInt", compositingMode, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	CompositingQuality[] {
+		Get {
+			return (this.GetCompositingQuality())
+		}
+
+		Set {
+			this.SetCompositingQuality(value)
+
+			return (value)
+		}
+	}
+
+	;* graphics.GetCompositingQuality()
+	;* Return:
+		;* * - See CompositingQuality enumeration.
+	GetCompositingQuality() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetCompositingQuality", "Ptr", this.Ptr, "UInt*", compositingQuality := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (compositingQuality)
+	}
+
+	;* graphics.SetCompositingQuality(compositingQuality)
+	;* Parameter:
+		;* compositingQuality - See CompositingQuality enumeration.
+	SetCompositingQuality(compositingQuality) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetCompositingQuality", "Ptr", this.Ptr, "UInt", compositingQuality, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -112,6 +181,10 @@ Class __Graphics {
 	}
 
 	InterpolationMode[] {
+		Get {
+			return (this.GetInterpolationMode())
+		}
+
 		Set {
 			this.SetInterpolationMode(value)
 
@@ -119,13 +192,102 @@ Class __Graphics {
 		}
 	}
 
-	;* graphics.SetInterpolationMode(mode)
-	;* Parameter:
-		;* mode - See InterpolationMode enumeration.
-	SetInterpolationMode(mode) {
+	;* graphics.GetInterpolationMode()
+	;* Return:
+		;* * - See InterpolationMode enumeration.
+	GetInterpolationMode() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", this.Ptr, "UInt", mode, "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetInterpolationMode", "Ptr", this.Ptr, "UInt*", interpolationMode := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (interpolationMode)
+	}
+
+	;* graphics.SetInterpolationMode(interpolationMode)
+	;* Parameter:
+		;* interpolationMode - See InterpolationMode enumeration.
+	SetInterpolationMode(interpolationMode) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", this.Ptr, "UInt", interpolationMode, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	PageScale[] {
+		Get {
+			return (this.GetPageScale())
+		}
+
+		Set {
+			this.SetPageScale(value)
+
+			return (value)
+		}
+	}
+
+	;* graphics.GetPageScale()
+	;* Return:
+		;* * - The scaling factor for the page transformation of this graphics object.
+	GetPageScale() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetPageScale", "Ptr", this.Ptr, "Float*", scale := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (scale)
+	}
+
+	;* graphics.SetPageScale(scale)
+	;* Parameter:
+		;* scale - Sets the scaling factor for the page transformation of this graphics object.
+	SetPageScale(scale) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetPageScale", "Ptr", this.Ptr, "Float", scale, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	PageUnit[] {
+		Get {
+			return (this.GetPageUnit())
+		}
+
+		Set {
+			this.SetPageUnit(value)
+
+			return (value)
+		}
+	}
+
+	;* graphics.GetPageUnit()
+	;* Return:
+		;* * - See Unit enumeration.
+	GetPageUnit() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetPageUnit", "Ptr", this.Ptr, "Int*", unit := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (unit)
+	}
+
+	;* graphics.SetPageUnit(unit)
+	;* Parameter:
+		;* unit - See Unit enumeration.
+	SetPageUnit(unit) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetPageUnit", "Ptr", this.Ptr, "Int", unit, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -133,6 +295,10 @@ Class __Graphics {
 	}
 
 	SmoothingMode[] {
+		Get {
+			return (this.GetSmoothingMode())
+		}
+
 		Set {
 			this.SetSmoothingMode(value)
 
@@ -140,13 +306,62 @@ Class __Graphics {
 		}
 	}
 
-	;* graphics.SetSmoothingMode(mode)
-	;* Parameter:
-		;* mode - See SmoothingMode enumeration.
-	SetSmoothingMode(mode) {
+	;* graphics.GetSmoothingMode()
+	;* Return:
+		;* * - See SmoothingMode enumeration.
+	GetSmoothingMode() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", this.Ptr, "UInt", mode, "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetSmoothingMode", "Ptr", this.Ptr, "UInt*", smoothingMode := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (smoothingMode)
+	}
+
+	;* graphics.SetSmoothingMode(smoothingMode)
+	;* Parameter:
+		;* smoothingMode - See SmoothingMode enumeration.
+	SetSmoothingMode(smoothingMode) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", this.Ptr, "UInt", smoothingMode, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	TextContrast[] {
+		Get {
+			return (this.GetTextContrast())
+		}
+
+		Set {
+			this.SetTextContrast(value)
+
+			return (value)
+		}
+	}
+
+	;* graphics.GetTextContrast()
+	GetTextContrast() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetTextContrast", "Ptr", this.Ptr, "UInt*", contrast := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (contrast)
+	}
+
+	;* graphics.SetTextContrast(contrast)
+	;* Parameter:
+		;* contrast - A number between 0 and 12, which defines the value of contrast used for antialiasing text.
+	SetTextContrast(contrast) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetTextContrast", "Ptr", this.Ptr, "UInt", contrast, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -154,11 +369,28 @@ Class __Graphics {
 	}
 
 	TextRenderingHint[] {
+		Get {
+			return (this.GetTextRenderingHint())
+		}
+
 		Set {
 			this.SetTextRenderingHint(value)
 
 			return (value)
 		}
+	}
+
+	;* graphics.GetTextRenderingHint()
+	;* Return:
+		;* * - See TextRenderingHint enumeration.
+	GetTextRenderingHint() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetTextRenderingHint", "Ptr", this.Ptr, "UInt*", hint := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (hint)
 	}
 
 	;* graphics.SetTextRenderingHint(hint)
@@ -167,7 +399,40 @@ Class __Graphics {
 	SetTextRenderingHint(hint) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetTextRenderingHint", "Ptr", this.Ptr, "Int", hint, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetTextRenderingHint", "Ptr", this.Ptr, "UInt", hint, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	Transform[] {
+		Get {
+			return (this.GetTransform())
+		}
+
+		Set {
+			this.SetTransform(value)
+
+			return (value)
+		}
+	}
+
+	GetTransform() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetWorldTransform", "Ptr", this.Ptr, "Ptr*", pMatrix := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"Ptr": pMatrix
+			, "Base": GDIp.__Matrix})
+	}
+
+	SetTransform(matrix) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetWorldTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -177,14 +442,24 @@ Class __Graphics {
 	;--------------- Method -------------------------------------------------------;
 	;------------------------------------------------------  Control  --------------;
 
-	Clear(color := 0x00000000) {
+	Restore(state := 0) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipGraphicsClear", "Ptr", this.Ptr, "UInt", color, "Int")) {
+		if (status := DllCall("Gdiplus\GdipRestoreGraphics", "Ptr", this.Ptr, "UInt", (state) ? (state) : (this.Remove("LastState")), "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (True)
+		return (state)
+	}
+
+	Save() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSaveGraphics", "Ptr", this.Ptr, "UInt*", state := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (this.LastState := state)
 	}
 
 	;* graphics.Flush(intention)
@@ -200,18 +475,93 @@ Class __Graphics {
 		return (True)
 	}
 
-	;------------------------------------------------------- Bitmap ---------------;
-
-	;* graphics.DrawBitmap([__Bitmap] bitmap[, [__Rect] destinationRect, [__Rect] sourceRect, unit, imageAttributes])
-	;* Parameter:
-		;* unit - See Unit enumeration.
-	DrawBitmap(bitmap, destinationRect := "", sourceRect := "", unit := 2, imageAttributes := "") {
+	Clear(color := 0x00000000) {
 		Local
 
-		if (status := (sourceRect)
-			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationRect.x, "Float", destinationRect.y, "Float", destinationRect.Width, "Float", destinationRect.Height, "Float", sourceRect.x, "Float", sourceRect.y, "Float", sourceRect.Width, "Float", sourceRect.Height, "Int", unit, "Ptr", imageAttributes.Ptr, "Ptr", 0, "Ptr", 0, "Int"))
-			: ((destinationRect)
-				? (DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationRect.x, "Float", destinationRect.y, "Float", destinationRect.Width, "Float", destinationRect.Height, "Int"))
+		if (status := DllCall("Gdiplus\GdipGraphicsClear", "Ptr", this.Ptr, "UInt", color, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	;-----------------------------------------------------  Transform  -------------;
+
+	;* graphics.TranslateTransform(x, y[, matrixOrder])
+	;* Parameter:
+		;* matrixOrder - See MatrixOrder enumeration.
+	TranslateTransform(x, y, matrixOrder := 0) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipTranslateWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	;* graphics.RotateTransform(angle[, matrixOrder])
+	;* Parameter:
+		;* angle - Angle of rotation in degrees.
+		;* matrixOrder - See MatrixOrder enumeration.
+	RotateTransform(angle, matrixOrder := 0) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipRotateWorldTransform", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	;* graphics.MultiplyTransform([__Matrix] matrix[, matrixOrder])
+	;* Parameter:
+		;* matrixOrder - See MatrixOrder enumeration.
+	MultiplyTransform(matrix, matrixOrder := 0) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipMultiplyWorldTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	;* graphics.ScaleTransform(x, y[, matrixOrder])
+	;* Parameter:
+		;* matrixOrder - See MatrixOrder enumeration.
+	ScaleTransform(x, y, matrixOrder := 0) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipScaleWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	ResetTransform() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipResetWorldTransform", "Ptr", this.Ptr, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	;------------------------------------------------------- Bitmap ---------------;
+
+	;* graphics.DrawBitmap([__Bitmap] bitmap[, [__Rect] destinationObject, [__Rect] sourceObject, unit, [__ImageAttributes] imageAttributes])
+	;* Parameter:
+		;* unit - See Unit enumeration.
+	DrawBitmap(bitmap, destinationObject := "", sourceObject := "", unit := 2, imageAttributes := "") {
+		Local
+
+		if (status := (sourceObject)
+			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Float", sourceObject.x, "Float", sourceObject.y, "Float", sourceObject.Width, "Float", sourceObject.Height, "Int", unit, "Ptr", imageAttributes.Ptr, "Ptr", 0, "Ptr", 0, "Int"))
+			: ((destinationObject)
+				? (DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Int"))
 				: (DllCall("Gdiplus\GdipDrawImage", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", 0, "Float", 0, "Int")))) {
 			throw (Exception(FormatStatus(status)))
 		}
@@ -219,11 +569,11 @@ Class __Graphics {
 		return (True)
 	}
 
-	;* graphics.DrawCachedBitmap([__CachedBitmap] cachedBitmap[, [__Vec2] object])
-	DrawCachedBitmap(cachedBitmap, object := "") {
+	;* graphics.DrawCachedBitmap([__CachedBitmap] bitmap[, [__Vec2] object])
+	DrawCachedBitmap(bitmap, object := "") {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", cachedBitmap.Ptr, "Int", object.x, "Int", object.y, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", object.x, "Int", object.y, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -491,61 +841,6 @@ Class __Graphics {
 		Local
 
 		if (status := DllCall("Gdiplus\GdipDrawRectangle", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width - (width := pen.Width), "Float", object.Height - width, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return (True)
-	}
-
-	;-----------------------------------------------------  Transform  -------------;
-
-	;* graphics.TranslateTransform(x, y)
-	TranslateTransform(x, y) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipTranslateWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", 1, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return (True)
-	}
-
-	;* graphics.RotateTransform(angle[, x, y]))
-	RotateTransform(angle, x := "", y := "") {
-		Local
-
-		if (x == "" || y == "") {
-			if (status := DllCall("Gdiplus\GdipRotateWorldTransform", "Ptr", this.Ptr, "Float", angle, "Int", 1, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
-		}
-		else {
-			this.TranslateTransform(x, y)
-
-			if (status := DllCall("Gdiplus\GdipRotateWorldTransform", "Ptr", this.Ptr, "Float", angle, "Int", 1, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
-
-			this.TranslateTransform(-x, -y)
-		}
-
-		return (True)
-	}
-
-	ScaleTransform(x, y) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipScaleWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", 1, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return (True)
-	}
-
-	ResetTransform() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipResetWorldTransform", "Ptr", this.Ptr, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 

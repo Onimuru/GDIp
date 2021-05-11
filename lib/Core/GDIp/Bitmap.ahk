@@ -55,13 +55,13 @@
 	;? 1 = Rotate270FlipXY
 */
 
-;* GDIp.GdipCreateBitmap(width, height[, format, stride, [Struct] scan0])
+;* GDIp.GdipCreateBitmap(width, height[, pixelFormat, stride, [__Structure] scan0])
 ;* Parameter:
-	;* format - PixelFormat enumeration.
-CreateBitmap(width, height, format := 0x26200A, stride := 0, scan0 := 0) {
+	;* pixelFormat - See PixelFormat enumeration.
+CreateBitmap(width, height, pixelFormat := 0x26200A, stride := 0, scan0 := 0) {
 	Local
 
-	if (status := DllCall("Gdiplus\GdipCreateBitmapFromScan0", "UInt", width, "UInt", height, "UInt", stride, "UInt", format, "Ptr", scan0, "Ptr*", pBitmap := 0, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-bitmap(int_int_int_pixelformat_byte)
+	if (status := DllCall("Gdiplus\GdipCreateBitmapFromScan0", "UInt", width, "UInt", height, "UInt", stride, "UInt", pixelFormat, "Ptr", scan0, "Ptr*", pBitmap := 0, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-bitmap(int_int_int_pixelformat_byte)
 		throw (Exception(FormatStatus(status)))
 	}
 
@@ -210,7 +210,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	;* bitmap.GetFlags()
 	;* Return:
-		;* flags - ImageFlags enumeration.
+		;* * - See ImageFlags enumeration.
 	GetFlags() {
 		Local
 
@@ -312,38 +312,28 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	;* bitmap.GetPixelFormat()
 	;* Return:
-		;* format: PixelFormat enumeration.
+		;* * - See PixelFormat enumeration.
 	GetPixelFormat() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipGetImagePixelFormat", "Ptr", this.Ptr, "UInt*", format := 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetImagePixelFormat", "Ptr", this.Ptr, "UInt*", pixelFormat := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (Format("0x{:08X}", format))
+		return (Format("0x{:08X}", pixelFormat))
 	}
 
 	;--------------- Method -------------------------------------------------------;
 
-	CreateHandle(background := 0xFFFFFFFF) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipCreateHBITMAPFromBitmap", "Ptr", this.Ptr, "Ptr*", hBitmap := 0, "UInt", background, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return (hBitmap)
-	}
-
-	;* bitmap.Clone([x, y, width, height, format])
+	;* bitmap.Clone([x, y, width, height, pixelFormat])
 	;* Parameter:
-		;* format - PixelFormat enumeration.
-	Clone(x := "", y := "", width := "", height := "", format := "") {
+		;* pixelFormat - See PixelFormat enumeration.
+	Clone(x := "", y := "", width := "", height := "", pixelFormat := "") {
 		Local
 
 		if (status := (x == "" || y == "" || width == "" || height == "")
 			? (DllCall("Gdiplus\GdipCloneImage", "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int"))  ;* The new bitmap will have the same PixelFormat.
-			: (DllCall("Gdiplus\GdipCloneBitmapArea", "Float", x, "Float", y, "Float", width, "Float", height, "UInt", (format) ? (format) : (this.GetPixelFormat()), "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int"))) {
+			: (DllCall("Gdiplus\GdipCloneBitmapArea", "Float", x, "Float", y, "Float", width, "Float", height, "UInt", (pixelFormat) ? (pixelFormat) : (this.GetPixelFormat()), "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int"))) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -351,11 +341,11 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 			, "Base": this.Base})
 	}
 
-	;* bitmap.LockBits([x, y, width, height, format, lockMode])
+	;* bitmap.LockBits([x, y, width, height, pixelFormat, lockMode])
 	;* Parameter:
-		;* format - PixelFormat enumeration.
-		;* lockMode - ImageLockMode enumeration.
-	LockBits(x := 0, y := 0, width := 0, height := 0, format := "", lockMode := 0x0003) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
+		;* pixelFormat - See PixelFormat enumeration.
+		;* lockMode - See ImageLockMode enumeration.
+	LockBits(x := 0, y := 0, width := 0, height := 0, pixelFormat := "", lockMode := 0x0003) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
 		if (!this.HasKey("BitmapData")) {
 			if (!width) {
 				width := this.Width
@@ -367,7 +357,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 			Static bitmapData := CreateBitmapData()
 
-			if (status := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", CreateRect(x, y, width, height, "UInt").Ptr, "UInt", lockMode, "UInt", (format == "") ? (this.PixelFormat) : (format), "Ptr", bitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+			if (status := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", CreateRect(x, y, width, height, "UInt").Ptr, "UInt", lockMode, "UInt", (pixelFormat) ? (pixelFormat) : (this.GetPixelFormat()), "Ptr", bitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
 				throw (Exception(FormatStatus(status)))
 			}
 
@@ -395,7 +385,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	;* bitmap.RotateFlip(rotateType)
 	;* Parameter:
-		;* rotateType - RotateFlipType enumeration.
+		;* rotateType - See RotateFlipType enumeration.
 	RotateFlip(rotateType) {
 		Local
 

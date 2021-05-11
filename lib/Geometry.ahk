@@ -156,18 +156,18 @@ Class Vec2 {
 	;* new Vec2((x), (y))
 	;* new Vec2([Array || Object|| Vec2 || Vec3] point)
 	__New(params*) {
-		switch (Type(params[1])) {
-			case "Integer, Float": {
-				return ({"x": params[1], "y": (Math.IsNumeric(params[2])) ? (params[2]) : (params[1])
+		switch (Class(params[1])) {
+			case "__String": {
+				return ({"x": params[1], "y": (params[2].IsNumber) ? (params[2]) : (params[1])
 
 					, "Base": this.__Vec2})
 			}
-			case "Vec2", "Vec3": {
+			case "__Vec2", "__Vec3": {
 				return ({"x": params[1].x, "y": params[1].y
 
 					, "Base": this.__Vec2})
 			}
-			case "Array": {
+			case "__Array": {
 				return ({"x": params[1][0], "y": params[1][1]
 
 					, "Base": this.__Vec2})
@@ -190,14 +190,14 @@ Class Vec2 {
 	;* Description:
 		;* Divide a vector by another vector or a scalar.
 	Divide(vector, scalar) {
-		switch (Type(scalar)) {
-			case "Integer, Float": {
+		switch (Class(scalar)) {
+			case "__String": {
 				return (new this(vector.x/scalar, vector.y/scalar))
 			}
-			case "Vec2", "Vec3": {
+			case "__Vec2", "__Vec3": {
 				return (new this(vector.x/scalar.x, vector.y/scalar.y))
 			}
-			case "Array": {
+			case "__Array": {
 				return (new this(vector.x/scalar[0], vector.y/scalar[1]))
 			}
 			Default: {
@@ -214,14 +214,14 @@ Class Vec2 {
 	;* Description:
 		;* Multiply a vector by another vector or a scalar.
 	Multiply(vector, scalar) {
-		switch (Type(scalar)) {
-			case "Integer, Float": {
+		switch (Class(scalar)) {
+			case "__String": {
 				return (new this(vector.x*scalar, vector.y*scalar))
 			}
-			case "Vec2", "Vec3": {
+			case "__Vec2", "__Vec3": {
 				return (new this(vector.x*scalar.x, vector.y*scalar.y))
 			}
-			case "Array": {
+			case "__Array": {
 				return (new this(vector.x*scalar[0], vector.y*scalar[1]))
 			}
 			Default: {
@@ -238,14 +238,14 @@ Class Vec2 {
 	;* Description:
 		;* Add to a vector another vector or a scalar.
 	Add(vector, scalar) {
-		switch (Type(scalar)) {
-			case "Integer, Float": {
+		switch (Class(scalar)) {
+			case "__String": {
 				return (new this(vector.x + scalar, vector.y + scalar))
 			}
-			case "Vec2", "Vec3": {
+			case "__Vec2", "__Vec3": {
 				return (new this(vector.x + scalar.x, vector.y + scalar.y))
 			}
-			case "Array": {
+			case "__Array": {
 				return (new this(vector.x + scalar[0], vector.y + scalar[1]))
 			}
 			Default: {
@@ -262,14 +262,14 @@ Class Vec2 {
 	;* Description:
 		;* Subtract from a vector another vector or scalar.
 	Subtract(vector, scalar) {
-		switch (Type(scalar)) {
-			case "Integer, Float": {
+		switch (Class(scalar)) {
+			case "__String": {
 				return (new this(vector.x - scalar, vector.y - scalar))
 			}
-			case "Vec2", "Vec3": {
+			case "__Vec2", "__Vec3": {
 				return (new this(vector.x - scalar.x, vector.y - scalar.y))
 			}
-			case "Array": {
+			case "__Array": {
 				return (new this(vector.x - scalar[0], vector.y - scalar[1]))
 			}
 			Default: {
@@ -423,14 +423,14 @@ Class Vec2 {
 		}
 
         Divide(scalar) {
-			switch (Type(scalar)) {
-				case "Integer, Float": {
+			switch (Class(scalar)) {
+				case "__String": {
 					this.x /= scalar, this.y /= scalar
 				}
-				case "Vec2", "Vec3": {
+				case "__Vec2", "__Vec3": {
 					this.x /= scalar.x, this.y /= scalar.y
 				}
-				case "Array": {
+				case "__Array": {
 					this.x /= scalar[0], this.y /= scalar[1]
 				}
 				Default: {
@@ -448,14 +448,14 @@ Class Vec2 {
         }
 
         Multiply(scalar) {
-			switch (Type(scalar)) {
-				case "Integer, Float": {
+			switch (Class(scalar)) {
+				case "__String": {
 					this.x *= scalar, this.y *= scalar
 				}
-				case "Vec2", "Vec3": {
+				case "__Vec2", "__Vec3": {
 					this.x *= scalar.x, this.y *= scalar.y
 				}
-				case "Array": {
+				case "__Array": {
 					this.x *= scalar[0], this.y *= scalar[1]
 				}
 				Default: {
@@ -473,14 +473,14 @@ Class Vec2 {
         }
 
         Add(scalar) {
-			switch (Type(scalar)) {
-				case "Integer, Float": {
+			switch (Class(scalar)) {
+				case "__String": {
 					this.x += scalar, this.y += scalar
 				}
-				case "Vec2", "Vec3": {
+				case "__Vec2", "__Vec3": {
 					this.x += scalar.x, this.y += scalar.y
 				}
-				case "Array": {
+				case "__Array": {
 					this.x += scalar[0], this.y += scalar[1]
 				}
 				Default: {
@@ -498,14 +498,14 @@ Class Vec2 {
         }
 
         Subtract(scalar) {
-			switch (Type(scalar)) {
-				case "Integer, Float": {
+			switch (Class(scalar)) {
+				case "__String": {
 					this.x -= scalar, this.y -= scalar
 				}
-				case "Vec2", "Vec3": {
+				case "__Vec2", "__Vec3": {
 					this.x -= scalar.x, this.y -= scalar.y
 				}
-				case "Array": {
+				case "__Array": {
 					this.x -= scalar[0], this.y -= scalar[1]
 				}
 				Default: {
@@ -965,8 +965,8 @@ Class Rect {
 	;* new Rect([Vec2 || Vec3] point, width, height)
 	;* new Rect([Object] rect)
 	__New(params*) {
-		switch (Type(params[1])) {
-			case "Integer", "Float": {
+		switch (Class(params[1])) {
+			case "__String": {
 				switch (params.Count()) {
 					case 4: {
 						return {"x": params[1], "y": params[2]
@@ -979,13 +979,13 @@ Class Rect {
 					}
 				}
 			}
-			case "Vec2", "Vec3": {
+			case "__Vec2", "__Vec3": {
 				return {"x": params[1].x, "y": params[1].y
 					, "Width": params[2], "Height": params[3]
 
 					, "Base": this.__Rect}
 			}
-			case "Array": {  ;* Array is only included here to support legacy scripts as I don't intend to account for arrays of length 2/4 (`[x, y]` vs `[x, y, width, height]`).
+			case "__Array": {  ;* Array is only included here to support legacy scripts as I don't intend to account for arrays of length 2/4 (`[x, y]` vs `[x, y, width, height]`).
 				return ({"x": params[1][0], "y": params[1][1]
 					, "Width": params[2], "Height": params[3]
 
@@ -999,7 +999,7 @@ Class Rect {
 						, "Base": this.__Rect}
 				}
 
-				throw (Exception("ArgumentException", -1, Format("{} is invalid. This object must be constructed from type:`n`tInteger, Array, Object, Vec2, Vec3 or Rect.", Type(x))))
+				throw (Exception("ArgumentException", -1, Format("{} is invalid. This object must be constructed from type:`n`tInteger, Array, Object, Vec2, Vec3 or Rect.", Class(x))))
 			}
 		}
 	}
@@ -1054,8 +1054,8 @@ Class Ellipse {
 	__New(params*) {
 		Local
 
-		switch (Type(params[1])) {
-			case "Integer, Float": {
+		switch (Class(params[1])) {
+			case "__String": {
 				switch (params.Count()) {
 					case 4: {
 						width := params[3], height := params[4]
@@ -1084,7 +1084,7 @@ Class Ellipse {
 					}
 				}
 			}
-			case "Vec2", "Vec3": {
+			case "__Vec2", "__Vec3": {
 				switch (params.Count()) {
 					case 3: {
 						width := params[2], height := params[3]
@@ -1113,7 +1113,7 @@ Class Ellipse {
 					}
 				}
 			}
-			case "Array": {
+			case "__Array": {
 				switch (params.Count()) {
 					case 3: {
 						width := params[2], height := params[3]
@@ -1167,7 +1167,7 @@ Class Ellipse {
 					}
 				}
 
-				throw (Exception("ArgumentException", -1, Format("{} is invalid. This object must be constructed from type:`n`tInteger, Float, Array, Vec2, Vec3 or Rect.", Type(x))))
+				throw (Exception("ArgumentException", -1, Format("{} is invalid. This object must be constructed from type:`n`tInteger, Float, Array, Vec2, Vec3 or Rect.", Class(x))))
 			}
 		}
 	}
@@ -1232,11 +1232,11 @@ Class Ellipse {
 			}
 
 			Set {
-				switch (Type(value)) {
-					case "Integer, Float": {
+				switch (Class(value)) {
+					case "__String": {
 						ObjRawSet(this, "__Radius", value)
 					}
-					case "Object": {
+					case "__Object": {
 						ObjRawSet(this, "__Radius", [value.a, value.b]), ObjSetBase(this, Ellipse.__Ellipse)
 					}
 					Default: {
@@ -1353,11 +1353,11 @@ Class Ellipse {
 			}
 
 			Set {
-				switch (Type(value)) {
-					case "Integer, Float": {
+				switch (Class(value)) {
+					case "__String": {
 						ObjRawSet(this, "__Radius", value), ObjSetBase(this, Ellipse.__Circle)
 					}
-					case "Object": {
+					case "__Object": {
 						ObjRawSet(this, "__Radius", [value.a, value.b])
 					}
 					Default: {

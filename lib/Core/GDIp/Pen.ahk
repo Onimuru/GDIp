@@ -46,10 +46,10 @@
 	;? 5 = UnitDocument - Each unit is 1/300 inch.
 */
 
-;* GDIp.CreatePen([color, width, unit])
+;* GDIp.CreatePen(color[, width, unit])
 ;* Parameter:
-	;* unit - Unit enumeration.
-CreatePen(color := 0xFFFFFFFF, width := 1, unit := 2) {
+	;* unit - See Unit enumeration.
+CreatePen(color, width := 1, unit := 2) {
 	Local
 
 	if (status := DllCall("Gdiplus\GdipCreatePen1", "UInt", color, "Float", width, "Int", unit, "Ptr*", pPen := 0, "Int")) {
@@ -62,7 +62,7 @@ CreatePen(color := 0xFFFFFFFF, width := 1, unit := 2) {
 
 ;* GDIp.CreatePenFromBrush([__Brush] brush[, width, unit])
 ;* Parameter:
-	;* unit - Unit enumeration.
+	;* unit - See Unit enumeration.
 CreatePenFromBrush(brush, width := 1, unit := 2) {
 	Local
 
@@ -77,7 +77,7 @@ CreatePenFromBrush(brush, width := 1, unit := 2) {
 Class __Pen {
 
 	__Delete() {
-		if (!this.Ptr) {
+		if (!this.HasKey("Ptr")) {
 			MsgBox("Pen.__Delete()")
 		}
 
@@ -108,7 +108,7 @@ Class __Pen {
 		return (Format("0x{:08X}", color))
 	}
 
-	SetColor(color := 0xFFFFFFFF) {
+	SetColor(color) {
 		Local
 
 		if (status := DllCall("Gdiplus\GdipSetPenColor", "Ptr", this.Ptr, "UInt", color, "Int")) {
@@ -140,7 +140,7 @@ Class __Pen {
 		return (~~width)
 	}
 
-	SetWidth(width := 1) {
+	SetWidth(width) {
 		Local
 
 		if (status := DllCall("Gdiplus\GdipSetPenWidth", "Ptr", this.Ptr, "Float", width, "Int")) {
@@ -164,7 +164,7 @@ Class __Pen {
 
 	;* pen.GetUnit()
 	;* Return:
-		;* unit - Unit enumeration.
+		;* * - See Unit enumeration.
 	GetUnit() {
 		Local
 
@@ -177,7 +177,7 @@ Class __Pen {
 
 	;* pen.SetUnit()
 	;* Parameter:
-		;* unit - Unit enumeration.
+		;* unit - See Unit enumeration.
 	SetUnit(unit) {
 		Local
 
@@ -207,6 +207,13 @@ Class __Pen {
 			throw (Exception(FormatStatus(status)))
 		}
 
+		if (status := DllCall("Gdiplus\GdipGetBrushType", "Ptr", pBrush, "Int*", type := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"Ptr": pBrush
+			, "Base": (type == 0) ? (GDIp.__SolidBrush) : ((type == 1) ? (GDIp.__HatchBrush) : ((type == 2) ? (GDIp.__TextureBrush) : ((type == 3) ? (GDIp.__PathBrush) : (GDIp.__LinearBrush))))})
+
 		return (pBrush)
 	}
 
@@ -229,7 +236,7 @@ Class __Pen {
 
 	;* pen.GetType()
 	;* Return:
-		;* type - PenType enumeration.
+		;* * - See PenType enumeration.
 	GetType() {
 		Local
 
@@ -254,7 +261,7 @@ Class __Pen {
 
 	;* pen.GetAlignment()
 	;* Return:
-		;* alignment - PenAlignment enumeration.
+		;* * - See PenAlignment enumeration.
 	GetAlignment() {
 		Local
 
@@ -267,7 +274,7 @@ Class __Pen {
 
 	;* pen.SetAlignment()
 	;* Parameter:
-		;* alignment - PenAlignment enumeration.
+		;* alignment - See PenAlignment enumeration.
 	SetAlignment(alignment) {
 		Local
 
@@ -322,7 +329,7 @@ Class __Pen {
 
 	;* pen.GetStartCap()
 	;* Return:
-		;* lineCap - LineCap enumeration.
+		;* * - See LineCap enumeration.
 	GetStartCap() {
 		Local
 
@@ -335,7 +342,7 @@ Class __Pen {
 
 	;* pen.SetStartCap(lineCap)
 	;* Parameter:
-		;* lineCap - LineCap enumeration.
+		;* lineCap - See LineCap enumeration.
 	SetStartCap(lineCap) {
 		Local
 
@@ -360,7 +367,7 @@ Class __Pen {
 
 	;* pen.GetEndCap()
 	;* Return:
-		;* lineCap - LineCap enumeration.
+		;* * - See LineCap enumeration.
 	GetEndCap() {
 		Local
 
@@ -373,7 +380,7 @@ Class __Pen {
 
 	;* pen.SetEndCap(lineCap)
 	;* Parameter:
-		;* lineCap - LineCap enumeration.
+		;* lineCap - See LineCap enumeration.
 	SetEndCap(lineCap) {
 		Local
 
@@ -398,7 +405,7 @@ Class __Pen {
 
 	;* pen.GetDashCap()
 	;* Return:
-		;* dashCap - DashCap enumeration.
+		;* * - See DashCap enumeration.
 	GetDashCap() {
 		Local
 
@@ -411,7 +418,7 @@ Class __Pen {
 
 	;* pen.SetDashCap(dashCap)
 	;* Parameter:
-		;* dashCap - DashCap enumeration.
+		;* dashCap - See DashCap enumeration.
 	SetDashCap(dashCap) {
 		Local
 
@@ -424,9 +431,9 @@ Class __Pen {
 
 	;* pen.SetLineCap(startCap, endCap, dashCap)
 	;* Parameter:
-		;* startCap - LineCap enumeration.
-		;* endCap - LineCap enumeration.
-		;* dashCap - DashCap enumeration.
+		;* startCap - See LineCap enumeration.
+		;* endCap - See LineCap enumeration.
+		;* dashCap - See DashCap enumeration.
 	SetLineCap(startCap, endCap, dashCap) {
 		Local
 
@@ -483,7 +490,7 @@ Class __Pen {
 
 	;* pen.GetDashStyle()
 	;* Return:
-		;* style - DashStyle enumeration.
+		;* * - See DashStyle enumeration.
 	GetDashStyle() {
 		Local
 
@@ -496,7 +503,7 @@ Class __Pen {
 
 	;* pen.SetDashStyle()
 	;* Parameter:
-		;* style - DashStyle enumeration.
+		;* style - See DashStyle enumeration.
 	SetDashStyle(style) {
 		Local
 
@@ -526,7 +533,8 @@ Class __Pen {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (pMatrix)
+		return ({"Ptr": pMatrix
+			, "Base": GDIp.__Matrix})
 	}
 
 	SetTransform(matrix) {

@@ -86,7 +86,7 @@ CreateSolidBrush(color)  {
 Class __SolidBrush {
 
 	__Delete() {
-		if (!this.Ptr) {
+		if (!this.HasKey("Ptr")) {
 			MsgBox("Brush.__Delete()")
 		}
 
@@ -135,7 +135,7 @@ Class __SolidBrush {
 
 	;* brush.GetType()
 	;* Return:
-		;* type - BrushType enumeration.
+		;* * - See BrushType enumeration.
 	GetType() {
 		Local
 
@@ -162,7 +162,7 @@ Class __SolidBrush {
 
 ;* GDIp.CreateHatchBrush(foregroundColor, backgroundColor[, style])
 ;* Parameter:
-	;* style - HatchStyle enumeration.
+	;* style - See HatchStyle enumeration.
 CreateHatchBrush(foregroundColor, backgroundColor, style := 0) {
 	Local
 
@@ -201,9 +201,9 @@ Class __HatchBrush extends GDIp.__SolidBrush {
 		}
 	}
 
-	;* hatchBrush.GetHatchStyle():
+	;* hatchBrush.GetHatchStyle()
 	;* Return:
-		;* style - HatchStyle enumeration.
+		;* * - See HatchStyle enumeration.
 	GetHatchStyle() {
 		Local
 
@@ -219,7 +219,7 @@ Class __HatchBrush extends GDIp.__SolidBrush {
 
 ;* GDIp.CreateTextureBrush([__Bitmap] bitmap[, wrapMode, x, y, width, height, [__ImageAttributes] imageAttributes])
 ;* Parameter:
-	;* wrapMode - WrapMode enumeration.
+	;* wrapMode - See WrapMode enumeration.
 CreateTextureBrush(bitmap, wrapMode := 0, x := "", y := "", width := "", height := "", imageAttributes := 0) {
 	Local
 
@@ -321,7 +321,8 @@ Class __TextureBrush extends GDIp.__SolidBrush {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (pMatrix)
+		return ({"Ptr": pMatrix
+			, "Base": GDIp.__Matrix})
 	}
 
 	SetTransform(matrix) {
@@ -337,20 +338,20 @@ Class __TextureBrush extends GDIp.__SolidBrush {
 	;--------------- Method -------------------------------------------------------;
 	;-----------------------------------------------------  Transform  -------------;
 
-	RotateTransform(angle, matrixOrder := 0) {
+	TranslateTransform(x, y, matrixOrder := 0) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipRotateTextureTransform", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
+		if (status := DllCall("Gdiplus\GdipTranslateTextureTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
 		return (True)
 	}
 
-	TranslateTransform(x, y, matrixOrder := 0) {
+	RotateTransform(angle, matrixOrder := 0) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipTranslateTextureTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
+		if (status := DllCall("Gdiplus\GdipRotateTextureTransform", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -392,7 +393,7 @@ Class __TextureBrush extends GDIp.__SolidBrush {
 
 ;* GDIp.CreateLinearBrush(x1, y1, x2, y2, color1, color2[, wrapMode])
 ;* Parameter:
-	;* wrapMode - WrapMode enumeration.
+	;* wrapMode - See WrapMode enumeration.
 CreateLinearBrush(x1, y1, x2, y2, color1, color2, wrapMode := 0) {
 	Static point1 := CreatePoint(0, 0, "Float"), point2 := CreatePoint(0, 0, "Float")
 
@@ -408,7 +409,7 @@ CreateLinearBrush(x1, y1, x2, y2, color1, color2, wrapMode := 0) {
 
 ;* GDIp.CreateLinearBrushFromRect(x, y, width, height, color1, color2[, gradientMode, wrapMode])
 ;* Parameter:
-	;* wrapMode - WrapMode enumeration.
+	;* wrapMode - See WrapMode enumeration.
 CreateLinearBrushFromRect(x, y, width, height, color1, color2, gradientMode := 0, wrapMode := 0) {
 	Static rect := CreateRect(0, 0, 0, 0, "Float")
 
@@ -424,7 +425,7 @@ CreateLinearBrushFromRect(x, y, width, height, color1, color2, gradientMode := 0
 
 ;* GDIp.CreateLinearBrushFromRectWithAngle(x, y, width, height, color1, color2[, angle, wrapMode])
 ;* Parameter:
-	;* wrapMode - WrapMode enumeration.
+	;* wrapMode - See WrapMode enumeration.
 CreateLinearBrushFromRectWithAngle(x, y, width, height, color1, color2, angle := 0, wrapMode := 0) {
 	Static rect := CreateRect(0, 0, 0, 0, "Float")
 
@@ -536,9 +537,9 @@ Class __LinearBrush extends GDIp.__SolidBrush {
 		}
 	}
 
-	;* lineBrush.GetGammaCorrection():
+	;* lineBrush.GetGammaCorrection()
 	;* Return:
-		;* enabled - If gamma correction is enabled, this method returns True; otherwise, it returns False.
+		;* * - Bool that indicates if gamma correction is enabled or not.
 	GetGammaCorrection() {
 		Local
 
@@ -578,7 +579,8 @@ Class __LinearBrush extends GDIp.__SolidBrush {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (pMatrix)
+		return ({"Ptr": pMatrix
+			, "Base": GDIp.__Matrix})
 	}
 
 	SetTransform(matrix) {

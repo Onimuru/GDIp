@@ -21,7 +21,7 @@ CreateCanvas(x, y, width, height, guiOptions := "", showOptions := "NA", title :
 Class __Canvas {
 
 	__Delete() {
-		if (!this.Handle) {
+		if (!this.HasKey("Handle")) {
 			MsgBox("Canvas.__Delete()")
 		}
 
