@@ -84,6 +84,17 @@ Class __Pen {
 		DllCall("Gdiplus\GdipDeletePen", "Ptr", this.Ptr)
 	}
 
+	Clone() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipClonePen", "Ptr", this.Ptr, "Ptr*", pPen := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"Ptr": pPen
+			, "Base": this.Base})
+	}
+
 	;-------------- Property ------------------------------------------------------;
 
 	Color[] {
@@ -213,8 +224,6 @@ Class __Pen {
 
 		return ({"Ptr": pBrush
 			, "Base": (type == 0) ? (GDIp.__SolidBrush) : ((type == 1) ? (GDIp.__HatchBrush) : ((type == 2) ? (GDIp.__TextureBrush) : ((type == 3) ? (GDIp.__PathBrush) : (GDIp.__LinearBrush))))})
-
-		return (pBrush)
 	}
 
 	;* pen.SetBrush([__Brush] brush)
@@ -286,13 +295,13 @@ Class __Pen {
 	}
 
 	SetCompoundArray(compoundArray) {
-		s := compoundArray.Length
+		Local index, number, compounds
 
-		for i, v in (compoundArray, compunds := new Structure(s*4)) {
-			compunds.NumPut(i*4, "Float", v)
+		for index, number in (compoundArray, compounds := new Structure(compoundArray.Length*4)) {
+			compounds.NumPut(index*4, "Float", number)
 		}
 
-		if (status := DllCall("Gdiplus\GdipSetPenCompoundArray", "Ptr", this.Ptr, "Ptr", compunds.Ptr, "Int", s, "Int")) {  ;* If you set the alignment of a Pen object to PenAlignmentInset, you cannot use that pen to draw compound lines.
+		if (status := DllCall("Gdiplus\GdipSetPenCompoundArray", "Ptr", this.Ptr, "Ptr", compounds.Ptr, "Int", index, "Int")) {  ;* If you set the alignment of a Pen object to PenAlignmentInset, you cannot use that pen to draw compound lines.
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -459,17 +468,17 @@ Class __Pen {
 	GetDashOffset() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipGetPenDashOffset", "Ptr", this.Ptr, "Float*", offset := 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetPenDashOffset", "Ptr", this.Ptr, "Float*", dashOffset := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (offset)
+		return (dashOffset)
 	}
 
-	SetDashOffset(offset) {
+	SetDashOffset(dashOffset) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetPenDashOffset", "Ptr", this.Ptr, "Float", offset, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetPenDashOffset", "Ptr", this.Ptr, "Float", dashOffset, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -494,20 +503,20 @@ Class __Pen {
 	GetDashStyle() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipGetPenDashStyle", "Ptr", this.Ptr, "Int*", style := 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetPenDashStyle", "Ptr", this.Ptr, "Int*", dashStyle := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
-		return (style)
+		return (dashStyle)
 	}
 
 	;* pen.SetDashStyle()
 	;* Parameter:
-		;* style - See DashStyle enumeration.
-	SetDashStyle(style) {
+		;* dashStyle - See DashStyle enumeration.
+	SetDashStyle(dashStyle) {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipSetPenDashStyle", "Ptr", this.Ptr, "Int", style, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetPenDashStyle", "Ptr", this.Ptr, "Int", dashStyle, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -548,18 +557,6 @@ Class __Pen {
 	}
 
 	;--------------- Method -------------------------------------------------------;
-
-	Clone() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipClonePen", "Ptr", this.Ptr, "Ptr*", pPen := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return ({"Ptr": pPen
-			, "Base": this.Base})
-	}
-
 	;-----------------------------------------------------  Transform  -------------;
 
 	TranslateTransform(x, y, matrixOrder := 0) {

@@ -168,6 +168,22 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 		DllCall("Gdiplus\GdipDisposeImage", "Ptr", this.Ptr)
 	}
 
+	;* bitmap.Clone([x, y, width, height, pixelFormat])
+	;* Parameter:
+		;* pixelFormat - See PixelFormat enumeration.
+	Clone(x := "", y := "", width := "", height := "", pixelFormat := "") {
+		Local
+
+		if (status := (x == "" || y == "" || width == "" || height == "")
+			? (DllCall("Gdiplus\GdipCloneImage", "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int"))  ;* The new bitmap will have the same PixelFormat.
+			: (DllCall("Gdiplus\GdipCloneBitmapArea", "Float", x, "Float", y, "Float", width, "Float", height, "UInt", (pixelFormat) ? (pixelFormat) : (this.GetPixelFormat()), "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int"))) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"Ptr": pBitmap
+			, "Base": this.Base})
+	}
+
 	;-------------- Property ------------------------------------------------------;
 
 	Width[] {
@@ -325,27 +341,11 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
 	;--------------- Method -------------------------------------------------------;
 
-	;* bitmap.Clone([x, y, width, height, pixelFormat])
-	;* Parameter:
-		;* pixelFormat - See PixelFormat enumeration.
-	Clone(x := "", y := "", width := "", height := "", pixelFormat := "") {
-		Local
-
-		if (status := (x == "" || y == "" || width == "" || height == "")
-			? (DllCall("Gdiplus\GdipCloneImage", "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int"))  ;* The new bitmap will have the same PixelFormat.
-			: (DllCall("Gdiplus\GdipCloneBitmapArea", "Float", x, "Float", y, "Float", width, "Float", height, "UInt", (pixelFormat) ? (pixelFormat) : (this.GetPixelFormat()), "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int"))) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return ({"Ptr": pBitmap
-			, "Base": this.Base})
-	}
-
 	;* bitmap.LockBits([x, y, width, height, pixelFormat, lockMode])
 	;* Parameter:
 		;* pixelFormat - See PixelFormat enumeration.
 		;* lockMode - See ImageLockMode enumeration.
-	LockBits(x := 0, y := 0, width := 0, height := 0, pixelFormat := "", lockMode := 0x0003) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
+	LockBits(x := 0, y := 0, width := 0, height := 0, lockMode := 0x0003, pixelFormat := "") {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
 		if (!this.HasKey("BitmapData")) {
 			if (!width) {
 				width := this.Width

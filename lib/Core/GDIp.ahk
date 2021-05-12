@@ -115,11 +115,29 @@ Class GDIp {
 		return (False)
 	}
 
-	;--------------- Canvas -------------------------------------------------------;
+	;--------------- Method -------------------------------------------------------;
+
+	GetThumbnailFromImage(bitmap, width, height) {
+	; by jballi, source
+	; https://www.autohotkey.com/boards/viewtopic.php?style=7&t=70508
+
+		DllCall("Gdiplus\GdipGetImageThumbnail"
+			,"Ptr", pBitmap                         ;-- *image
+			,"UInt", W                               ;-- thumbWidth
+			,"UInt", H                               ;-- thumbHeight
+			,"Ptr*", pThumbnail                     ;-- **thumbImage
+			,"Ptr", 0                               ;-- callback
+			,"Ptr", 0)                              ;-- callbackData
+
+		Return pThumbnail
+	}
+
+	;---------------  Class  -------------------------------------------------------;
+	;------------------------------------------------------- Canvas ---------------;
 
 	#Include, %A_LineFile%\..\GDIp\Canvas.ahk
 
-	;----------  Imageattributes  --------------------------------------------------;
+	;--------------------------------------------------  ImageAttributes  ----------;
 
 	CreateImageAttributes() {
 		Local
@@ -142,8 +160,6 @@ Class GDIp {
 			DllCall("Gdiplus\GdipDisposeImageAttributes", "Ptr", this.Ptr)
 		}
 
-		;--------------- Method -------------------------------------------------------;
-
 		Clone() {
 			Local
 
@@ -156,29 +172,29 @@ Class GDIp {
 		}
 	}
 
-	;--------------- Bitmap -------------------------------------------------------;
+	;------------------------------------------------------- Bitmap ---------------;
 
 	#Include, %A_LineFile%\..\GDIp\Bitmap.ahk
 
-	;-------------- Graphics ------------------------------------------------------;
+	;------------------------------------------------------ Graphics --------------;
 
 	#Include, %A_LineFile%\..\GDIp\Graphics.ahk
 
-	;---------------  Brush  -------------------------------------------------------;
+	;-------------------------------------------------------  Brush  ---------------;
 
 	#Include, %A_LineFile%\..\GDIp\Brush.ahk
 
-	;----------------  Pen  --------------------------------------------------------;
+	;--------------------------------------------------------  Pen  ----------------;
 
 	#Include, %A_LineFile%\..\GDIp\Pen.ahk
 
-	;--------------- Matrix -------------------------------------------------------;
+	;------------------------------------------------------- Matrix ---------------;
 
 	;* GDIp.CreateMatrix()
 	CreateMatrix() {
 		Local
 
-		if (status := DllCall("Gdiplus\GdipCreateMatrix", "UPtr*", pMatrix, "Int")) {
+		if (status := DllCall("Gdiplus\GdipCreateMatrix", "Ptr*", pMatrix := 0, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 
@@ -194,6 +210,17 @@ Class GDIp {
 			}
 
 			DllCall("Gdiplus\GdipDeleteMatrix", "Ptr", this.Ptr)
+		}
+
+		Clone() {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipCloneMatrix", "Ptr", this.Ptr, "Ptr*", pMatrix := 0, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return ({"Ptr": pMatrix
+				, "Base": this.Base})
 		}
 
 		;-------------- Property ------------------------------------------------------;
@@ -220,17 +247,6 @@ Class GDIp {
 
 		;--------------- Method -------------------------------------------------------;
 
-		Clone() {
-			Local
-
-			if (status := DllCall("Gdiplus\GdipCloneMatrix", "Ptr", this.Ptr, "Ptr*", pMatrix := 0, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
-
-			return ({"Ptr": pMatrix
-				, "Base": this.Base})
-		}
-
 		;* matrix.Invert() - If the matrix is invertible, this function replaces its elements  with the elements of its inverse.
 		Invert() {
 			Local
@@ -242,13 +258,15 @@ Class GDIp {
 			return (True)
 		}
 
-		;* matrix.Multiply([__Matrix] matrix[, matrixOrder]) - Updates this matrix with the product of itself and another matrix.
+		;* matrix.Translate(x, y[, matrixOrder]) - Updates this matrix with the product of itself and a scaling matrix.
 		;* Parameter:
+			;* x - Single precision value that specifies the horizontal component of the translation.
+			;* y - Single precision value that specifies the vertical component of the translation.
 			;* matrixOrder - See MatrixOrder enumeration.
-		Multiply(matrix, matrixOrder := 0) {
+		Translate(x, y, matrixOrder := 0) {
 			Local
 
-			if (status := DllCall("Gdiplus\GdipMultiplyMatrix", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
+			if (status := DllCall("Gdiplus\GdipTranslateMatrix", "Ptr", this.Ptr, "Int", x, "Int", y, "Int", matrixOrder, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 
@@ -263,6 +281,19 @@ Class GDIp {
 			Local
 
 			if (status := DllCall("Gdiplus\GdipRotateMatrix", "Ptr", this.Ptr, "Int", angle, "Int", matrixOrder, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return (True)
+		}
+
+		;* matrix.Multiply([__Matrix] matrix[, matrixOrder]) - Updates this matrix with the product of itself and another matrix.
+		;* Parameter:
+			;* matrixOrder - See MatrixOrder enumeration.
+		Multiply(matrix, matrixOrder := 0) {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipMultiplyMatrix", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 
@@ -299,15 +330,10 @@ Class GDIp {
 			return (True)
 		}
 
-		;* matrix.Translate(x, y[, matrixOrder]) - Updates this matrix with the product of itself and a scaling matrix.
-		;* Parameter:
-			;* x - Single precision value that specifies the horizontal component of the translation.
-			;* y - Single precision value that specifies the vertical component of the translation.
-			;* matrixOrder - See MatrixOrder enumeration.
-		Translate(x, y, matrixOrder := 0) {
+		Reset() {
 			Local
 
-			if (status := DllCall("Gdiplus\GdipTranslateMatrix", "Ptr", this.Ptr, "Int", x, "Int", y, "Int", matrixOrder, "Int")) {
+			if (status := DllCall("gdiplus\GdipResetMatrix", "Ptr", this.Ptr, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 
@@ -315,13 +341,21 @@ Class GDIp {
 		}
 	}
 
-	;---------------- Path --------------------------------------------------------;
+	;-------------------------------------------------------- Path ----------------;
 
 	#Include, %A_LineFile%\..\GDIp\Path.ahk
 
-	;--------------- Region -------------------------------------------------------;
+	;------------------------------------------------------- Region ---------------;
 
 	CreateRegion() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipCreateRegion", "Ptr*", pRegion := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"Ptr": pRegion
+			, "Base": this.__Region})
 	}
 
 	Class __Region {
@@ -333,9 +367,54 @@ Class GDIp {
 
 			DllCall("Gdiplus\GdipDeleteRegion", "Ptr", this.Ptr)
 		}
+
+		Clone() {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipCloneRegion", "Ptr", this.Ptr, "Ptr*", pRegion := 0, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return ({"Ptr": pRegion
+				, "Base": this.Base})
+		}
+
+		;-------------- Property ------------------------------------------------------;
+
+		IsEmpty(graphics) {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipIsEmptyRegion", "Ptr", this.Ptr, "Ptr", graphics.Ptr, "UInt*", bool, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return (bool)
+		}
+
+		;--------------- Method -------------------------------------------------------;
+
+		Translate(x, y) {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipTranslateRegion", "Ptr", this.Ptr, "Float", x, "Float", y, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return (True)
+		}
+
+		Transform(matrix) {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipTransformRegion", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return (True)
+		}
 	}
 
-	;------------- FontFamily -----------------------------------------------------;
+	;----------------------------------------------------- FontFamily -------------;
 
 	CreateFontFamilyFromName(name := "Fira Code Retina", fontCollection := 0) {
 		Local
@@ -358,6 +437,17 @@ Class GDIp {
 			DllCall("Gdiplus\GdipDeleteFontFamily", "Ptr", this.Ptr)
 		}
 
+		Clone() {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipCloneFontFamily", "Ptr", this.Ptr, "Ptr*", pFontFamily := 0, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return ({"Ptr": pFontFamily
+				, "Base": this.Base})
+		}
+
 		;-------------- Property ------------------------------------------------------;
 
 		Name[] {
@@ -377,22 +467,9 @@ Class GDIp {
 
 			return (fontName)
 		}
-
-		;--------------- Method -------------------------------------------------------;
-
-		Clone() {
-			Local
-
-			if (status := DllCall("Gdiplus\GdipCloneFontFamily", "Ptr", this.Ptr, "Ptr*", pFontFamily := 0, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
-
-			return ({"Ptr": pFontFamily
-				, "Base": this.Base})
-		}
 	}
 
-	;---------------- Font --------------------------------------------------------;
+	;-------------------------------------------------------- Font ----------------;
 
 	;* GDIp.CreateFont([__FontFamily] fontFamily, size[, style, unit])
 	;* Parameter:
@@ -429,6 +506,17 @@ Class GDIp {
 			}
 
 			DllCall("Gdiplus\GdipDeleteFont", "Ptr", this.Ptr)
+		}
+
+		Clone() {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipCloneFont", "Ptr", this.Ptr, "Ptr*", pFont := 0, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return ({"Ptr": pFont
+				, "Base": this.Base})
 		}
 
 		;-------------- Property ------------------------------------------------------;
@@ -519,22 +607,9 @@ Class GDIp {
 
 			return (height)
 		}
-
-		;--------------- Method -------------------------------------------------------;
-
-		Clone() {
-			Local
-
-			if (status := DllCall("Gdiplus\GdipCloneFont", "Ptr", this.Ptr, "Ptr*", pFont := 0, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
-
-			return ({"Ptr": pFont
-				, "Base": this.Base})
-		}
 	}
 
-	;------------ StringFormat ----------------------------------------------------;
+	;---------------------------------------------------- StringFormat ------------;
 
 	;* GDIp.CreateStringFormat([flags, language])
 	;* Parameter:
@@ -561,14 +636,39 @@ Class GDIp {
 			DllCall("Gdiplus\GdipDeleteStringFormat", "Ptr", this.Ptr)
 		}
 
+		Clone() {
+			Local
+
+			if (status := DllCall("Gdiplus\GdipCloneStringFormat", "Ptr", this.Ptr, "Ptr*", pStringFormat := 0, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return ({"Ptr": pStringFormat
+				, "Base": this.Base})
+		}
+
 		;-------------- Property ------------------------------------------------------;
 
 		Flags[] {
+			Get {
+				return (this.GetFlags())
+			}
+
 			Set {
 				this.SetFlags(value)
 
 				return (value)
 			}
+		}
+
+		GetFlags() {
+			Local
+
+			if (status := DllCall("gdiplus\GdipGetStringFormatFlags", "UPtr", this.Ptr, "Int*", flags, "Int")) {
+				throw (Exception(FormatStatus(status)))
+			}
+
+			return (True)
 		}
 
 		;* stringFormat.SetFlags(flags)
@@ -734,19 +834,6 @@ Class GDIp {
 			}
 
 			return (True)
-		}
-
-		;--------------- Method -------------------------------------------------------;
-
-		Clone() {
-			Local
-
-			if (status := DllCall("Gdiplus\GdipCloneStringFormat", "Ptr", this.Ptr, "Ptr*", pStringFormat := 0, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
-
-			return ({"Ptr": pStringFormat
-				, "Base": this.Base})
 		}
 	}
 }
