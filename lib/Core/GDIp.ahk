@@ -96,8 +96,9 @@ Class GDIp {
 				throw (Exception(FormatStatus(status)))
 			}
 
-			return (True
-				, this.Token := pToken)
+			this.Token := pToken
+
+			return (True)
 		}
 
 		return (False)
@@ -105,11 +106,11 @@ Class GDIp {
 
 	Shutdown() {
 		if (this.Token) {
-			DllCall("Gdiplus\GdiplusShutdown", "Ptr", this.Remove("Token"))
+			if (status := DllCall("Gdiplus\GdiplusShutdown", "Ptr", this.Remove("Token"))) {
+				throw (Exception(FormatStatus(status)))
+			}
 
-			FreeLibrary("Gdiplus")
-
-			return (True)
+			return (FreeLibrary("Gdiplus"))
 		}
 
 		return (False)
@@ -118,18 +119,13 @@ Class GDIp {
 	;--------------- Method -------------------------------------------------------;
 
 	GetThumbnailFromImage(bitmap, width, height) {
-	; by jballi, source
-	; https://www.autohotkey.com/boards/viewtopic.php?style=7&t=70508
+		Local
 
-		DllCall("Gdiplus\GdipGetImageThumbnail"
-			,"Ptr", pBitmap                         ;-- *image
-			,"UInt", W                               ;-- thumbWidth
-			,"UInt", H                               ;-- thumbHeight
-			,"Ptr*", pThumbnail                     ;-- **thumbImage
-			,"Ptr", 0                               ;-- callback
-			,"Ptr", 0)                              ;-- callbackData
+		if (status := DllCall("Gdiplus\GdipGetImageThumbnail", "Ptr", bitmap.Ptr, "UInt", width, "UInt", height, "Ptr*", pThumbnail := 0, "Ptr", 0, "Ptr", 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
 
-		Return pThumbnail
+		return (pThumbnail)
 	}
 
 	;---------------  Class  -------------------------------------------------------;

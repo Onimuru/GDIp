@@ -25,11 +25,11 @@ FreeLibrary(libraryName) {  ;: https://www.autohotkey.com/boards/viewtopic.php?p
 				throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
 			}
 
-			return (1)
+			return (True)
 		}
 	}
 
-	return (0)
+	return (False)
 }
 
 LoadLibrary(libraryName) {

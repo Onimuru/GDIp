@@ -411,7 +411,8 @@ CreatePathBrush(objects*)  {
 		, "Base": this.__PathBrush})
 }
 
-CreatePathBrushFromPath(path)  {
+;* GDIp.CreatePathBrushFromPath([__Path] path)
+CreatePathBrushFromPath(path) {
 	Local
 
 	if (status := DllCall("Gdiplus\GdipCreatePathGradientFromPath", "Ptr", path.Ptr, "Ptr*", pBrush := 0, "Int")) {
@@ -438,6 +439,9 @@ Class __PathBrush {
 		}
 	}
 
+	;* brush.GetWrapMode()
+	;* Return:
+		;* * - See WrapMode enumeration.
 	GetWrapMode() {
 		Local
 
@@ -448,6 +452,9 @@ Class __PathBrush {
 		return (wrapMode)
 	}
 
+	;* brush.SetWrapMode(wrapMode)
+	;* return:
+		;* wrapMode - See WrapMode enumeration.
 	SetWrapMode(wrapMode) {
 		Local
 
@@ -458,6 +465,138 @@ Class __PathBrush {
 		return (True)
 	}
 
+	PointCount[] {
+		Get {
+			return (this.GetPointCount())
+		}
+	}
+
+	;* brush.GetPointCount()
+	GetPointCount() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetPathGradientPointCount", "Ptr", this.Ptr, "Int*", count := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (count)
+	}
+
+	CenterPoint[] {
+		Get {
+			return (this.GetCenterPoint())
+		}
+	}
+
+	;* brush.GetCenterPoint()
+	GetCenterPoint() {
+		Local status
+
+		Static point := new Structure(8)
+
+		if (status := DllCall("Gdiplus\GdipGetPathGradientCenterPoint", "Ptr", this.Ptr, "Ptr", point.Ptr, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"x": point.NumGet(0, "Float"), "y": point.NumGet(4, "Float")})
+	}
+
+	;* brush.SetCenterPoint(x, y)
+	SetCenterPoint(x, y) {
+		Local status
+
+		Static point := new Structure(8)
+		point.NumPut(0, "Float", x, "Float", y)
+
+		if (status := DllCall("Gdiplus\GdipSetPathGradientCenterPoint", "Ptr", this.Ptr, "Ptr", point.Ptr, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	Rect[] {
+		Get {
+			return (this.GetRect())
+		}
+	}
+
+	;* brush.GetRect()
+	GetRect() {
+		Local status
+
+		Static rect := new Structure(16)
+
+		if (status := DllCall("Gdiplus\GdipGetPathGradientRect", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"x": point.NumGet(0, "Float"), "y": point.NumGet(4, "Float"), "Width": point.NumGet(8, "Float"), "Height": point.NumGet(12, "Float")})
+	}
+
+	FocusScales[] {
+		Get {
+			return (this.GetFocusScales())
+		}
+
+		Set {
+			this.SetFocusScales(value)
+
+			return (value)
+		}
+	}
+
+	;* brush.GetFocusScales()
+	GetFocusScales() {
+		Local status
+
+		Static point := new Structure(8)
+
+		if (status := DllCall("Gdiplus\GdipGetPathGradientFocusScales", "Ptr", this.Ptr, "Float*", x := 0, "Float*", y := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"x": x, "y": y})
+	}
+
+	;* brush.SetFocusScales(x, y)
+	;* Parameter:
+		;* x - Scalar in the range `(0.0, 1.0)`.
+		;* y - Scalar in the range `(0.0, 1.0)`.
+	SetFocusScales(x, y) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetPathGradientFocusScales", "Ptr", this.Ptr, "Float", x, "Float", y, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	CenterColor[] {
+		Get {
+			return (this.GetCenterColor())
+		}
+
+		Set {
+			this.SetCenterColor(value)
+
+			return (value)
+		}
+	}
+
+	;* brush.GetCenterColor()
+	GetCenterColor() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetPathGradientCenterColor", "Ptr", this.Ptr, "UInt*", color := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (Format("0x{:08X}", color))
+	}
+
+	;* brush.SetCenterColor(color)
 	SetCenterColor(color) {
 		Local
 
@@ -468,13 +607,117 @@ Class __PathBrush {
 		return (True)
 	}
 
-	SetCenterPoint(x, y) {
-		Local status
+	SurroundColorCount[] {
+		Get {
+			return (this.GetSurroundColorCount())
+		}
 
-		Static point := new Structure(8)
-		point.NumPut(0, "Float", x, "Float", y)
+		Set {
+			this.SetSurroundColors(value*)
 
-		if (status := DllCall("Gdiplus\GdipSetPathGradientCenterPoint", "Ptr", this.Ptr, "Ptr", point.Ptr, "Int")) {
+			return (value*)
+		}
+	}
+
+	;* brush.GetSurroundColorCount()
+	GetSurroundColorCount() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetPathGradientSurroundColorCount", "Ptr", this.Ptr, "UInt*", count := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (count)
+	}
+
+	;* brush.GetSurroundColors()
+	GetSurroundColors() {
+		Local count := this.GetSurroundColorCount(), struct, status, array
+
+		if (status := DllCall("Gdiplus\GdipGetPathGradientSurroundColorsWithCount", "Ptr", this.Ptr, "Ptr", (struct := new Structure(count*4)).Ptr, "Int*", count, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		loop, % (count, array := []) {
+			array.Push(struct.NumGet((A_Index - 1)*4, "UInt"))
+		}
+
+		return (array)
+	}
+
+	;* brush.SetSurroundColors(colors*)
+	SetSurroundColors(colors*) {
+		Local index, color, struct, status
+
+		for index, color in (colors, struct := new Structure(colors.Length()*4)) {
+			struct.NumPut((index - 1)*4, "UInt", color)
+		}
+
+		if (status := DllCall("Gdiplus\GdipSetPathGradientSurroundColorsWithCount", "Ptr", this.Ptr, "Ptr", struct.Ptr, "Int*", index, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	GammaCorrection[] {
+		Get {
+			return (this.GetGammaCorrection())
+		}
+
+		Set {
+			this.SetGammaCorrection(value)
+
+			return (value)
+		}
+	}
+
+	;* brush.GetGammaCorrection()
+	GetGammaCorrection() {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetPathGradientGammaCorrection", "Ptr", this.Ptr, "UInt*", bool := 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (bool)
+	}
+
+	;* brush.SetGammaCorrection(useGammaCorrection)
+	;* return:
+		;* useGammaCorrection - Bool that indicates if gamma correction should be used or not.
+	SetGammaCorrection(useGammaCorrection) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetPathGradientGammaCorrection", "Ptr", this.Ptr, "UInt", useGammaCorrection, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	;* brush.SetLinearBlend(focus[, scale])
+	;* return:
+		;* focus - Number in the range `(0.0, 1.0)` that specifies where the center color will be at its highest intensity.
+		;* scale - Number in the range `(0.0, 1.0)` that specifies the maximum intensity of center color that gets blended with the boundary color.
+	SetLinearBlend(focus, scale := 1.0) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetPathGradientLinearBlend", "Ptr", this.Ptr, "Float", focus, "Float", scale, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return (True)
+	}
+
+	;* brush.SetSigmaBlend(focus[, scale])
+	;* return:
+		;* focus - Number in the range `(0.0, 1.0)` that specifies where the center color will be at its highest intensity.
+		;* scale - Number in the range `(0.0, 1.0)` that specifies the maximum intensity of center color that gets blended with the boundary color.
+	SetSigmaBlend(focus, scale := 1.0) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipSetPathGradientSigmaBlend", "Ptr", this.Ptr, "Float", focus, "Float", scale, "Int")) {
 			throw (Exception(FormatStatus(status)))
 		}
 

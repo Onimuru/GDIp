@@ -106,9 +106,9 @@ Class __Graphics {
 
 	States[] {
 		Get {
-			ObjRawSet(this, "States", states := [])  ;* Only initialize this object as needed.
+			ObjRawSet(this, "States", object := [])  ;* Only initialize this object as needed.
 
-			return (states)
+			return (object)
 		}
 	}
 
