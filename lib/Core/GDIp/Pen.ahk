@@ -1,49 +1,49 @@
 ﻿/*
-;* DashCap enum (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-dashcap)
-	;? 0 = DashCapFlat
-	;? 2 = DashCapRound
-	;? 3 = DashCapTriangle
+;* enum DashCap  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-dashcap
+	0 = DashCapFlat
+	2 = DashCapRound
+	3 = DashCapTriangle
 
-;* DashStyle enum (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-dashstyle)
-	;? 0 = DashStyleSolid
-	;? 1 = DashStyleDash
-	;? 2 = DashStyleDot
-	;? 3 = DashStyleDashDot
-	;? 4 = DashStyleDashDotDot
-	;? 5 = DashStyleCustom
+;* enum DashStyle  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-dashstyle
+	0 = DashStyleSolid
+	1 = DashStyleDash
+	2 = DashStyleDot
+	3 = DashStyleDashDot
+	4 = DashStyleDashDotDot
+	5 = DashStyleCustom
 
-;* LineCap enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-linecap)
-	;? 0x00 = LineCapFlat
-	;? 0x01 = LineCapSquare
-	;? 0x02 = LineCapRound
-	;? 0x03 = LineCapTriangle
-	;? 0x10 = LineCapNoAnchor
-	;? 0x11 = LineCapSquareAnchor
-	;? 0x12 = LineCapRoundAnchor
-	;? 0x13 = LineCapDiamondAnchor
-	;? 0x14 = LineCapArrowAnchor
-	;? 0xFF = LineCapCustom
-	;? 0xF0 = LineCapAnchorMask
+;* enum LineCap  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-linecap
+	0x00 = LineCapFlat
+	0x01 = LineCapSquare
+	0x02 = LineCapRound
+	0x03 = LineCapTriangle
+	0x10 = LineCapNoAnchor
+	0x11 = LineCapSquareAnchor
+	0x12 = LineCapRoundAnchor
+	0x13 = LineCapDiamondAnchor
+	0x14 = LineCapArrowAnchor
+	0xFF = LineCapCustom
+	0xF0 = LineCapAnchorMask
 
-;* PenAlignment enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-penalignment)
-	;? 0 = PenAlignmentCenter - Specifies that the pen is aligned on the center of the line that is drawn.
-	;? 1 = PenAlignmentInset - Specifies, when drawing a polygon, that the pen is aligned on the inside of the edge of the polygon.
+;* enum PenAlignment  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-penalignment
+	0 = PenAlignmentCenter - Specifies that the pen is aligned on the center of the line that is drawn.
+	1 = PenAlignmentInset - Specifies, when drawing a polygon, that the pen is aligned on the inside of the edge of the polygon.
 
-;* PenType enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-pentype)
-	;? 0 = PenTypeSolidColor
-	;? 1 = PenTypeHatchFill
-	;? 2 = PenTypeTextureFill
-	;? 3 = PenTypePathGradient
-	;? 4 = PenTypeLinearGradient
-	;? -1 = PenTypeUnknown
+;* enum PenType  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-pentype
+	0 = PenTypeSolidColor
+	1 = PenTypeHatchFill
+	2 = PenTypeTextureFill
+	3 = PenTypePathGradient
+	4 = PenTypeLinearGradient
+	-1 = PenTypeUnknown
 
-;* Unit enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-unit)
-	;? 0 = UnitWorld - World coordinate (non-physical unit).
-	;? 1 = UnitDisplay - Variable (only for PageTransform).
-	;? 2 = UnitPixel - Each unit is one device pixel.
-	;? 3 = UnitPoint - Each unit is a printer's point, or 1/72 inch.
-	;? 4 = UnitInch
-	;? 5 = UnitDocument - Each unit is 1/300 inch.
+;* enum Unit  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-unit
+	0 = UnitWorld - World coordinate (non-physical unit).
+	1 = UnitDisplay - Variable (only for PageTransform).
+	2 = UnitPixel - Each unit is one device pixel.
+	3 = UnitPoint - Each unit is a printer's point, or 1/72 inch.
+	4 = UnitInch
+	5 = UnitDocument - Each unit is 1/300 inch.
 */
 
 ;* GDIp.CreatePen(color[, width, unit])

@@ -1,58 +1,50 @@
 ﻿/*
-;* ImageFlags enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imageflags)
-	;? 0x00000000 = ImageFlagsNone
-	;? 0x00000001 = ImageFlagsScalable
-	;? 0x00000002 = ImageFlagsHasAlpha
-	;? 0x00000004 = ImageFlagsHasTranslucent
-	;? 0x00000008 = ImageFlagsPartiallyScalable
-	;? 0x00000010 = ImageFlagsColorSpaceRGB
-	;? 0x00000020 = ImageFlagsColorSpaceCMYK
-	;? 0x00000040 = ImageFlagsColorSpaceGRAY
-	;? 0x00000080 = ImageFlagsColorSpaceYCBCR
-	;? 0x00000100 = ImageFlagsColorSpaceYCCK
-	;? 0x00001000 = ImageFlagsHasRealDPI
-	;? 0x00002000 = ImageFlagsHasRealPixelSize
-	;? 0x00010000 = ImageFlagsReadOnly
-	;? 0x00020000 = ImageFlagsCaching
+;* enum ImageFlags  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imageflags
+	0x00000000 = ImageFlagsNone
+	0x00000001 = ImageFlagsScalable
+	0x00000002 = ImageFlagsHasAlpha
+	0x00000004 = ImageFlagsHasTranslucent
+	0x00000008 = ImageFlagsPartiallyScalable
+	0x00000010 = ImageFlagsColorSpaceRGB
+	0x00000020 = ImageFlagsColorSpaceCMYK
+	0x00000040 = ImageFlagsColorSpaceGRAY
+	0x00000080 = ImageFlagsColorSpaceYCBCR
+	0x00000100 = ImageFlagsColorSpaceYCCK
+	0x00001000 = ImageFlagsHasRealDPI
+	0x00002000 = ImageFlagsHasRealPixelSize
+	0x00010000 = ImageFlagsReadOnly
+	0x00020000 = ImageFlagsCaching
 
-;* ImageLockMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imagelockmode)
-	;? 0x0001 = ImageLockModeRead
-	;? 0x0002 = ImageLockModeWrite
-	;? 0x0004 = ImageLockModeUserInputBuf
+;* enum ImageLockMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imagelockmode
+	0x0001 = ImageLockModeRead
+	0x0002 = ImageLockModeWrite
+	0x0004 = ImageLockModeUserInputBuf
 
-;* PixelFormat enumeration (https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-emfplus/47cbe48e-d13c-450b-8a23-6aa95488428e)
-	;? 0x00030101 = PixelFormat1bppIndexed
-	;? 0x00030402 = PixelFormat4bppIndexed
-	;? 0x00030803 = PixelFormat8bppIndexed
-	;? 0x00101004 = PixelFormat16bppGrayScale
-	;? 0x00021005 = PixelFormat16bppRGB555
-	;? 0x00021006 = PixelFormat16bppRGB565
-	;? 0x00061007 = PixelFormat16bppARGB1555
-	;? 0x00021808 = PixelFormat24bppRGB
-	;? 0x00022009 = PixelFormat32bppRGB
-	;? 0x0026200A = PixelFormat32bppARGB
-	;? 0x000E200B = PixelFormat32bppPARGB
-	;? 0x0010300C = PixelFormat48bppRGB
-	;? 0x0034400D = PixelFormat64bppARGB
-	;? 0x001A400E = PixelFormat64bppPARGB
+;* enum PixelFormat  ;: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-emfplus/47cbe48e-d13c-450b-8a23-6aa95488428e
+	0x00030101 = PixelFormat1bppIndexed
+	0x00030402 = PixelFormat4bppIndexed
+	0x00030803 = PixelFormat8bppIndexed
+	0x00101004 = PixelFormat16bppGrayScale
+	0x00021005 = PixelFormat16bppRGB555
+	0x00021006 = PixelFormat16bppRGB565
+	0x00061007 = PixelFormat16bppARGB1555
+	0x00021808 = PixelFormat24bppRGB
+	0x00022009 = PixelFormat32bppRGB
+	0x0026200A = PixelFormat32bppARGB
+	0x000E200B = PixelFormat32bppPARGB
+	0x0010300C = PixelFormat48bppRGB
+	0x0034400D = PixelFormat64bppARGB
+	0x001A400E = PixelFormat64bppPARGB
 
-;* RotateFlipType enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-rotatefliptype)
-	;? 0 = RotateNoneFlipNone
-	;? 1 = Rotate90FlipNone
-	;? 2 = Rotate180FlipNone
-	;? 3 = Rotate270FlipNone
-	;? 4 = RotateNoneFlipX
-	;? 5 = Rotate90FlipX
-	;? 6 = Rotate180FlipX
-	;? 7 = Rotate270FlipX
-	;? 6 = RotateNoneFlipY
-	;? 7 = Rotate90FlipY
-	;? 4 = Rotate180FlipY
-	;? 5 = Rotate270FlipY
-	;? 2 = RotateNoneFlipXY
-	;? 3 = Rotate90FlipXY
-	;? 0 = Rotate180FlipXY
-	;? 1 = Rotate270FlipXY
+;* enum RotateFlipType  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-rotatefliptype
+	0 = RotateNoneFlipNone || Rotate180FlipXY
+	1 = Rotate90FlipNone || Rotate270FlipXY
+	2 = Rotate180FlipNone || RotateNoneFlipXY
+	3 = Rotate270FlipNone || Rotate90FlipXY
+	4 = RotateNoneFlipX || Rotate180FlipY
+	5 = Rotate90FlipX || Rotate270FlipY
+	6 = Rotate180FlipX || RotateNoneFlipY
+	7 = Rotate270FlipX || Rotate90FlipY
 */
 
 ;* GDIp.GdipCreateBitmap(width, height[, pixelFormat, stride, [__Structure] scan0])
@@ -69,6 +61,8 @@ CreateBitmap(width, height, pixelFormat := 0x26200A, stride := 0, scan0 := 0) {
 		, "Base": this.__Bitmap})
 }
 
+;~ CreateBitmapFromDirectDrawSurface()
+
 CreateBitmapFromFile(file, useICM := 0) {
 	Local
 
@@ -82,6 +76,8 @@ CreateBitmapFromFile(file, useICM := 0) {
 		, "Base": this.__Bitmap})
 }
 
+;~ CreateBitmapFromGdiDIB
+
 CreateBitmapFromGraphics(graphics, width, height) {
 	Local
 
@@ -92,6 +88,10 @@ CreateBitmapFromGraphics(graphics, width, height) {
 	return ({"Ptr": pBitmap
 		, "Base": this.__Bitmap})
 }
+
+;~ CreateBitmapFromHBITMAP
+;~ CreateBitmapFromHICON
+;~ CreateBitmapFromResource
 
 CreateBitmapFromScreen(params*) {
 	switch (params.Length()) {
@@ -121,6 +121,8 @@ CreateBitmapFromScreen(params*) {
 	return ({"Ptr": pBitmap
 		, "Base": this.__Bitmap})
 }
+
+;~ CreateBitmapFromStream, CreateBitmapFromStreamICM
 
 CreateBitmapFromWindow(hWnd, client := True) {
 	hWnd := RegExReplace(hWnd, "i)ahk_id\s?")
@@ -157,6 +159,9 @@ CreateBitmapFromWindow(hWnd, client := True) {
 	return ({"Ptr": pBitmap
 		, "Base": this.__Bitmap})
 }
+
+;~ CreateHBITMAPFromBitmap
+;~ CreateHICONFromBitmap
 
 Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 
@@ -339,20 +344,44 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 		return (Format("0x{:08X}", pixelFormat))
 	}
 
+	GetThumbnail(width, height) {
+		Local
+
+		if (status := DllCall("Gdiplus\GdipGetImageThumbnail", "Ptr", bitmap.Ptr, "UInt", width, "UInt", height, "Ptr*", pBitmap := 0, "Ptr", 0, "Ptr", 0, "Int")) {
+			throw (Exception(FormatStatus(status)))
+		}
+
+		return ({"Ptr": pBitmap
+			, "Base": this.Base})
+	}
+
 	;--------------- Method -------------------------------------------------------;
+
+	;~ ApplyEffect
+	;~ ConvertFormat
+	;~ CreateApplyEffect
+	;~ GetHistogram
+	;~ GetHistogramSize
+	;~ SetResolution
 
 	;* bitmap.LockBits([x, y, width, height, pixelFormat, lockMode])
 	;* Parameter:
 		;* pixelFormat - See PixelFormat enumeration.
 		;* lockMode - See ImageLockMode enumeration.
-	LockBits(x := 0, y := 0, width := 0, height := 0, lockMode := 0x0003, pixelFormat := "") {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
-		if (!this.HasKey("BitmapData")) {
-			if (!width) {
-				width := this.Width
-			}
+	LockBits(x := 0, y := 0, width := "", height := "", lockMode := 0x0003, pixelFormat := "") {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
+		Local
 
-			if (!height) {
-				height := this.Height
+		if (!this.HasKey("BitmapData")) {
+			if (width == "") {
+				if (height == "") {
+					DllCall("Gdiplus\GdipGetImageDimension", "Ptr", this.Ptr, "Float*", width := 0, "Float*", height := 0)
+				}
+				else {
+					DllCall("Gdiplus\GdipGetImageWidth", "Ptr", this.Ptr, "UInt*", width := 0, "Int")
+				}
+			}
+			else if (height == "") {
+				DllCall("Gdiplus\GdipGetImageHeight", "Ptr", this.Ptr, "UInt*", height := 0, "Int")
 			}
 
 			Static bitmapData := CreateBitmapData()
@@ -370,12 +399,12 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 	}
 
 	UnlockBits() {
+		Local
+
 		if (this.HasKey("BitmapData")) {
-			if (status := DllCall("Gdiplus\GdipBitmapUnlockBits", "Ptr", this.Ptr, "Ptr", this.BitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+			if (status := DllCall("Gdiplus\GdipBitmapUnlockBits", "Ptr", this.Ptr, "Ptr", this.Remove("BitmapData").Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
 				throw (Exception(FormatStatus(status)))
 			}
-
-			this.Delete("BitmapData")
 
 			return (True)
 		}
@@ -397,7 +426,7 @@ Class __Bitmap {  ;~ http://paulbourke.net/dataformats/bitmaps/
 	}
 
 	SaveToFile(file) {
-		if (status := DllCall("Gdiplus\GdipGetImageEncodersSize", "UInt*", number := 0, "UInt*", size := 0), "Int") {  ;: https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-retrieving-the-class-identifier-for-an-encoder-use
+		if (status := DllCall("Gdiplus\GdipGetImageEncodersSize", "UInt*", number := 0, "UInt*", size := 0), "Int") {
 			throw (Exception(FormatStatus(status)))
 		}
 

@@ -1,22 +1,22 @@
 ﻿/*
-;* RasterOperation codes (https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt):
-	;? 0x00000042 = BLACKNESS - Fills the destination rectangle using the color associated with palette index 0.
-	;? 0x40000000 = CAPTUREBLT - Includes any window that are layered on top of your window in the resulting image.
-	;? 0x00550009 = DSTINVERT - Inverts the destination rectangle.
-	;? 0x00C000CA = MERGECOPY - Merges the color of the source rectangle with the brush currently selected in hDest, by using the AND operator.
-	;? 0x00BB0226 = MERGEPAINT - Merges the color of the inverted source rectangle with the colors of the destination rectangle by using the OR operator.
-	;? 0x80000000 = NOMIRRORBITMAP - Prevents the bitmap from being mirrored.
-	;? 0x00330008 = NOTSRCCOPY - Copies the inverted source rectangle to the destination.
-	;? 0x001100A6 = NOTSRCERASE - Combines the colors of the source and destination rectangles by using the OR operator and then inverts the resultant color.
-	;? 0x00F00021 = PATCOPY - Copies the brush selected in hdcDest, into the destination bitmap.
-	;? 0x005A0049 = PATINVERT - Combines the colors of the brush currently selected in hDest, with the colors of the destination rectangle by using the XOR operator.
-	;? 0x00FB0A09 = PATPAINT - Combines the colors of the brush currently selected in hDest, with the colors of the inverted source rectangle by using the OR operator. The result of this operation is combined with the color of the destination rectangle by using the OR operator.
-	;? 0x008800C6 = SRCAND - Combines the colors of the source and destination rectangles by using the AND operator.
-	;? 0x00CC0020 = SRCCOPY - Copies the source rectangle directly to the destination rectangle.
-	;? 0x00440328 = SRCERASE - Combines the inverted color of the destination rectangle with the colors of the source rectangle by using the AND operator.
-	;? 0x00660046 = SRCINVERT - Combines the colors of the source and destination rectangles by using the XOR operator.
-	;? 0x00EE0086 = SRCPAINT - Combines the colors of the source and destination rectangles by using the OR operator.
-	;? 0x00FF0062 = WHITENESS - Fills the destination rectangle using the color associated with index 1 in the physical palette.
+;* RasterOperation codes
+	0x00000042 = BLACKNESS - Fills the destination rectangle using the color associated with palette index 0.
+	0x40000000 = CAPTUREBLT - Includes any window that are layered on top of your window in the resulting image.
+	0x00550009 = DSTINVERT - Inverts the destination rectangle.
+	0x00C000CA = MERGECOPY - Merges the color of the source rectangle with the brush currently selected in hDest, by using the AND operator.
+	0x00BB0226 = MERGEPAINT - Merges the color of the inverted source rectangle with the colors of the destination rectangle by using the OR operator.
+	0x80000000 = NOMIRRORBITMAP - Prevents the bitmap from being mirrored.
+	0x00330008 = NOTSRCCOPY - Copies the inverted source rectangle to the destination.
+	0x001100A6 = NOTSRCERASE - Combines the colors of the source and destination rectangles by using the OR operator and then inverts the resultant color.
+	0x00F00021 = PATCOPY - Copies the brush selected in hdcDest, into the destination bitmap.
+	0x005A0049 = PATINVERT - Combines the colors of the brush currently selected in hDest, with the colors of the destination rectangle by using the XOR operator.
+	0x00FB0A09 = PATPAINT - Combines the colors of the brush currently selected in hDest, with the colors of the inverted source rectangle by using the OR operator. The result of this operation is combined with the color of the destination rectangle by using the OR operator.
+	0x008800C6 = SRCAND - Combines the colors of the source and destination rectangles by using the AND operator.
+	0x00CC0020 = SRCCOPY - Copies the source rectangle directly to the destination rectangle.
+	0x00440328 = SRCERASE - Combines the inverted color of the destination rectangle with the colors of the source rectangle by using the AND operator.
+	0x00660046 = SRCINVERT - Combines the colors of the source and destination rectangles by using the XOR operator.
+	0x00EE0086 = SRCPAINT - Combines the colors of the source and destination rectangles by using the OR operator.
+	0x00FF0062 = WHITENESS - Fills the destination rectangle using the color associated with index 1 in the physical palette.
 */
 
 Class GDI {
@@ -29,7 +29,7 @@ Class GDI {
 
 	;* GDI.BitBlt([__DC] dDC, dx, dy, width, height, [__DC] sDC, sx, sy[, operation])
 	;* Parameter:
-		;* operation: RasterOperation codes.
+		;* operation - See RasterOperation codes.
 	BitBlt(dDC, dx, dy, width, height, sDC, sx, sy, operation := 0x00CC0020) {
 		if (!DllCall("Gdi32\BitBlt", "Ptr", dDC.Handle, "Int", dx, "Int", dy, "Int", width, "Int", height, "Ptr", sDC.Handle, "Int", sx, "Int", sy, "UInt", operation, "UInt")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt
 			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
@@ -48,7 +48,7 @@ Class GDI {
 
 	;* GDI.BitBlt([__DC] dDC, dx, dy, dWidth, dHeight, [__DC] sDC, sx, sy, sWidth, sHeight[, operation])
 	;* Parameter:
-		;* operation: RasterOperation codes.
+		;* operation - See RasterOperation codes.
 	StretchBlt(dDC, dx, dy, dWidth, dHeight, sDC, sx, sy, sWidth, sHeight, operation := 0x00CC0020) {
 		if (!DllCall("gdi32\StretchBlt", "Ptr", dDC.Handle, "Int", dx, "Int", dy, "Int", dWidth, "Int", dHeight, "Ptr", sDC.Handle, "Int", sx, "Int", sy, "Int", sWidth, "Int", sHeight, "UInt", operation, "UInt")) {
 			throw (Exception(Format("0x{:X}", A_LastError), 0, FormatMessage(A_LastError)))
@@ -131,7 +131,7 @@ Class GDI {
 			, "Base": this.__CompatibleDC})
 	}
 
-	Class __CompatibleDC {  ;~ Fixed a massive bug here, this is treated as a single class with shared static variables since it is never initialized.
+	Class __CompatibleDC {  ;~ Fixed a massive bug here, this is treated as a single class and any static variables are shared since it is never initialized properly.
 
 		__Delete() {
 			if (!this.Handle) {

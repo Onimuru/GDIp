@@ -1,73 +1,79 @@
 ﻿/*
-;* BrushType enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-brushtype)
-	;? 0 = BrushTypeSolidColor
-	;? 1 = BrushTypeHatchFill
-	;? 2 = BrushTypeTextureFill
-	;? 3 = BrushTypePathGradient
-	;? 4 = BrushTypeLinearGradient
+;* enum BrushType  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-brushtype
+	0 = BrushTypeSolidColor
+	1 = BrushTypeHatchFill
+	2 = BrushTypeTextureFill
+	3 = BrushTypePathGradient
+	4 = BrushTypeLinearGradient
 
-;* HatchStyle enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-hatchstyle)
-	;? 0 = HatchStyleHorizontal || HatchStyleMin
-	;? 1 = HatchStyleVertical
-	;? 2 = HatchStyleForwardDiagonal
-	;? 3 = HatchStyleBackwardDiagonal
-	;? 4 = HatchStyleCross || HatchStyleLargeGrid
-	;? 5 = HatchStyleDiagonalCross
-	;? 6 = HatchStyle05Percent
-	;? 7 = HatchStyle10Percent
-	;? 8 = HatchStyle20Percent
-	;? 9 = HatchStyle25Percent
-	;? 10 = HatchStyle30Percent
-	;? 11 = HatchStyle40Percent
-	;? 12 = HatchStyle50Percent
-	;? 13 = HatchStyle60Percent
-	;? 14 = HatchStyle70Percent
-	;? 15 = HatchStyle75Percent
-	;? 16 = HatchStyle80Percent
-	;? 17 = HatchStyle90Percent
-	;? 18 = HatchStyleLightDownwardDiagonal
-	;? 19 = HatchStyleLightUpwardDiagonal
-	;? 20 = HatchStyleDarkDownwardDiagonal
-	;? 21 = HatchStyleDarkUpwardDiagonal
-	;? 22 = HatchStyleWideDownwardDiagonal
-	;? 23 = HatchStyleWideUpwardDiagonal
-	;? 24 = HatchStyleLightVertical
-	;? 25 = HatchStyleLightHorizontal
-	;? 26 = HatchStyleNarrowVertical
-	;? 27 = HatchStyleNarrowHorizontal
-	;? 28 = HatchStyleDarkVertical
-	;? 29 = HatchStyleDarkHorizontal
-	;? 30 = HatchStyleDashedDownwardDiagonal
-	;? 31 = HatchStyleDashedUpwardDiagonal
-	;? 32 = HatchStyleDashedHorizontal
-	;? 33 = HatchStyleDashedVertical
-	;? 34 = HatchStyleSmallConfetti
-	;? 35 = HatchStyleLargeConfetti
-	;? 36 = HatchStyleZigZag
-	;? 37 = HatchStyleWave
-	;? 38 = HatchStyleDiagonalBrick
-	;? 39 = HatchStyleHorizontalBrick
-	;? 40 = HatchStyleWeave
-	;? 41 = HatchStylePlaid
-	;? 42 = HatchStyleDivot
-	;? 43 = HatchStyleDottedGrid
-	;? 44 = HatchStyleDottedDiamond
-	;? 45 = HatchStyleShingle
-	;? 46 = HatchStyleTrellis
-	;? 47 = HatchStyleSphere
-	;? 48 = HatchStyleSmallGrid
-	;? 49 = HatchStyleSmallCheckerBoard
-	;? 50 = HatchStyleLargeCheckerBoard
-	;? 51 = HatchStyleOutlinedDiamond
-	;? 52 = HatchStyleSolidDiamond || HatchStyleMax
-	;? 53 = HatchStyleTotal
+;* enum HatchStyle  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-hatchstyle
+	0 = HatchStyleHorizontal || HatchStyleMin
+	1 = HatchStyleVertical
+	2 = HatchStyleForwardDiagonal
+	3 = HatchStyleBackwardDiagonal
+	4 = HatchStyleCross || HatchStyleLargeGrid
+	5 = HatchStyleDiagonalCross
+	6 = HatchStyle05Percent
+	7 = HatchStyle10Percent
+	8 = HatchStyle20Percent
+	9 = HatchStyle25Percent
+	10 = HatchStyle30Percent
+	11 = HatchStyle40Percent
+	12 = HatchStyle50Percent
+	13 = HatchStyle60Percent
+	14 = HatchStyle70Percent
+	15 = HatchStyle75Percent
+	16 = HatchStyle80Percent
+	17 = HatchStyle90Percent
+	18 = HatchStyleLightDownwardDiagonal
+	19 = HatchStyleLightUpwardDiagonal
+	20 = HatchStyleDarkDownwardDiagonal
+	21 = HatchStyleDarkUpwardDiagonal
+	22 = HatchStyleWideDownwardDiagonal
+	23 = HatchStyleWideUpwardDiagonal
+	24 = HatchStyleLightVertical
+	25 = HatchStyleLightHorizontal
+	26 = HatchStyleNarrowVertical
+	27 = HatchStyleNarrowHorizontal
+	28 = HatchStyleDarkVertical
+	29 = HatchStyleDarkHorizontal
+	30 = HatchStyleDashedDownwardDiagonal
+	31 = HatchStyleDashedUpwardDiagonal
+	32 = HatchStyleDashedHorizontal
+	33 = HatchStyleDashedVertical
+	34 = HatchStyleSmallConfetti
+	35 = HatchStyleLargeConfetti
+	36 = HatchStyleZigZag
+	37 = HatchStyleWave
+	38 = HatchStyleDiagonalBrick
+	39 = HatchStyleHorizontalBrick
+	40 = HatchStyleWeave
+	41 = HatchStylePlaid
+	42 = HatchStyleDivot
+	43 = HatchStyleDottedGrid
+	44 = HatchStyleDottedDiamond
+	45 = HatchStyleShingle
+	46 = HatchStyleTrellis
+	47 = HatchStyleSphere
+	48 = HatchStyleSmallGrid
+	49 = HatchStyleSmallCheckerBoard
+	50 = HatchStyleLargeCheckerBoard
+	51 = HatchStyleOutlinedDiamond
+	52 = HatchStyleSolidDiamond || HatchStyleMax
+	53 = HatchStyleTotal
 
-;* WrapMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-wrapmode)
-	;? 0 = WrapModeTile - Tiling without flipping.
-	;? 1 = WrapModeTileFlipX - Tiles are flipped horizontally as you move from one tile to the next in a row.
-	;? 2 = WrapModeTileFlipY - Tiles are flipped vertically as you move from one tile to the next in a column.
-	;? 3 = WrapModeTileFlipXY - Tiles are flipped horizontally as you move along a row and flipped vertically as you move along a column.
-	;? 4 = WrapModeClamp - No tiling takes place.
+;* enum LinearGradientMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-lineargradientmode
+	0 = LinearGradientModeVertical
+	1 = LinearGradientModeHorizontal
+	2 = LinearGradientModeBackwardDiagonal
+	3 = LinearGradientModeForwardDiagonal
+
+;* enum WrapMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-wrapmode
+	0 = WrapModeTile - Tiling without flipping.
+	1 = WrapModeTileFlipX - Tiles are flipped horizontally as you move from one tile to the next in a row.
+	2 = WrapModeTileFlipY - Tiles are flipped vertically as you move from one tile to the next in a column.
+	3 = WrapModeTileFlipXY - Tiles are flipped horizontally as you move along a row and flipped vertically as you move along a column.
+	4 = WrapModeClamp - No tiling takes place.
 */
 
 ;------------- SolidBrush -----------------------------------------------------;
@@ -832,6 +838,7 @@ CreateLinearBrush(x1, y1, x2, y2, color1, color2, wrapMode := 0) {
 
 ;* GDIp.CreateLinearBrushFromRect(x, y, width, height, color1, color2[, gradientMode, wrapMode])
 ;* Parameter:
+	;* gradientMode - See LinearGradientMode enumeration.
 	;* wrapMode - See WrapMode enumeration.
 CreateLinearBrushFromRect(x, y, width, height, color1, color2, gradientMode := 0, wrapMode := 0) {
 	Local status, pBrush

@@ -2,55 +2,55 @@
 ;* GDIp enums: https://github.com/mono/libgdiplus/blob/main/src/gdipenums.h
 
 /*
-;* FontStyle enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fontstyle)
-	;? 0 = FontStyleRegular
-	;? 1 = FontStyleBold
-	;? 2 = FontStyleItalic
-	;? 3 = FontStyleBoldItalic
-	;? 4 = FontStyleUnderline
-	;? 8 = FontStyleStrikeout
+;* enum FontStyle  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fontstyle
+	0 = FontStyleRegular
+	1 = FontStyleBold
+	2 = FontStyleItalic
+	3 = FontStyleBoldItalic
+	4 = FontStyleUnderline
+	8 = FontStyleStrikeout
 
-;* MatrixOrder enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-matrixorder)
-	;? 0 = MatrixOrderPrepend
-	;? 1 = MatrixOrderAppend
+;* enum MatrixOrder  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-matrixorder
+	0 = MatrixOrderPrepend
+	1 = MatrixOrderAppend
 
-;* StringAlignment enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-stringalignment)
-	;? 0 = StringAlignmentNear - Left/Top.
-	;? 1 = StringAlignmentCenter
-	;? 2 = StringAlignmentFar - Right/Bottom.
+;* enum StringAlignment  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-stringalignment
+	0 = StringAlignmentNear - Left/Top.
+	1 = StringAlignmentCenter
+	2 = StringAlignmentFar - Right/Bottom.
 
-;* StringDigitSubstitute enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-stringdigitsubstitute)
-	;? 0 = StringDigitSubstituteUser
-	;? 1 = StringDigitSubstituteNone
-	;? 2 = StringDigitSubstituteNational
-	;? 3 = StringDigitSubstituteTraditional
+;* enum StringDigitSubstitute  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-stringdigitsubstitute
+	0 = StringDigitSubstituteUser
+	1 = StringDigitSubstituteNone
+	2 = StringDigitSubstituteNational
+	3 = StringDigitSubstituteTraditional
 
-;* StringFormatFlags enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-stringformatflags)
-	;? 0x00000001 = StringFormatFlagsDirectionRightToLeft
-	;? 0x00000002 = StringFormatFlagsDirectionVertical
-	;? 0x00000004 = StringFormatFlagsNoFitBlackBox - Parts of characters are allowed to overhang the string's layout rectangle.
-	;? 0x00000020 = StringFormatFlagsDisplayFormatControl - Unicode layout control characters are displayed with a representative character.
-	;? 0x00000400 = StringFormatFlagsNoFontFallback - Prevent using an alternate font  for characters that are not supported in the requested font.
-	;? 0x00000800 = StringFormatFlagsMeasureTrailingSpaces - The spaces at the end of each line are included in a string measurement.
-	;? 0x00001000 = StringFormatFlagsNoWrap - Disable text wrapping.
-	;? 0x00002000 = StringFormatFlagsLineLimit - Only entire lines are laid out in the layout rectangle.
-	;? 0x00004000 = StringFormatFlagsNoClip - Characters overhanging the layout rectangle and text extending outside the layout rectangle are allowed to show.
+;* enum StringFormatFlags  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-stringformatflags
+	0x00000001 = StringFormatFlagsDirectionRightToLeft
+	0x00000002 = StringFormatFlagsDirectionVertical
+	0x00000004 = StringFormatFlagsNoFitBlackBox - Parts of characters are allowed to overhang the string's layout rectangle.
+	0x00000020 = StringFormatFlagsDisplayFormatControl - Unicode layout control characters are displayed with a representative character.
+	0x00000400 = StringFormatFlagsNoFontFallback - Prevent using an alternate font  for characters that are not supported in the requested font.
+	0x00000800 = StringFormatFlagsMeasureTrailingSpaces - The spaces at the end of each line are included in a string measurement.
+	0x00001000 = StringFormatFlagsNoWrap - Disable text wrapping.
+	0x00002000 = StringFormatFlagsLineLimit - Only entire lines are laid out in the layout rectangle.
+	0x00004000 = StringFormatFlagsNoClip - Characters overhanging the layout rectangle and text extending outside the layout rectangle are allowed to show.
 
-;* StringTrimming enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-stringtrimming)
-	;? 0 = StringTrimmingNone
-	;? 1 = StringTrimmingCharacter
-	;? 2 = StringTrimmingWord
-	;? 3 = StringTrimmingEllipsisCharacter
-	;? 4 = StringTrimmingEllipsisWord
-	;? 5 = StringTrimmingEllipsisPath
+;* enum StringTrimming  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-stringtrimming
+	0 = StringTrimmingNone
+	1 = StringTrimmingCharacter
+	2 = StringTrimmingWord
+	3 = StringTrimmingEllipsisCharacter
+	4 = StringTrimmingEllipsisWord
+	5 = StringTrimmingEllipsisPath
 
-;* Unit enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-unit)
-	;? 0 = UnitWorld - World coordinate (non-physical unit).
-	;? 1 = UnitDisplay - Variable (only for PageTransform).
-	;? 2 = UnitPixel - Each unit is one device pixel.
-	;? 3 = UnitPoint - Each unit is a printer's point, or 1/72 inch.
-	;? 4 = UnitInch
-	;? 5 = UnitDocument - Each unit is 1/300 inch.
+;* enum Unit  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-unit
+	0 = UnitWorld - World coordinate (non-physical unit).
+	1 = UnitDisplay - Variable (only for PageTransform).
+	2 = UnitPixel - Each unit is one device pixel.
+	3 = UnitPoint - Each unit is a printer's point, or 1/72 inch.
+	4 = UnitInch
+	5 = UnitDocument - Each unit is 1/300 inch.
 */
 
 GetRotatedTranslation(width, height, angle, ByRef xTranslation, ByRef yTranslation) {
@@ -86,6 +86,8 @@ Class GDIp {
         throw (Exception("GDIp.__New()", -1, "This class must not be constructed."))
 	}
 
+	;--------------- Method -------------------------------------------------------;
+
 	Startup() {
 		Local
 
@@ -114,18 +116,6 @@ Class GDIp {
 		}
 
 		return (False)
-	}
-
-	;--------------- Method -------------------------------------------------------;
-
-	GetThumbnailFromImage(bitmap, width, height) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetImageThumbnail", "Ptr", bitmap.Ptr, "UInt", width, "UInt", height, "Ptr*", pThumbnail := 0, "Ptr", 0, "Ptr", 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return (pThumbnail)
 	}
 
 	;---------------  Class  -------------------------------------------------------;
@@ -167,6 +157,14 @@ Class GDIp {
 				, "Base": this.Base})
 		}
 	}
+
+	;------------------------------------------------------- Effect ---------------;
+
+	;~ CreateEffect
+	;~ DeleteEffect
+	;~ GetEffectParameters
+	;~ GetEffectParameterSize
+	;~ SetEffectParameters
 
 	;------------------------------------------------------- Bitmap ---------------;
 
@@ -241,7 +239,7 @@ Class GDIp {
 			return (bool)
 		}
 
-		;--------------- Method -------------------------------------------------------;
+		;--------------- Method -------------------------------------------------------;  ;~ REAL is a typedef for a float.
 
 		;* matrix.Invert() - If the matrix is invertible, this function replaces its elements  with the elements of its inverse.
 		Invert() {
@@ -262,7 +260,7 @@ Class GDIp {
 		Translate(x, y, matrixOrder := 0) {
 			Local
 
-			if (status := DllCall("Gdiplus\GdipTranslateMatrix", "Ptr", this.Ptr, "Int", x, "Int", y, "Int", matrixOrder, "Int")) {
+			if (status := DllCall("Gdiplus\GdipTranslateMatrix", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 
@@ -276,7 +274,7 @@ Class GDIp {
 		Rotate(angle, matrixOrder := 0) {
 			Local
 
-			if (status := DllCall("Gdiplus\GdipRotateMatrix", "Ptr", this.Ptr, "Int", angle, "Int", matrixOrder, "Int")) {
+			if (status := DllCall("Gdiplus\GdipRotateMatrix", "Ptr", this.Ptr, "Float", angle, "Float", matrixOrder, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 
@@ -304,7 +302,7 @@ Class GDIp {
 		Scale(x, y, matrixOrder := 0) {
 			Local
 
-			if (status := DllCall("Gdiplus\GdipScaleMatrix", "Ptr", this.Ptr, "Int", x, "Int", y, "Int", matrixOrder, "Int")) {
+			if (status := DllCall("Gdiplus\GdipScaleMatrix", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 
@@ -319,7 +317,7 @@ Class GDIp {
 		Shear(x, y, matrixOrder := 0) {
 			Local
 
-			if (status := DllCall("Gdiplus\GdipShearMatrix", "Ptr", this.Ptr, "Int", x, "Int", y, "Int", matrixOrder, "Int")) {
+			if (status := DllCall("Gdiplus\GdipShearMatrix", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 				throw (Exception(FormatStatus(status)))
 			}
 

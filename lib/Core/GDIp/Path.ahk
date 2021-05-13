@@ -1,7 +1,7 @@
 ﻿/*
-;* FillMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fillmode)
-	;? 0 = FillModeAlternate
-	;? 1 = FillModeWinding
+;* enum FillMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fillmode
+	0 = FillModeAlternate
+	1 = FillModeWinding
 */
 
 ;* GDIp.CreatePath([fillMode])

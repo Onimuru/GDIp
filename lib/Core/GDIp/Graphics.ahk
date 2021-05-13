@@ -1,60 +1,60 @@
 ﻿/*
-;* CompositingMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-compositingmode)
-	;? 0 = CompositingModeSourceOver - Specifies that when a color is rendered, it overwrites the background color.
-	;? 1 = CompositingModeSourceCopy - Specifies that when a color is rendered, it is blended with the background color. The blend is determined by the alpha component of the color being rendered.
+;* enum CompositingMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-compositingmode
+	0 = CompositingModeSourceOver - Specifies that when a color is rendered, it overwrites the background color.
+	1 = CompositingModeSourceCopy - Specifies that when a color is rendered, it is blended with the background color. The blend is determined by the alpha component of the color being rendered.
 
-;* CompositingQuality enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-compositingquality)
-	;? 0 = CompositingQualityDefault
-	;? 1 = CompositingQualityHighSpeed
-	;? 2 = CompositingQualityHighQuality
-	;? 3 = CompositingQualityGammaCorrected
-	;? 4 = CompositingQualityAssumeLinear
+;* enum CompositingQuality  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-compositingquality
+	0 = CompositingQualityDefault
+	1 = CompositingQualityHighSpeed
+	2 = CompositingQualityHighQuality
+	3 = CompositingQualityGammaCorrected
+	4 = CompositingQualityAssumeLinear
 
-;* FillMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fillmode)
-	;? 0 = FillModeAlternate
-	;? 1 = FillModeWinding
+;* enum FillMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fillmode
+	0 = FillModeAlternate
+	1 = FillModeWinding
 
-;* FlushIntention enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-flushintention)
-	;? 0 = FlushIntentionFlush - Flush all batched rendering operations and return immediately.
-	;? 1 = FlushIntentionSync - Flush all batched rendering operations and wait for them to complete.
+;* enum FlushIntention  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-flushintention
+	0 = FlushIntentionFlush - Flush all batched rendering operations and return immediately.
+	1 = FlushIntentionSync - Flush all batched rendering operations and wait for them to complete.
 
-;* InterpolationMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-interpolationmode)
-	;? 0 = InterpolationModeDefault
-	;? 1 = InterpolationModeLowQuality
-	;? 2 = InterpolationModeHighQuality
-	;? 3 = InterpolationModeBilinear
-	;? 4 = InterpolationModeBicubic
-	;? 5 = InterpolationModeNearestNeighbor
-	;? 6 = InterpolationModeHighQualityBilinear
-	;? 7 = InterpolationModeHighQualityBicubic
+;* enum InterpolationMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-interpolationmode
+	0 = InterpolationModeDefault
+	1 = InterpolationModeLowQuality
+	2 = InterpolationModeHighQuality
+	3 = InterpolationModeBilinear
+	4 = InterpolationModeBicubic
+	5 = InterpolationModeNearestNeighbor
+	6 = InterpolationModeHighQualityBilinear
+	7 = InterpolationModeHighQualityBicubic
 
-;* MatrixOrder enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-matrixorder)
-	;? 0 = MatrixOrderPrepend
-	;? 1 = MatrixOrderAppend
+;* enum MatrixOrder  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-matrixorder
+	0 = MatrixOrderPrepend
+	1 = MatrixOrderAppend
 
-;* SmoothingMode enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-smoothingmode)
-	;? 0 = SmoothingModeDefault
-	;? 1 = SmoothingModeHighSpeed
-	;? 2 = SmoothingModeHighQuality
-	;? 3 = SmoothingModeNone
-	;? 4 = SmoothingModeAntiAlias
+;* enum SmoothingMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-smoothingmode
+	0 = SmoothingModeDefault
+	1 = SmoothingModeHighSpeed
+	2 = SmoothingModeHighQuality
+	3 = SmoothingModeNone
+	4 = SmoothingModeAntiAlias
 
-;* TextRenderingHint enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-textrenderinghint)
-	;? 0 = TextRenderingHintSystemDefault
-	;? 1 = TextRenderingHintSingleBitPerPixelGridFit
-	;? 2 = TextRenderingHintSingleBitPerPixel
-	;? 3 = TextRenderingHintAntiAliasGridFit
-	;? 4 = TextRenderingHintAntiAlias
-	;? 5 = TextRenderingHintClearTypeGridFit
+;* enum TextRenderingHint  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-textrenderinghint
+	0 = TextRenderingHintSystemDefault
+	1 = TextRenderingHintSingleBitPerPixelGridFit
+	2 = TextRenderingHintSingleBitPerPixel
+	3 = TextRenderingHintAntiAliasGridFit
+	4 = TextRenderingHintAntiAlias
+	5 = TextRenderingHintClearTypeGridFit
 
-;* Unit enumeration (https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-unit)
-	;? 0 = UnitWorld - World coordinate (non-physical unit).
-	;? 1 = UnitDisplay - Variable (only for PageTransform).
-	;? 2 = UnitPixel - Each unit is one device pixel.
-	;? 3 = UnitPoint - Each unit is a printer's point, or 1/72 inch.
-	;? 4 = UnitInch
-	;? 5 = UnitDocument - Each unit is 1/300 inch.
-	;? 6 = UnitMillimeter
+;* enum Unit  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-unit
+	0 = UnitWorld - World coordinate (non-physical unit).
+	1 = UnitDisplay - Variable (only for PageTransform).
+	2 = UnitPixel - Each unit is one device pixel.
+	3 = UnitPoint - Each unit is a printer's point, or 1/72 inch.
+	4 = UnitInch
+	5 = UnitDocument - Each unit is 1/300 inch.
+	6 = UnitMillimeter
 */
 
 CreateGraphicsFromDC(DC) {
