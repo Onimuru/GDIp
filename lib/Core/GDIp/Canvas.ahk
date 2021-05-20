@@ -8,7 +8,7 @@
 	;* [Integer] y
 	;* [Integer] width
 	;* [Integer] height
-	;* [Func || Closure] windowProc
+	;* [Func] windowProc
 	;* [String] windowClassName
 	;* [Integer] windowClassStyles
 	;* [String] title
@@ -123,18 +123,18 @@ class Canvas {
 
 	;* canvas.Show([nCmdShow])
 	Show(nCmdShow := "SW_SHOWNA") {
-		static SW_HIDE := 0, SW_NORMAL := 1, SW_SHOWNORMAL := 1, SW_SHOWMINIMIZED := 2, SW_MAXIMIZE := 3, SW_SHOWMAXIMIZED := 3, SW_SHOWNOACTIVATE := 4, SW_SHOW := 5, SW_MINIMIZE := 6, SW_SHOWMINNOACTIVE := 7, SW_SHOWNA := 8, SW_RESTORE := 9, SW_SHOWDEFAULT := 10, SW_FORCEMINIMIZE := 11
+		static SW_NORMAL := 1, SW_SHOWNORMAL := 1, SW_SHOWMINIMIZED := 2, SW_MAXIMIZE := 3, SW_SHOWMAXIMIZED := 3, SW_SHOWNOACTIVATE := 4, SW_SHOW := 5, SW_MINIMIZE := 6, SW_SHOWMINNOACTIVE := 7, SW_SHOWNA := 8, SW_RESTORE := 9, SW_SHOWDEFAULT := 10, SW_FORCEMINIMIZE := 11
 
-		DllCall("User32\ShowWindow", "Ptr", this.Handle, "Int", %nCmdShow%)  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showwindow
+		try {
+			nCmdShow := %nCmdShow%
+		}
 
-		return (True)
+		DllCall("User32\ShowWindow", "Ptr", this.Handle, "Int", nCmdShow)  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showwindow
 	}
 
 	;* canvas.Hide()
 	Hide() {
 		DllCall("User32\ShowWindow", "Ptr", this.Handle, "Int", 0)
-
-		return (True)
 	}
 
 	;* canvas.Clear()
@@ -147,7 +147,7 @@ class Canvas {
 		return (this.Graphics.Reset())
 	}
 
-	;* canvas.Reset([x, y, width, height, alpha])
+	;* canvas.Update([x, y, width, height, alpha])
 	;* Parameter:
 		;* [Integer] x
 		;* [Integer] y
@@ -188,7 +188,5 @@ class Canvas {
 		if (!(DllCall("User32\UpdateLayeredWindow", "Ptr", this.Handle, "Ptr", 0, "Ptr", point.Ptr, "Ptr", size.Ptr, "Ptr", this.DC.Handle, "Int64*", 0, "UInt", 0, "Ptr", blend.Ptr, "UInt", 0x00000002, "UInt"))) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
-
-		return (True)
 	}
 }

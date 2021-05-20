@@ -49,7 +49,7 @@
 ;* GDIp.CreatePen(color[, width, unit])
 ;* Parameter:
 	;* [Integer] color
-	;* [Integer] width
+	;* [Float] width
 	;* [Integer] unit - See Unit enumeration.
 ;* Return:
 	;* [Pen]
@@ -65,7 +65,7 @@ static CreatePen(color, width := 1, unit := 2) {
 ;* GDIp.CreatePenFromBrush(brush[, width, unit])
 ;* Parameter:
 	;* [Brush] brush
-	;* [Integer] width
+	;* [Float] width
 	;* [Integer] unit - See Unit enumeration.
 ;* Return:
 	;* [Pen]
@@ -131,8 +131,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenColor", "Ptr", this.Ptr, "UInt", color, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	Width {
@@ -149,24 +147,22 @@ class Pen {
 
 	;* pen.GetWidth()
 	;* Return:
-		;* [Integer]
+		;* [Float]
 	GetWidth() {
 		if (status := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", this.Ptr, "Float*", &(width := 0), "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
-		return (Round(width))
+		return (width)
 	}
 
 	;* pen.SetWidth(width)
 	;* Parameter:
-		;* [Integer] width
+		;* [Float] width
 	SetWidth(width) {
 		if (status := DllCall("Gdiplus\GdipSetPenWidth", "Ptr", this.Ptr, "Float", width, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	Unit {
@@ -199,8 +195,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenUnit", "Ptr", this.Ptr, "Int", unit, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	Brush {
@@ -230,16 +224,11 @@ class Pen {
 		}
 
 		switch (type) {
-			case 0:
-				(instance := GDIp.SolidBrush()).Ptr := pBrush
-			case 1:
-				(instance := GDIp.HatchBrush()).Ptr := pBrush
-			case 2:
-				(instance := GDIp.TextureBrush()).Ptr := pBrush
-			case 3:
-				(instance := GDIp.PathBrush()).Ptr := pBrush
-			case 4:
-				(instance := GDIp.LinearBrush()).Ptr := pBrush
+			case 0: (instance := GDIp.SolidBrush()).Ptr := pBrush
+			case 1: (instance := GDIp.HatchBrush()).Ptr := pBrush
+			case 2: (instance := GDIp.TextureBrush()).Ptr := pBrush
+			case 3: (instance := GDIp.PathBrush()).Ptr := pBrush
+			case 4: (instance := GDIp.LinearBrush()).Ptr := pBrush
 		}
 
 		return (instance)
@@ -252,8 +241,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenBrushFill", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	Type {
@@ -303,8 +290,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenMode", "Ptr", this.Ptr, "Int", alignment, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* pen.SetCompoundArray(compoundArray)
@@ -318,8 +303,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenCompoundArray", "Ptr", this.Ptr, "Ptr", compounds.Ptr, "Int", index, "Int")) {  ;~ If you set the alignment of a Pen object to PenAlignmentInset, you cannot use that pen to draw compound lines.
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	CompoundCount {
@@ -369,8 +352,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenStartCap", "Ptr", this.Ptr, "UInt", lineCap, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	EndCap {
@@ -403,8 +384,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenEndCap", "Ptr", this.Ptr, "UInt", lineCap, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	DashCap {
@@ -437,8 +416,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenDashCap197819", "Ptr", this.Ptr, "Int", dashCap, "Int")) {  ;~ If you set the alignment of a Pen object to Pen Alignment Inset, you cannot use that pen to draw triangular dash caps.
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* pen.SetLineCap(startCap, endCap, dashCap)
@@ -450,8 +427,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenLineCap197819", "Ptr", this.Ptr, "Int", startCap, "Int", endCap, "Int", dashCap, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	DashOffset {
@@ -484,8 +459,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenDashOffset", "Ptr", this.Ptr, "Float", dashOffset, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	DashStyle {
@@ -518,8 +491,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenDashStyle", "Ptr", this.Ptr, "Int", dashStyle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	Transform {
@@ -553,8 +524,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipSetPenTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;--------------- Method -------------------------------------------------------;
@@ -562,15 +531,13 @@ class Pen {
 
 	;* pen.TranslateTransform(x, y[, matrixOrder])
 	;* Parameter:
-		;* [Integer] x
-		;* [Integer] y
+		;* [Float] x
+		;* [Float] y
 		;* [Integer] matrixOrder
 	TranslateTransform(x, y, matrixOrder := 0) {
 		if (status := DllCall("Gdiplus\GdipTranslatePenTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* pen.RotateTransform(angle[, matrixOrder])
@@ -581,8 +548,6 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipRotatePenTransform", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* pen.MultiplyTransform(matrix[, matrixOrder])
@@ -593,21 +558,17 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipMultiplyPenTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* pen.ScaleTransform(x, y[, matrixOrder])
 	;* Parameter:
-		;* [Integer] x
-		;* [Integer] y
+		;* [Float] x
+		;* [Float] y
 		;* [Integer] matrixOrder
 	ScaleTransform(x, y, matrixOrder := 0) {
 		if (status := DllCall("Gdiplus\GdipScalePenTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* pen.ResetTransform()
@@ -615,7 +576,5 @@ class Pen {
 		if (status := DllCall("Gdiplus\GdipResetPenTransform", "Ptr", this.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 }

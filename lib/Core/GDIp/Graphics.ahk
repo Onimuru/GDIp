@@ -57,6 +57,11 @@
 	6 = UnitMillimeter
 */
 
+;* GDIp.CreateGraphicsFromDC(DC)
+;* Parameter:
+	;* [DC] DC
+;* Return:
+	;* [Graphics]
 static CreateGraphicsFromDC(DC) {
 	if (status := DllCall("Gdiplus\GdipCreateFromHDC", "Ptr", DC.Handle, "Ptr*", &(pGraphics := 0), "Int")) {
 		throw (ErrorFromStatus(status))
@@ -66,6 +71,11 @@ static CreateGraphicsFromDC(DC) {
 	return (instance)
 }
 
+;* GDIp.CreateGraphicsFromBitmap(bitmap)
+;* Parameter:
+	;* [Bitmap] bitmap
+;* Return:
+	;* [Graphics]
 static CreateGraphicsFromBitmap(bitmap) {
 	if (status := DllCall("Gdiplus\GdipGetImageGraphicsContext", "Ptr", bitmap.Ptr, "Ptr*", &(pGraphics := 0), "Int")) {
 		throw (ErrorFromStatus(status))
@@ -75,6 +85,12 @@ static CreateGraphicsFromBitmap(bitmap) {
 	return (instance)
 }
 
+;* GDIp.CreateGraphicsFromWindow(hWnd[, useICM])
+;* Parameter:
+	;* [Integer] hWnd
+	;* [Integer] useICM
+;* Return:
+	;* [Graphics]
 static CreateGraphicsFromWindow(hWnd, useICM := False) {
 	if (status := (useICM)
 		? (DllCall("Gdiplus\GdipCreateFromHWNDICM", "Ptr", hWnd, "Ptr*", &(pGraphics := 0), "Int"))
@@ -119,7 +135,7 @@ class Graphics {
 
 	;* graphics.GetCompositingMode()
 	;* Return:
-		;* [UInt] - See CompositingMode enumeration.
+		;* [Integer] - See CompositingMode enumeration.
 	GetCompositingMode() {
 		if (status := DllCall("Gdiplus\GdipGetCompositingMode", "Ptr", this.Ptr, "UInt*", &(compositingMode := 0), "Int")) {
 			throw (ErrorFromStatus(status))
@@ -130,13 +146,11 @@ class Graphics {
 
 	;* graphics.SetCompositingMode(compositingMode)
 	;* Parameter:
-		;* [UInt] compositingMode - See CompositingMode enumeration.
+		;* [Integer] compositingMode - See CompositingMode enumeration.
 	SetCompositingMode(compositingMode) {
 		if (status := DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", this.Ptr, "UInt", compositingMode, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	CompositingQuality {
@@ -153,7 +167,7 @@ class Graphics {
 
 	;* graphics.GetCompositingQuality()
 	;* Return:
-		;* [UInt] - See CompositingQuality enumeration.
+		;* [Integer] - See CompositingQuality enumeration.
 	GetCompositingQuality() {
 		if (status := DllCall("Gdiplus\GdipGetCompositingQuality", "Ptr", this.Ptr, "UInt*", &(compositingQuality := 0), "Int")) {
 			throw (ErrorFromStatus(status))
@@ -164,13 +178,11 @@ class Graphics {
 
 	;* graphics.SetCompositingQuality(compositingQuality)
 	;* Parameter:
-		;* [UInt] compositingQuality - See CompositingQuality enumeration.
+		;* [Integer] compositingQuality - See CompositingQuality enumeration.
 	SetCompositingQuality(compositingQuality) {
 		if (status := DllCall("Gdiplus\GdipSetCompositingQuality", "Ptr", this.Ptr, "UInt", compositingQuality, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	InterpolationMode {
@@ -187,7 +199,7 @@ class Graphics {
 
 	;* graphics.GetInterpolationMode()
 	;* Return:
-		;* [UInt] - See InterpolationMode enumeration.
+		;* [Integer] - See InterpolationMode enumeration.
 	GetInterpolationMode() {
 		if (status := DllCall("Gdiplus\GdipGetInterpolationMode", "Ptr", this.Ptr, "UInt*", &(interpolationMode := 0), "Int")) {
 			throw (ErrorFromStatus(status))
@@ -198,13 +210,11 @@ class Graphics {
 
 	;* graphics.SetInterpolationMode(interpolationMode)
 	;* Parameter:
-		;* [UInt] interpolationMode - See InterpolationMode enumeration.
+		;* [Integer] interpolationMode - See InterpolationMode enumeration.
 	SetInterpolationMode(interpolationMode) {
 		if (status := DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", this.Ptr, "UInt", interpolationMode, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	PageScale {
@@ -237,8 +247,6 @@ class Graphics {
 		if (status := DllCall("Gdiplus\GdipSetPageScale", "Ptr", this.Ptr, "Float", scale, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	PageUnit {
@@ -255,7 +263,7 @@ class Graphics {
 
 	;* graphics.GetPageUnit()
 	;* Return:
-		;* [Int] - See Unit enumeration.
+		;* [Integer] - See Unit enumeration.
 	GetPageUnit() {
 		if (status := DllCall("Gdiplus\GdipGetPageUnit", "Ptr", this.Ptr, "Int*", &(unit := 0), "Int")) {
 			throw (ErrorFromStatus(status))
@@ -266,13 +274,11 @@ class Graphics {
 
 	;* graphics.SetPageUnit(unit)
 	;* Parameter:
-		;* [Int] unit - See Unit enumeration.
+		;* [Integer] unit - See Unit enumeration.
 	SetPageUnit(unit) {
 		if (status := DllCall("Gdiplus\GdipSetPageUnit", "Ptr", this.Ptr, "Int", unit, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	SmoothingMode {
@@ -289,7 +295,7 @@ class Graphics {
 
 	;* graphics.GetSmoothingMode()
 	;* Return:
-		;* [UInt] - See SmoothingMode enumeration.
+		;* [Integer] - See SmoothingMode enumeration.
 	GetSmoothingMode() {
 		if (status := DllCall("Gdiplus\GdipGetSmoothingMode", "Ptr", this.Ptr, "UInt*", &(smoothingMode := 0), "Int")) {
 			throw (ErrorFromStatus(status))
@@ -300,13 +306,11 @@ class Graphics {
 
 	;* graphics.SetSmoothingMode(smoothingMode)
 	;* Parameter:
-		;* [UInt] smoothingMode - See SmoothingMode enumeration.
+		;* [Integer] smoothingMode - See SmoothingMode enumeration.
 	SetSmoothingMode(smoothingMode) {
 		if (status := DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", this.Ptr, "UInt", smoothingMode, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	TextContrast {
@@ -323,7 +327,7 @@ class Graphics {
 
 	;* graphics.GetTextContrast()
 	;* Return:
-		;* [UInt] - A number between 0 and 12, which defines the value of contrast used for antialiasing text.
+		;* [Integer] - A number between 0 and 12, which defines the value of contrast used for antialiasing text.
 	GetTextContrast() {
 		if (status := DllCall("Gdiplus\GdipGetTextContrast", "Ptr", this.Ptr, "UInt*", &(contrast := 0), "Int")) {
 			throw (ErrorFromStatus(status))
@@ -334,13 +338,11 @@ class Graphics {
 
 	;* graphics.SetTextContrast(contrast)
 	;* Parameter:
-		;* [UInt] contrast - A number between 0 and 12, which defines the value of contrast used for antialiasing text.
+		;* [Integer] contrast - A number between 0 and 12, which defines the value of contrast used for antialiasing text.
 	SetTextContrast(contrast) {
 		if (status := DllCall("Gdiplus\GdipSetTextContrast", "Ptr", this.Ptr, "UInt", contrast, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	TextRenderingHint {
@@ -357,7 +359,7 @@ class Graphics {
 
 	;* graphics.GetTextRenderingHint()
 	;* Return:
-		;* [UInt] - See TextRenderingHint enumeration.
+		;* [Integer] - See TextRenderingHint enumeration.
 	GetTextRenderingHint() {
 		if (status := DllCall("Gdiplus\GdipGetTextRenderingHint", "Ptr", this.Ptr, "UInt*", &(hint := 0), "Int")) {
 			throw (ErrorFromStatus(status))
@@ -368,13 +370,11 @@ class Graphics {
 
 	;* graphics.SetTextRenderingHint(hint)
 	;* Parameter:
-		;* [UInt] hint - See TextRenderingHint enumeration.
+		;* [Integer] hint - See TextRenderingHint enumeration.
 	SetTextRenderingHint(hint) {
 		if (status := DllCall("Gdiplus\GdipSetTextRenderingHint", "Ptr", this.Ptr, "UInt", hint, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	Transform {
@@ -389,6 +389,9 @@ class Graphics {
 		}
 	}
 
+	;* graphics.GetTransform()
+	;* Return:
+		;* [Matrix]
 	GetTransform() {
 		if (status := DllCall("Gdiplus\GdipGetWorldTransform", "Ptr", this.Ptr, "Ptr*", &(pMatrix := 0), "Int")) {
 			throw (ErrorFromStatus(status))
@@ -398,12 +401,13 @@ class Graphics {
 		return (instance)
 	}
 
+	;* graphics.SetTransform(matrix)
+	;* Parameter:
+		;* [Matrix] matrix
 	SetTransform(matrix) {
 		if (status := DllCall("Gdiplus\GdipSetWorldTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;--------------- Method -------------------------------------------------------;
@@ -411,121 +415,129 @@ class Graphics {
 
 	;* graphics.TranslateTransform(x, y[, matrixOrder])
 	;* Parameter:
-		;* [Int] matrixOrder - See MatrixOrder enumeration.
+		;* [Float] x
+		;* [Float] y
+		;* [Integer] matrixOrder - See MatrixOrder enumeration.
 	TranslateTransform(x, y, matrixOrder := 0) {
 		if (status := DllCall("Gdiplus\GdipTranslateWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* graphics.RotateTransform(angle[, matrixOrder])
 	;* Parameter:
-		;* [Float] angle - Angle of rotation in degrees.
-		;* [Int] matrixOrder - See MatrixOrder enumeration.
+		;* [Float] angle - Angle of rotation (in degrees).
+		;* [Integer] matrixOrder - See MatrixOrder enumeration.
 	RotateTransform(angle, matrixOrder := 0) {
 		if (status := DllCall("Gdiplus\GdipRotateWorldTransform", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.MultiplyTransform([__Matrix] matrix[, matrixOrder])
+	;* graphics.MultiplyTransform(matrix[, matrixOrder])
 	;* Parameter:
-		;* [Int] matrixOrder - See MatrixOrder enumeration.
+		;* [Matrix] matrix
+		;* [Integer] matrixOrder - See MatrixOrder enumeration.
 	MultiplyTransform(matrix, matrixOrder := 0) {
 		if (status := DllCall("Gdiplus\GdipMultiplyWorldTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* graphics.ScaleTransform(x, y[, matrixOrder])
 	;* Parameter:
-		;* [Int] matrixOrder - See MatrixOrder enumeration.
+		;* [Float] x
+		;* [Float] y
+		;* [Integer] matrixOrder - See MatrixOrder enumeration.
 	ScaleTransform(x, y, matrixOrder := 0) {
 		if (status := DllCall("Gdiplus\GdipScaleWorldTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
+	;* graphics.ResetTransform()
 	ResetTransform() {
 		if (status := DllCall("Gdiplus\GdipResetWorldTransform", "Ptr", this.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;------------------------------------------------------  Control  --------------;
 
 	;* graphics.Flush(intention)
 	;* Parameter:
-		;* [Int] intention - See FlushIntention enumeration.
+		;* [Integer] intention - See FlushIntention enumeration.
 	Flush(intention) {
-
 		if (status := DllCall("Gdiplus\GdipFlush", "Ptr", this.Ptr, "Int", intention, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
+	;* graphics.Save()
+	;* Return:
+		;* [Integer]
 	Save() {
 		if (status := DllCall("Gdiplus\GdipSaveGraphics", "Ptr", this.Ptr, "UInt*", &(state := 0), "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
 		this.States.Push(state)
-
 		return (state)
 	}
 
-	Restore(state := 0) {
-		if (status := DllCall("Gdiplus\GdipRestoreGraphics", "Ptr", this.Ptr, "UInt", (state) ? (this.States.RemoveAt(this.States.IndexOf(state))) : (this.States.Shift()), "Int")) {
+	;* graphics.Restore([state])
+	;* Parameter:
+		;* [Integer] state
+	;* Return:
+		;* [Integer]
+	Restore(state := unset) {
+		if (status := DllCall("Gdiplus\GdipRestoreGraphics", "Ptr", this.Ptr, "UInt", (IsSet(state)) ? (this.States.RemoveAt(this.States.IndexOf(state))) : (this.States.Shift()), "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
 		return (state)
 	}
 
+	;* graphics.Clear([color])
+	;* Parameter:
+		;* [Integer] color
 	Clear(color := 0x00000000) {
 		if (status := DllCall("Gdiplus\GdipGraphicsClear", "Ptr", this.Ptr, "UInt", color, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;------------------------------------------------------- Bitmap ---------------;
 
-	;* graphics.DrawBitmap([__Bitmap] bitmap[, [__Rect] destinationObject, [__Rect] sourceObject, unit, [__ImageAttributes] imageAttributes])
+	;* graphics.DrawBitmap(bitmap[, destinationObject, sourceObject, unit, imageAttributes])
 	;* Parameter:
-		;* [Int] unit - See Unit enumeration.
-	DrawBitmap(bitmap, destinationObject := "", sourceObject := "", unit := 2, imageAttributes := "") {
-		if (status := (sourceObject)
-			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Float", sourceObject.x, "Float", sourceObject.y, "Float", sourceObject.Width, "Float", sourceObject.Height, "Int", unit, "Ptr", imageAttributes.Ptr, "Ptr", 0, "Ptr", 0, "Int"))
-			: ((destinationObject)
+		;* [Bitmap] bitmap
+		;* [Object] destinationObject
+		;* [Object] sourceObject
+		;* [Integer] unit - See Unit enumeration.
+		;* [ImageAttributes] imageAttributes
+	DrawBitmap(bitmap, destinationObject := unset, sourceObject := unset, unit := 2, imageAttributes := unset) {
+		if (status := (IsSet(sourceObject))
+			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Float", sourceObject.x, "Float", sourceObject.y, "Float", sourceObject.Width, "Float", sourceObject.Height, "Int", unit, "Ptr", (IsSet(imageAttributes)) ? (imageAttributes.Ptr) : (0), "Ptr", 0, "Ptr", 0, "Int"))
+			: ((IsSet(destinationObject))
 				? (DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Int"))
 				: (DllCall("Gdiplus\GdipDrawImage", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", 0, "Float", 0, "Int")))) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawCachedBitmap([__CachedBitmap] bitmap[, [__Vec2] object])
-	DrawCachedBitmap(bitmap, object := "") {
+	;* graphics.DrawCachedBitmap(bitmap[, object])
+	;* Parameter:
+		;* [CachedBitmap] bitmap
+		;* [Object] object
+	DrawCachedBitmap(bitmap, object := unset) {
+		if (!(IsSet(object))) {
+			object := {x: 0, y:0}
+		}
+
 		if (status := DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", object.x, "Int", object.y, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;-------------------------------------------------------- Fill ----------------;
@@ -542,9 +554,9 @@ class Graphics {
 	;* graphics.FillClosedCurve(brush, objects*[, tension, fillMode])
 	;* Parameter:
 		;* [Brush] brush
-		;* [Object] objects*
+		;* [Object]* objects
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
-		;* [UInt] fillMode - See FillMode enumeration.
+		;* [Integer] fillMode - See FillMode enumeration.
 	FillClosedCurve(brush, objects*) {
 		if (IsNumber(objects[index := (length := objects.Length) - 1])) {
 			if (IsNumber(objects[index - 1])) {
@@ -564,20 +576,16 @@ class Graphics {
 			: (DllCall("Gdiplus\GdipFillClosedCurve", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", points.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* graphics.FillEllipse(brush, object)
 	;* Parameter:
 		;* [Brush] brush
-		;* [Object] objects
+		;* [Object] object
 	FillEllipse(brush, object) {
 		if (status := DllCall("Gdiplus\GdipFillEllipse", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width, "Float", object.Height, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* graphics.FillPath(brush, path)
@@ -588,8 +596,6 @@ class Graphics {
 		if (status := DllCall("Gdiplus\GdipFillPath", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", path.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* graphics.FillPie(brush, object, startAngle, sweepAngle)
@@ -602,15 +608,13 @@ class Graphics {
 		if (status := DllCall("Gdiplus\GdipFillPie", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width, "Float", object.Height, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.FillPolygon(brush, [__Vec2] objects*[, fillMode])
+	;* graphics.FillPolygon(brush, objects*[, fillMode])
 	;* Parameter:
 		;* [Brush] brush
-		;* [Object] objects
-		;* [UInt] fillMode - See FillMode enumeration.
+		;* [Object]* objects
+		;* [Integer] fillMode - See FillMode enumeration.
 	FillPolygon(brush, objects*) {
 		if (IsNumber(objects[(length := objects.Length) - 1])) {
 			fillMode := objects.Pop(), length--
@@ -623,8 +627,6 @@ class Graphics {
 		if (status := DllCall("Gdiplus\GdipFillPolygon", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", points.Ptr, "Int", length, "UInt", fillMode, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* graphics.FillRectangle(brush, object)
@@ -635,15 +637,13 @@ class Graphics {
 		if (status := DllCall("Gdiplus\GdipFillRectangle", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width, "Float", object.Height, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* graphics.FillRoundedRectangle(brush, object, radius)
 	;* Parameter:
 		;* [Brush] brush
 		;* [Object] object - Object with `x`, `y`, `Width` and `Height` properties that defines the rectangle to be rounded.
-		;* radius - Radius of the rounded corners.
+		;* [Float] radius - Radius of the rounded corners.
 	FillRoundedRectangle(brush, object, radius) {
 		state := this.Save()
 			, pGraphics := this.Ptr
@@ -657,8 +657,6 @@ class Graphics {
 		}
 
 		this.Restore(state)
-
-		return (True)
 	}
 
 	;* graphics.FillRegion(brush, region)
@@ -669,8 +667,6 @@ class Graphics {
 		if (status := DllCall("Gdiplus\GdipFillRegion", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", region.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;-------------------------------------------------------- Draw ----------------;
@@ -689,27 +685,37 @@ class Graphics {
 	;DrawRectangle
 	;DrawRoundedRectangle
 
-	;* graphics.DrawArc([__Pen] pen, [__Rect] object, startAngle, sweepAngle)
+	;* graphics.DrawArc(pen, object, startAngle, sweepAngle)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Object] object
+		;* [Float] startAngle
+		;* [Float] sweepAngle
 	DrawArc(pen, object, startAngle, sweepAngle) {
 		if (status := DllCall("Gdiplus\GdipDrawArc", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width - (offset := pen.Width), "Float", object.Height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawBezier([__Pen] pen, [__Vec2] object1, [__Vec2] object2, [__Vec2] object3, [__Vec2] object4)
+	;* graphics.DrawBezier(pen, object1, object2, object3, object4)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Object] object1
+		;* [Object] object2
+		;* [Object] object3
+		;* [Object] object4
 	DrawBezier(pen, object1, object2, object3, object4) {
 		if (status := DllCall("Gdiplus\GdipDrawBezier", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object1.x, "Float", object1.y, "Float", object2.x, "Float", object2.y, "Float", object3.x, "Float", object3.y, "Float", object4.x, "Float", object4.y, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawBeziers([__Pen] pen, [__Vec2] objects*)
+	;* graphics.DrawBeziers(pen, objects*)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Object]* objects
 	;* Note:
-		;* The first spline is constructed from the first point through the fourth point in the array and uses the second and third points as control points. Each subsequent spline in the sequence needs exactly three more points: the ending point of the previous spline is used as the starting point, the next two points in the sequence are control points, and the third point is the ending point.
+		;~ The first spline is constructed from the first point through the fourth point in the array and uses the second and third points as control points. Each subsequent spline in the sequence needs exactly three more points: the ending point of the previous spline is used as the starting point, the next two points in the sequence are control points, and the third point is the ending point.
 	DrawBeziers(pen, objects*) {
 		for index, object in (points := Structure((length := objects.Length)*8), objects) {
 			points.NumPut(index*8, "Float", object.x, "Float", object.y)
@@ -718,13 +724,13 @@ class Graphics {
 		if (status := DllCall("Gdiplus\GdipDrawBeziers", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawClosedCurve([__Pen] pen, [__Vec2] objects*[, tension])
+	;* graphics.DrawClosedCurve(pen, objects*[, tension])
 	;* Parameter:
-		;* tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
+		;* [Pen] pen
+		;* [Object]* objects
+		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
 	DrawClosedCurve(pen, objects*) {
 		if (IsNumber(objects[(length := objects.Length) - 1])) {
 			tension := objects.Pop(), length--
@@ -739,13 +745,13 @@ class Graphics {
 			: (DllCall("Gdiplus\GdipDrawClosedCurve", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawCurve([__Pen] pen, [__Vec2] objects*[, tension])
+	;* graphics.DrawCurve(pen, objects*[, tension])
 	;* Parameter:
-		;* tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
+		;* [Pen] pen
+		;* [Object]* objects
+		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
 	DrawCurve(pen, objects*) {
 		if (IsNumber(objects[(length := objects.Length) - 1])) {
 			tension := objects.Pop(), length--
@@ -760,29 +766,33 @@ class Graphics {
 			: (DllCall("Gdiplus\GdipDrawCurve", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawEllipse([__Pen] pen, [__Rect] object)
+	;* graphics.DrawEllipse(pen, object)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Object] object
 	DrawEllipse(pen, object) {
 		if (status := DllCall("Gdiplus\GdipDrawEllipse", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width - (offset := pen.Width), "Float", object.Height - offset, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawLine([__Pen] pen, [__Vec2] object1, [__Vec2] object2)
+	;* graphics.DrawLine(pen, object1, object2)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Object] object1
+		;* [Object] object2
 	DrawLine(pen, object1, object2) {
 		if (status := DllCall("Gdiplus\GdipDrawLine", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object1.x, "Float", object1.y, "Float", object2.x, "Float", object2.y, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawLines([__Pen] pen, [__Vec2] objects*)
+	;* graphics.DrawLines(pen, objects*)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Object]* objects
 	DrawLines(pen, objects*) {
 		for index, object in (points := Structure((length := objects.Length)*8), objects) {
 			points.NumPut(index*8, "Float", object.x, "Float", object.y)
@@ -791,29 +801,34 @@ class Graphics {
 		if (status := DllCall("Gdiplus\GdipDrawLines", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawPath([__Pen] pen, [__Path] path)
+	;* graphics.DrawPath(pen, path)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Path] path
 	DrawPath(pen, path) {
 		if (status := DllCall("Gdiplus\GdipDrawPath", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", path.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawPie([__Pen] pen, [__Rect] object, startAngle, sweepAngle)
+	;* graphics.DrawPie(pen, object, startAngle, sweepAngle)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Object] object
+		;* [Float] startAngle
+		;* [Float] sweepAngle
 	DrawPie(pen, object, startAngle, sweepAngle) {
 		if (status := DllCall("Gdiplus\GdipDrawPie", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width - (offset := pen.Width), "Float", object.Height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawPolygon([__Pen] pen, [__Vec2] objects*)
+	;* graphics.DrawPolygon(pen, objects*)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Object]* objects
 	DrawPolygon(pen, objects*) {
 		for index, object in (points := Structure((length := objects.Length)*8), objects) {
 			points.NumPut(index*8, "Float", object.x, "Float", object.y)
@@ -822,30 +837,30 @@ class Graphics {
 		if (status := DllCall("Gdiplus\GdipDrawPolygon", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawRectangle([__Pen] pen, [__Rect] object)
+	;* graphics.DrawRectangle(pen, object)
+	;* Parameter:
+		;* [Pen] pen
+		;* [Object] object
 	DrawRectangle(pen, object) {
 		if (status := DllCall("Gdiplus\GdipDrawRectangle", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width - (offset := pen.Width), "Float", object.Height - offset, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
-	;* graphics.DrawRoundedRectangle([__Pen] pen, [__Rect] object, radius)
+	;* graphics.DrawRoundedRectangle(pen, object, radius)
 	;* Parameter:
-		;* object - Object with `x`, `y`, `Width` and `Height` properties that defines the rectangle to be rounded.
-		;* radius - Radius of the rounded corners.
+		;* [Pen] pen
+		;* [Object] object - Object with `x`, `y`, `Width` and `Height` properties that defines the rectangle to be rounded.
+		;* [Float] radius - Radius of the rounded corners.
 	DrawRoundedRectangle(pen, object, radius) {
 		state := this.Save()
 			, pGraphics := this.Ptr
 
 		DllCall("Gdiplus\GdipSetPixelOffsetMode", "Ptr", pGraphics, "Int", 2), DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", pGraphics, "Int", 1), DllCall("Gdiplus\GdipSetCompositingQuality", "Ptr", pGraphics, "Int", 0), DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", pGraphics, "Int", 0), DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", pGraphics, "Int", 7)
 
-		diameter := radius*2, offset := pen.Width
+		diameter := radius*2, offset := Round(pen.Width)
 			, width := object.Width - diameter - offset, height := object.Height - diameter - offset, x := object.x + (offset := (offset + 1)//2), y := object.y + offset
 
 		DllCall("Gdiplus\GdipCreatePath", "UInt", 0, "Ptr*", &(pPath := 0))
@@ -863,7 +878,5 @@ class Graphics {
 		this.Restore(state)
 
 		DllCall("Gdiplus\GdipDeletePath", "Ptr", pPath)
-
-		return (True)
 	}
 }

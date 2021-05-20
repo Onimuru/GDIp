@@ -1,4 +1,10 @@
-﻿;* GDIp.CreateMatrix()
+﻿/*
+;* enum MatrixOrder  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-matrixorder
+	0 = MatrixOrderPrepend
+	1 = MatrixOrderAppend
+*/
+
+;* GDIp.CreateMatrix()
 ;* Return:
 	;* [Matrix]
 static CreateMatrix() {
@@ -40,8 +46,10 @@ class Matrix {
 	}
 
 	;* matrix.IsIdentityMatrix()
+	;* Return:
+		;* [Integer]
 	IsIdentityMatrix() {
-		if (status := DllCall("Gdiplus\GdipIsMatrixIdentity", "Ptr", this.Ptr, "UInt*", &(bool := 0), "Int")) {
+		if (status := DllCall("Gdiplus\GdipIsMatrixIdentity", "Ptr", this.Ptr, "UInt*", &(bool := False), "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
@@ -55,8 +63,10 @@ class Matrix {
 	}
 
 	;* matrix.IsInvertible()
+	;* Return:
+		;* [Integer]
 	IsInvertible() {
-		if (status := DllCall("Gdiplus\GdipIsMatrixInvertible", "Ptr", this.Ptr, "UInt*", &(bool := 0), "Int")) {
+		if (status := DllCall("Gdiplus\GdipIsMatrixInvertible", "Ptr", this.Ptr, "UInt*", &(bool := False), "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
@@ -70,8 +80,6 @@ class Matrix {
 		if (status := DllCall("Gdiplus\GdipInvertMatrix", "Ptr", this.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* matrix.Translate(x, y[, matrixOrder]) - Updates this matrix with the product of itself and a scaling matrix.
@@ -83,8 +91,6 @@ class Matrix {
 		if (status := DllCall("Gdiplus\GdipTranslateMatrix", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* matrix.Rotate(angle[, matrixOrder]) - Updates this matrix with the product of itself and a rotation matrix.
@@ -92,11 +98,9 @@ class Matrix {
 		;* [Float] angle - Simple precision value that specifies the angle of rotation in degrees. Positive values specify clockwise rotation.
 		;* [Integer] matrixOrder - See MatrixOrder enumeration.
 	Rotate(angle, matrixOrder := 0) {
-		if (status := DllCall("Gdiplus\GdipRotateMatrix", "Ptr", this.Ptr, "Float", angle, "Float", matrixOrder, "Int")) {
+		if (status := DllCall("Gdiplus\GdipRotateMatrix", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* matrix.Multiply(matrix[, matrixOrder]) - Updates this matrix with the product of itself and another matrix.
@@ -107,8 +111,6 @@ class Matrix {
 		if (status := DllCall("Gdiplus\GdipMultiplyMatrix", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* matrix.Scale(x, y[, matrixOrder]) - Updates this matrix with the product of itself and a scaling matrix.
@@ -120,8 +122,6 @@ class Matrix {
 		if (status := DllCall("Gdiplus\GdipScaleMatrix", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* matrix.Shear(x, y[, matrixOrder]) - Updates this matrix with the product of itself and a shearing matrix.
@@ -133,8 +133,6 @@ class Matrix {
 		if (status := DllCall("Gdiplus\GdipShearMatrix", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* matrix.Reset()
@@ -142,7 +140,5 @@ class Matrix {
 		if (status := DllCall("gdiplus\GdipResetMatrix", "Ptr", this.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 }

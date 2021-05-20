@@ -1,4 +1,11 @@
-﻿/*
+﻿;============ Auto-execute ====================================================;
+;======================================================  Setting  ==============;
+
+#Requires AutoHotkey v2.0-a134-d3d43350
+
+;===============  Class  =======================================================;
+
+/*
 ;* enum DeviceCaps  ;: http://msaccessgurus.com/VBA/Code/API_GetDeviceCaps_ppi.htm
 	0x00 = DRIVERVERSION
 	0x02 = TECHNOLOGY
@@ -65,13 +72,6 @@
 	0x00FF0062 = WHITENESS - Fills the destination rectangle using the color associated with index 1 in the physical palette.
 */
 
-;============ Auto-execute ====================================================;
-;======================================================  Setting  ==============;
-
-#Requires AutoHotkey v2.0-a134-d3d43350
-
-;===============  Class  =======================================================;
-
 Class GDI {
 
 	__New(params*) {
@@ -95,16 +95,12 @@ Class GDI {
 		if (!(DllCall("Gdi32\BitBlt", "Ptr", dDC.Handle, "Int", dx, "Int", dy, "Int", width, "Int", height, "Ptr", sDC.Handle, "Int", sx, "Int", sy, "UInt", operation, "UInt"))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
-
-		return (True)
 	}
 
 	static MaskBlt() {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-maskblt
-		return (True)
 	}
 
 	static PlgBlt() {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-plgblt
-		return (True)
 	}
 
 	;* GDI.StretchBlt(dDC, dx, dy, dWidth, dHeight, sDC, sx, sy, sWidth, sHeight[, operation])
@@ -124,8 +120,6 @@ Class GDI {
 		if (!(DllCall("Gdi32\StretchBlt", "Ptr", dDC.Handle, "Int", dx, "Int", dy, "Int", dWidth, "Int", dHeight, "Ptr", sDC.Handle, "Int", sx, "Int", sy, "Int", sWidth, "Int", sHeight, "UInt", operation, "UInt"))) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
-
-		return (True)
 	}
 
 	;* GDI.GetDeviceCaps(DC, index)
@@ -203,8 +197,6 @@ Class GDI {
 			if (!(DllCall("Gdi32\SetStretchBltMode", "Ptr", this.Handle, "Int", stretchMode, "UInt"))) {
 				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 			}
-
-			return (True)
 		}
 
 		;--------------- Method -------------------------------------------------------;

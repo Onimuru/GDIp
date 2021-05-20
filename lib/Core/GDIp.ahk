@@ -45,10 +45,6 @@
 	4 = FontStyleUnderline
 	8 = FontStyleStrikeout
 
-;* enum MatrixOrder  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-matrixorder
-	0 = MatrixOrderPrepend
-	1 = MatrixOrderAppend
-
 ;* enum StringAlignment  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-stringalignment
 	0 = StringAlignmentNear - Left/Top.
 	1 = StringAlignmentCenter
@@ -255,14 +251,12 @@ class GDIp {
 
 		;* region.Translate(x, y)
 		;* Parameter:
-			;* [Integer] x
-			;* [Integer] y
+			;* [Float] x
+			;* [Float] y
 		Translate(x, y) {
 			if (status := DllCall("Gdiplus\GdipTranslateRegion", "Ptr", this.Ptr, "Float", x, "Float", y, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
-
-			return (True)
 		}
 
 		;* region.Transform(matrix)
@@ -272,8 +266,6 @@ class GDIp {
 			if (status := DllCall("Gdiplus\GdipTransformRegion", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
-
-			return (True)
 		}
 	}
 
@@ -356,7 +348,7 @@ class GDIp {
 		return (instance)
 	}
 
-	;* GDIp.CreateFont(DC)
+	;* GDIp.CreateFontFromDC(DC)
 	;* Parameter:
 		;* [DC] DC
 	;* Return:
@@ -468,7 +460,7 @@ class GDIp {
 			}
 		}
 
-		;* font.GetUnit([graphics])
+		;* font.GetHeight([graphics])
 		;* Parameter:
 			;* [Graphics] graphics
 		;* Return:
@@ -552,8 +544,6 @@ class GDIp {
 			if (status := DllCall("Gdiplus\GdipSetStringFormatFlags", "Ptr", this.Ptr, "Int", flags, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
-
-			return (True)
 		}
 
 		Alignment {
@@ -586,8 +576,6 @@ class GDIp {
 			if (status := DllCall("Gdiplus\GdipSetStringFormatAlign", "Ptr", this.Ptr, "Int", alignment, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
-
-			return (True)
 		}
 
 		LineAlignment {
@@ -620,8 +608,6 @@ class GDIp {
 			if (status := DllCall("Gdiplus\GdipSetStringFormatLineAlign", "Ptr", this.Ptr, "Int", alignment, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
-
-			return (True)
 		}
 
 		DigitSubstitution {
@@ -655,8 +641,6 @@ class GDIp {
 			if (status := DllCall("Gdiplus\GdipSetStringFormatDigitSubstitution", "Ptr", this.Ptr, "UShort", language, "Int", substitute, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
-
-			return (True)
 		}
 
 		Trimming {
@@ -689,8 +673,6 @@ class GDIp {
 			if (status := DllCall("Gdiplus\GdipSetStringFormatTrimming", "Ptr", this.Ptr, "Int", trimMode, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
-
-			return (True)
 		}
 	}
 }

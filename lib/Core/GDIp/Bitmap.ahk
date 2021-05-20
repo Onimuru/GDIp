@@ -47,7 +47,7 @@
 	7 = Rotate270FlipX || Rotate90FlipY
 */
 
-;* GDIp.GdipCreateBitmap(width, height[, pixelFormat, stride, scan0])
+;* GDIp.CreateBitmap(width, height[, pixelFormat, stride, scan0])
 ;* Parameter:
 	;* [Integer] width
 	;* [Integer] height
@@ -203,6 +203,8 @@ class Bitmap {
 		;* [Integer] pixelFormat - See PixelFormat enumeration.
 	;* Note:
 		;~ The new bitmap will have the same pixel format.
+	;* Return:
+		;* [Bitmap]
 	Clone(x := unset, y := unset, width := unset, height := unset, pixelFormat := unset) {
 		if (status := (IsSet(x) && IsSet(y) && IsSet(width) && IsSet(height))
 			? (DllCall("Gdiplus\GdipCloneBitmapArea", "Float", x, "Float", y, "Float", width, "Float", height, "UInt", (IsSet(pixelFormat)) ? (pixelFormat) : (this.GetPixelFormat()), "Ptr", this.Ptr, "Ptr*", &(pBitmap := 0), "Int"))
@@ -279,7 +281,10 @@ class Bitmap {
 		}
 	}
 
-	;* bitmap.GetPixel()
+	;* bitmap.GetPixel(x, y)
+	;* Parameter:
+		;* [Integer] x
+		;* [Integer] y
 	;* Return:
 		;* [Integer]
 	GetPixel(x, y) {
@@ -351,8 +356,6 @@ class Bitmap {
 ;				y++
 ;			}
 ;		}
-;
-;		return (True)
 ;	}
 
 	PixelFormat {
@@ -456,8 +459,6 @@ class Bitmap {
 		if (status := DllCall("Gdiplus\GdipImageRotateFlip", "Ptr", this.Ptr, "Int", rotateType, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 
 	;* bitmap.RotateFlip(file)
@@ -489,8 +490,6 @@ class Bitmap {
 		if (status := DllCall("Gdiplus\GdipSaveImageToFile", "Ptr", this.Ptr, "Ptr", &file, "Ptr", pCodec, "UInt", 0, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		return (True)
 	}
 }
 
