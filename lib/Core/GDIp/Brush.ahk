@@ -78,41 +78,44 @@
 
 ;------------- SolidBrush -----------------------------------------------------;
 
-CreateSolidBrush(color)  {
-	Local
-
-	if (status := DllCall("Gdiplus\GdipCreateSolidFill", "UInt", color, "Ptr*", pBrush := 0, "Int")) {
-		throw (Exception(FormatStatus(status)))
+;* GDIp.CreateSolidBrush(color)
+;* Parameter:
+	;* [Integer] color
+;* Return:
+	;* [Brush]
+static CreateSolidBrush(color)  {
+	if (status := DllCall("Gdiplus\GdipCreateSolidFill", "UInt", color, "Ptr*", &(pBrush := 0), "Int")) {
+		throw (ErrorFromStatus(status))
 	}
 
-	return ({"Ptr": pBrush
-		, "Base": this.__SolidBrush})
+	(instance := this.SolidBrush()).Ptr := pBrush
+	return (instance)
 }
 
-Class __SolidBrush {
+class SolidBrush {
+	Class := "Brush"
 
-	__Delete() {
-		if (!this.HasKey("Ptr")) {
-			MsgBox("Brush.__Delete()")
+	;* brush.Clone()
+	;* Return:
+		;* [Brush]
+	Clone() {
+		if (status := DllCall("Gdiplus\GdipCloneBrush", "Ptr", this.Ptr, "Ptr*", &(pBrush := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		DllCall("Gdiplus\GdipDeleteBrush", "Ptr", this.Ptr)
+		(instance := GDIp.SolidBrush()).Ptr := pBrush
+		return (instance)
 	}
 
-	Clone() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipCloneBrush", "Ptr", this.Ptr, "Ptr*", pBrush := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+	__Delete() {
+		if (status := DllCall("Gdiplus\GdipDeleteBrush", "Ptr", this.Ptr, "Int")) {
+			throw (ErrorFromStatus(status))
 		}
-
-		return ({"Ptr": pBrush
-			, "Base": this.Base})
 	}
 
 	;-------------- Property ------------------------------------------------------;
 
-	Color[] {
+	Color {
 		Get {
 			return (this.GetColor())
 		}
@@ -124,27 +127,29 @@ Class __SolidBrush {
 		}
 	}
 
+	;* brush.GetColor()
+	;* Return:
+		;* [Integer]
 	GetColor() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetSolidFillColor", "Ptr", this.Ptr, "UInt*", color := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetSolidFillColor", "Ptr", this.Ptr, "UInt*", &(color := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (Format("0x{:08X}", color))
 	}
 
+	;* brush.SetColor(color)
+	;* Parameter:
+		;* [Integer] color
 	SetColor(color) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetSolidFillColor", "Ptr", this.Ptr, "UInt", color, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Type[] {
+	Type {
 		Get {
 			return (this.GetType())
 		}
@@ -152,12 +157,10 @@ Class __SolidBrush {
 
 	;* brush.GetType()
 	;* Return:
-		;* * - See BrushType enumeration.
+		;* [Integer] - See BrushType enumeration.
 	GetType() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetBrushType", "Ptr", this.Ptr, "Int*", type := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetBrushType", "Ptr", this.Ptr, "Int*", &(type := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (type)
@@ -168,19 +171,18 @@ Class __SolidBrush {
 
 ;* GDIp.CreateHatchBrush(foregroundColor, backgroundColor[, style])
 ;* Parameter:
-	;* style - See HatchStyle enumeration.
-CreateHatchBrush(foregroundColor, backgroundColor, style := 0) {
-	Local
-
-	if (status := DllCall("Gdiplus\GdipCreateHatchBrush", "Int", style, "UInt", foregroundColor, "UInt", backgroundColor, "UPtr*", pBrush := 0, "Int")) {
-		throw (Exception(FormatStatus(status)))
+	;* [Integer] style - See HatchStyle enumeration.
+static CreateHatchBrush(foregroundColor, backgroundColor, style := 0) {
+	if (status := DllCall("Gdiplus\GdipCreateHatchBrush", "Int", style, "UInt", foregroundColor, "UInt", backgroundColor, "Ptr*", &(pBrush := 0), "Int")) {
+		throw (ErrorFromStatus(status))
 	}
 
-	return ({"Ptr": pBrush
-		, "Base": this.__HatchBrush})
+	(instance := this.HatchBrush()).Ptr := pBrush
+	return (instance)
 }
 
-Class __HatchBrush extends GDIp.__SolidBrush {
+class HatchBrush extends GDIp.SolidBrush {
+	Class := "Brush"
 
 	Color[which] {
 		Get {
@@ -190,12 +192,10 @@ Class __HatchBrush extends GDIp.__SolidBrush {
 
 	;* GDIp.GetColor(which)
 	;* Parameter:
-		;* which - Must be either `"Foreground"` or `"Background"`.
+		;* [Integer] which - Must be either `"Foreground"` or `"Background"`.
 	GetColor(which) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetHatch" . which . "Color", "Ptr", this.Ptr, "UInt*", color := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetHatch" . which . "Color", "Ptr", this.Ptr, "UInt*", &(color := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (Format("0x{:08X}", color))
@@ -211,10 +211,8 @@ Class __HatchBrush extends GDIp.__SolidBrush {
 	;* Return:
 		;* * - See HatchStyle enumeration.
 	GetHatchStyle() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetHatchStyle", Ptr, this.Ptr, "Int*", style := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetHatchStyle", "Ptr", this.Ptr, "Int*", &(style := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (style)
@@ -226,57 +224,52 @@ Class __HatchBrush extends GDIp.__SolidBrush {
 ;* GDIp.CreateTextureBrush([__Bitmap] bitmap[, wrapMode, x, y, width, height, [__ImageAttributes] imageAttributes])
 ;* Parameter:
 	;* wrapMode - See WrapMode enumeration.
-CreateTextureBrush(bitmap, wrapMode := 0, x := "", y := "", width := "", height := "", imageAttributes := 0) {
-	Local
-
+static CreateTextureBrush(bitmap, wrapMode := 0, x := "", y := "", width := "", height := "", imageAttributes := 0) {
 	if (x == "" || y == "" || width == "" || height == "") {
-		if (status := DllCall("Gdiplus\GdipCreateTexture", "Ptr", bitmap.Ptr, "UInt", wrapMode, "Ptr*", pBrush := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipCreateTexture", "Ptr", bitmap.Ptr, "UInt", wrapMode, "Ptr*", &(pBrush := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+	else if (imageAttributes) {
+		if (status := DllCall("Gdiplus\GdipCreateTextureIA", "Ptr", bitmap.Ptr, "Ptr", imageAttributes.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Ptr*", &(pBrush := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		if (status := DllCall("Gdiplus\GdipSetTextureWrapMode", "Ptr", pBrush, "Int", wrapMode, "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 	}
 	else {
-		if (imageAttributes) {
-			if (status := DllCall("Gdiplus\GdipCreateTextureIA", "Ptr", bitmap.Ptr, "Ptr", imageAttributes.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Ptr*", pBrush := 0, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
-
-			if (status := DllCall("Gdiplus\GdipSetTextureWrapMode", "Ptr", pBrush, "Int", wrapMode, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
-		}
-		else {
-			if (status := DllCall("Gdiplus\GdipCreateTexture2", "Ptr", bitmap.Ptr, "UInt", wrapMode, "Float", x, "Float", y, "Float", width, "Float", height, "Ptr*", pBrush := 0, "Int")) {
-				throw (Exception(FormatStatus(status)))
-			}
+		if (status := DllCall("Gdiplus\GdipCreateTexture2", "Ptr", bitmap.Ptr, "UInt", wrapMode, "Float", x, "Float", y, "Float", width, "Float", height, "Ptr*", &(pBrush := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 	}
 
-	return ({"Ptr": pBrush
-		, "Base": this.__TextureBrush})
+	(instance := this.TextureBrush()).Ptr := pBrush
+	return (instance)
 }
 
-Class __TextureBrush extends GDIp.__SolidBrush {
+class TextureBrush extends GDIp.SolidBrush {
+	Class := "Brush"
 
 	;-------------- Property ------------------------------------------------------;
 
-	Bitmap[] {
+	Bitmap {
 		Get {
 			return (this.GetBitmap())
 		}
 	}
 
 	GetBitmap() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetTextureImage", "Ptr", this.Ptr, "Ptr*", pBitmap := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetTextureImage", "Ptr", this.Ptr, "Ptr*", &(pBitmap := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"Ptr": pBitmap
-			, "Base": GDIp.__Bitmap})
+		(instance := this.Bitmap()).Ptr := pBitmap
+		return (instance)
 	}
 
-	WrapMode[] {
+	WrapMode {
 		Get {
 			return (this.GetWrapMode())
 		}
@@ -289,26 +282,22 @@ Class __TextureBrush extends GDIp.__SolidBrush {
 	}
 
 	GetWrapMode() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetTextureWrapMode", "Ptr", this.Ptr, "Int*", mode := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetTextureWrapMode", "Ptr", this.Ptr, "Int*", &(mode := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (mode)
 	}
 
 	SetWrapMode(mode) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetTextureWrapMode", "Ptr", this.Ptr, "Int", mode, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Transform[] {
+	Transform {
 		Get {
 			return (this.GetTransform())
 		}
@@ -321,21 +310,17 @@ Class __TextureBrush extends GDIp.__SolidBrush {
 	}
 
 	GetTransform() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetTextureTransform", "Ptr", this.Ptr, "Ptr*", pMatrix := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetTextureTransform", "Ptr", this.Ptr, "Ptr*", &(pMatrix := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"Ptr": pMatrix
-			, "Base": GDIp.__Matrix})
+		(instance := this.Matrix()).Ptr := pMatrix
+		return (instance)
 	}
 
 	SetTransform(matrix) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetTextureTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
@@ -345,50 +330,40 @@ Class __TextureBrush extends GDIp.__SolidBrush {
 	;-----------------------------------------------------  Transform  -------------;
 
 	TranslateTransform(x, y, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipTranslateTextureTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	RotateTransform(angle, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipRotateTextureTransform", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	MultiplyTransform(matrix, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipMultiplyTextureTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	ScaleTransform(x, y, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipScaleTextureTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	ResetTransform() {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipResetTextureTransform", "Ptr", this.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
@@ -398,42 +373,39 @@ Class __TextureBrush extends GDIp.__SolidBrush {
 ;-------------  PathBrush  -----------------------------------------------------;
 
 ;* GDIp.CreatePathBrush([__Vec2] objects*[, wrapMode])
-CreatePathBrush(objects*)  {
-	Local index, object, points, status
-
-	if (objects[index := objects.MaxIndex()].IsNumber()) {
-		Local wrapMode := objects.Remove(index)
+static CreatePathBrush(objects*)  {
+	if (IsNumber(objects[(length := objects.Length) - 1])) {
+		wrapMode := objects.Pop(), length--
 	}
 
-	for index, object in (objects, points := new Structure(objects.Length()*8)) {
-		points.NumPut((index - 1)*8, "Float", object.x, "Float", object.y)
+	for index, object in (points := Structure(length*8), objects) {
+		points.NumPut(index*8, "Float", object.x, "Float", object.y)
 	}
 
-	if (status := DllCall("Gdiplus\GdipCreatePathGradient", "Ptr", points.Ptr, "Int", index, "Int", wrapMode, "Ptr*", pBrush := 0, "Int")) {
-		throw (Exception(FormatStatus(status)))
+	if (status := DllCall("Gdiplus\GdipCreatePathGradient", "Ptr", points.Ptr, "Int", length, "Int", wrapMode, "Ptr*", &(pBrush := 0), "Int")) {
+		throw (ErrorFromStatus(status))
 	}
 
-	return ({"Ptr": pBrush
-		, "Base": this.__PathBrush})
+	(instance := this.PathBrush()).Ptr := pBrush
+	return (instance)
 }
 
 ;* GDIp.CreatePathBrushFromPath([__Path] path)
-CreatePathBrushFromPath(path) {
-	Local
-
-	if (status := DllCall("Gdiplus\GdipCreatePathGradientFromPath", "Ptr", path.Ptr, "Ptr*", pBrush := 0, "Int")) {
-		throw (Exception(FormatStatus(status)))
+static CreatePathBrushFromPath(path) {
+	if (status := DllCall("Gdiplus\GdipCreatePathGradientFromPath", "Ptr", path.Ptr, "Ptr*", &(pBrush := 0), "Int")) {
+		throw (ErrorFromStatus(status))
 	}
 
-	return ({"Ptr": pBrush
-		, "Base": this.__PathBrush})
+	(instance := this.PathBrush()).Ptr := pBrush
+	return (instance)
 }
 
-Class __PathBrush {
+class PathBrush extends GDIp.SolidBrush {
+	Class := "Brush"
 
 	;-------------- Property ------------------------------------------------------;
 
-	WrapMode[] {
+	WrapMode {
 		Get {
 			return (this.GetWrapMode())
 		}
@@ -449,10 +421,8 @@ Class __PathBrush {
 	;* Return:
 		;* * - See WrapMode enumeration.
 	GetWrapMode() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPathGradientWrapMode", "Ptr", this.Ptr, "Int*", wrapMode := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPathGradientWrapMode", "Ptr", this.Ptr, "Int*", &(wrapMode := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (wrapMode)
@@ -462,16 +432,14 @@ Class __PathBrush {
 	;* return:
 		;* wrapMode - See WrapMode enumeration.
 	SetWrapMode(wrapMode) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPathGradientWrapMode", "Ptr", this.Ptr, "Int", wrapMode, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	PointCount[] {
+	PointCount {
 		Get {
 			return (this.GetPointCount())
 		}
@@ -479,16 +447,14 @@ Class __PathBrush {
 
 	;* brush.GetPointCount()
 	GetPointCount() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPathGradientPointCount", "Ptr", this.Ptr, "Int*", count := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPathGradientPointCount", "Ptr", this.Ptr, "Int*", &(count := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (count)
 	}
 
-	CenterPoint[] {
+	CenterPoint {
 		Get {
 			return (this.GetCenterPoint())
 		}
@@ -496,32 +462,28 @@ Class __PathBrush {
 
 	;* brush.GetCenterPoint()
 	GetCenterPoint() {
-		Local status
-
-		Static point := new Structure(8)
+		static point := Structure(8)
 
 		if (status := DllCall("Gdiplus\GdipGetPathGradientCenterPoint", "Ptr", this.Ptr, "Ptr", point.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"x": point.NumGet(0, "Float"), "y": point.NumGet(4, "Float")})
+		return ({x: point.NumGet(0, "Float"), y: point.NumGet(4, "Float")})
 	}
 
 	;* brush.SetCenterPoint(x, y)
 	SetCenterPoint(x, y) {
-		Local status
-
-		Static point := new Structure(8)
+		static point := Structure(8)
 		point.NumPut(0, "Float", x, "Float", y)
 
 		if (status := DllCall("Gdiplus\GdipSetPathGradientCenterPoint", "Ptr", this.Ptr, "Ptr", point.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Rect[] {
+	Rect {
 		Get {
 			return (this.GetRect())
 		}
@@ -529,18 +491,16 @@ Class __PathBrush {
 
 	;* brush.GetRect()
 	GetRect() {
-		Local status
-
-		Static rect := new Structure(16)
+		static rect := Structure(16)
 
 		if (status := DllCall("Gdiplus\GdipGetPathGradientRect", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"x": point.NumGet(0, "Float"), "y": point.NumGet(4, "Float"), "Width": point.NumGet(8, "Float"), "Height": point.NumGet(12, "Float")})
+		return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
 	}
 
-	FocusScales[] {
+	FocusScales {
 		Get {
 			return (this.GetFocusScales())
 		}
@@ -554,15 +514,13 @@ Class __PathBrush {
 
 	;* brush.GetFocusScales()
 	GetFocusScales() {
-		Local status
+		static point := Structure(8)
 
-		Static point := new Structure(8)
-
-		if (status := DllCall("Gdiplus\GdipGetPathGradientFocusScales", "Ptr", this.Ptr, "Float*", x := 0, "Float*", y := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPathGradientFocusScales", "Ptr", this.Ptr, "Float*", &(x := 0), "Float*", &(y := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"x": x, "y": y})
+		return ({x: x, y: y})
 	}
 
 	;* brush.SetFocusScales(x, y)
@@ -570,16 +528,14 @@ Class __PathBrush {
 		;* x - Scalar in the range `(0.0, 1.0)`.
 		;* y - Scalar in the range `(0.0, 1.0)`.
 	SetFocusScales(x, y) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPathGradientFocusScales", "Ptr", this.Ptr, "Float", x, "Float", y, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	CenterColor[] {
+	CenterColor {
 		Get {
 			return (this.GetCenterColor())
 		}
@@ -593,10 +549,8 @@ Class __PathBrush {
 
 	;* brush.GetCenterColor()
 	GetCenterColor() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPathGradientCenterColor", "Ptr", this.Ptr, "UInt*", color := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPathGradientCenterColor", "Ptr", this.Ptr, "UInt*", &(color := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (Format("0x{:08X}", color))
@@ -604,33 +558,23 @@ Class __PathBrush {
 
 	;* brush.SetCenterColor(color)
 	SetCenterColor(color) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPathGradientCenterColor", "Ptr", this.Ptr, "UInt", color, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	SurroundColorCount[] {
+	SurroundColorCount {
 		Get {
 			return (this.GetSurroundColorCount())
-		}
-
-		Set {
-			this.SetSurroundColors(value*)
-
-			return (value*)
 		}
 	}
 
 	;* brush.GetSurroundColorCount()
 	GetSurroundColorCount() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPathGradientSurroundColorCount", "Ptr", this.Ptr, "UInt*", count := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPathGradientSurroundColorCount", "Ptr", this.Ptr, "UInt*", &(count := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (count)
@@ -638,13 +582,11 @@ Class __PathBrush {
 
 	;* brush.GetSurroundColors()
 	GetSurroundColors() {
-		Local count := this.GetSurroundColorCount(), struct, status, array
-
-		if (status := DllCall("Gdiplus\GdipGetPathGradientSurroundColorsWithCount", "Ptr", this.Ptr, "Ptr", (struct := new Structure(count*4)).Ptr, "Int*", count, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPathGradientSurroundColorsWithCount", "Ptr", this.Ptr, "Ptr", (struct := Structure((count := this.GetSurroundColorCount())*4)).Ptr, "Int*", &(count), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		loop, % (count, array := []) {
+		loop (array := [], count) {
 			array.Push(struct.NumGet((A_Index - 1)*4, "UInt"))
 		}
 
@@ -653,20 +595,18 @@ Class __PathBrush {
 
 	;* brush.SetSurroundColors(colors*)
 	SetSurroundColors(colors*) {
-		Local index, color, struct, status
-
-		for index, color in (colors, struct := new Structure(colors.Length()*4)) {
-			struct.NumPut((index - 1)*4, "UInt", color)
+		for index, color in (struct := Structure(colors.Length*4), colors) {
+			struct.NumPut(index*4, "UInt", color)
 		}
 
-		if (status := DllCall("Gdiplus\GdipSetPathGradientSurroundColorsWithCount", "Ptr", this.Ptr, "Ptr", struct.Ptr, "Int*", index, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipSetPathGradientSurroundColorsWithCount", "Ptr", this.Ptr, "Ptr", struct.Ptr, "Int*", &index, "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	GammaCorrection[] {
+	GammaCorrection {
 		Get {
 			return (this.GetGammaCorrection())
 		}
@@ -680,10 +620,8 @@ Class __PathBrush {
 
 	;* brush.GetGammaCorrection()
 	GetGammaCorrection() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPathGradientGammaCorrection", "Ptr", this.Ptr, "UInt*", bool := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPathGradientGammaCorrection", "Ptr", this.Ptr, "UInt*", &(bool := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (bool)
@@ -693,10 +631,8 @@ Class __PathBrush {
 	;* return:
 		;* useGammaCorrection - Bool that indicates if gamma correction should be used or not.
 	SetGammaCorrection(useGammaCorrection) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPathGradientGammaCorrection", "Ptr", this.Ptr, "UInt", useGammaCorrection, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
@@ -707,10 +643,8 @@ Class __PathBrush {
 		;* focus - Number in the range `(0.0, 1.0)` that specifies where the center color will be at its highest intensity.
 		;* scale - Number in the range `(0.0, 1.0)` that specifies the maximum intensity of center color that gets blended with the boundary color.
 	SetLinearBlend(focus, scale := 1.0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPathGradientLinearBlend", "Ptr", this.Ptr, "Float", focus, "Float", scale, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
@@ -721,16 +655,14 @@ Class __PathBrush {
 		;* focus - Number in the range `(0.0, 1.0)` that specifies where the center color will be at its highest intensity.
 		;* scale - Number in the range `(0.0, 1.0)` that specifies the maximum intensity of center color that gets blended with the boundary color.
 	SetSigmaBlend(focus, scale := 1.0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPathGradientSigmaBlend", "Ptr", this.Ptr, "Float", focus, "Float", scale, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Transform[] {
+	Transform {
 		Get {
 			return (this.GetTransform())
 		}
@@ -743,21 +675,17 @@ Class __PathBrush {
 	}
 
 	GetTransform() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPathGradientTransform", "Ptr", this.Ptr, "Ptr*", pMatrix := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPathGradientTransform", "Ptr", this.Ptr, "Ptr*", &(pMatrix := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"Ptr": pMatrix
-			, "Base": GDIp.__Matrix})
+		(instance := this.Matrix()).Ptr := pMatrix
+		return (instance)
 	}
 
 	SetTransform(matrix) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPathGradientTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
@@ -767,50 +695,40 @@ Class __PathBrush {
 	;-----------------------------------------------------  Transform  -------------;
 
 	TranslateTransform(x, y, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipTranslatePathGradientTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	RotateTransform(angle, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipRotatePathGradientTransform", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	MultiplyTransform(matrix, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipMultiplyPathGradientTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	ScaleTransform(x, y, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipScalePathGradientTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	ResetTransform() {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipResetPathGradientTransform", "Ptr", this.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
@@ -822,60 +740,55 @@ Class __PathBrush {
 ;* GDIp.CreateLinearBrush(x1, y1, x2, y2, color1, color2[, wrapMode])
 ;* Parameter:
 	;* wrapMode - See WrapMode enumeration.
-CreateLinearBrush(x1, y1, x2, y2, color1, color2, wrapMode := 0) {
-	Local status, pBrush
-
-	Static point1 := CreatePoint(0, 0, "Float"), point2 := CreatePoint(0, 0, "Float")
+static CreateLinearBrush(x1, y1, x2, y2, color1, color2, wrapMode := 0) {
+	static point1 := Structure.CreatePoint(0, 0, "Float"), point2 := Structure.CreatePoint(0, 0, "Float")
 	point1.NumPut(0, "Float", x1, "Float", y1), point2.NumPut(0, "Float", x2, "Float", y2)
 
-	if (status := DllCall("Gdiplus\GdipCreateLineBrush", "Ptr", point1.Ptr, "Ptr", point2.Ptr, "UInt", color1, "UInt", color2, "UInt", wrapMode, "Ptr*", pBrush := 0, "Int")) {
-		throw (Exception(FormatStatus(status)))
+	if (status := DllCall("Gdiplus\GdipCreateLineBrush", "Ptr", point1.Ptr, "Ptr", point2.Ptr, "UInt", color1, "UInt", color2, "UInt", wrapMode, "Ptr*", &(pBrush := 0), "Int")) {
+		throw (ErrorFromStatus(status))
 	}
 
-	return ({"Ptr": pBrush
-		, "Base": this.__LinearBrush})
+	(instance := this.LinearBrush()).Ptr := pBrush
+	return (instance)
 }
 
 ;* GDIp.CreateLinearBrushFromRect(x, y, width, height, color1, color2[, gradientMode, wrapMode])
 ;* Parameter:
 	;* gradientMode - See LinearGradientMode enumeration.
 	;* wrapMode - See WrapMode enumeration.
-CreateLinearBrushFromRect(x, y, width, height, color1, color2, gradientMode := 0, wrapMode := 0) {
-	Local status, pBrush
-
-	Static rect := CreateRect(0, 0, 0, 0, "Float")
+static CreateLinearBrushFromRect(x, y, width, height, color1, color2, gradientMode := 0, wrapMode := 0) {
+	static rect := Structure.CreateRect(0, 0, 0, 0, "Float")
 	rect.NumPut(0, "Float", x, "Float", y, "Float", width, "Float", height)
 
-	if (status := DllCall("Gdiplus\GdipCreateLineBrushFromRect", "Ptr", rect.Ptr, "UInt", color1, "UInt", color2, "UInt", gradientMode, "UInt", wrapMode, "Ptr*", pBrush := 0, "Int")) {
-		throw (Exception(FormatStatus(status)))
+	if (status := DllCall("Gdiplus\GdipCreateLineBrushFromRect", "Ptr", rect.Ptr, "UInt", color1, "UInt", color2, "UInt", gradientMode, "UInt", wrapMode, "Ptr*", &(pBrush := 0), "Int")) {
+		throw (ErrorFromStatus(status))
 	}
 
-	return ({"Ptr": pBrush
-		, "Base": this.__LinearBrush})
+	(instance := this.LinearBrush()).Ptr := pBrush
+	return (instance)
 }
 
 ;* GDIp.CreateLinearBrushFromRectWithAngle(x, y, width, height, color1, color2[, angle, wrapMode])
 ;* Parameter:
 	;* wrapMode - See WrapMode enumeration.
-CreateLinearBrushFromRectWithAngle(x, y, width, height, color1, color2, angle := 0, wrapMode := 0) {
-	Local status, pBrush
-
-	Static rect := CreateRect(0, 0, 0, 0, "Float")
+static CreateLinearBrushFromRectWithAngle(x, y, width, height, color1, color2, angle := 0, wrapMode := 0) {
+	static rect := Structure.CreateRect(0, 0, 0, 0, "Float")
 	rect.NumPut(0, "Float", x, "Float", y, "Float", width, "Float", height)
 
-	if (status := DllCall("Gdiplus\GdipCreateLineBrushFromRectWithAngle", "Ptr", rect.Ptr, "UInt", color1, "UInt", color2, "Float", angle, "UInt", 0, "UInt", wrapMode, "Ptr*", pBrush := 0, "Int")) {
-		throw (Exception(FormatStatus(status)))
+	if (status := DllCall("Gdiplus\GdipCreateLineBrushFromRectWithAngle", "Ptr", rect.Ptr, "UInt", color1, "UInt", color2, "Float", angle, "UInt", 0, "UInt", wrapMode, "Ptr*", &(pBrush := 0), "Int")) {
+		throw (ErrorFromStatus(status))
 	}
 
-	return ({"Ptr": pBrush
-		, "Base": this.__LinearBrush})
+	(instance := this.LinearBrush()).Ptr := pBrush
+	return (instance)
 }
 
-Class __LinearBrush extends GDIp.__SolidBrush {
+class LinearBrush extends GDIp.SolidBrush {
+	Class := "Brush"
 
 	;-------------- Property ------------------------------------------------------;
 
-	Color[] {
+	Color {
 		Get {
 			return (this.GetColor())
 		}
@@ -888,28 +801,24 @@ Class __LinearBrush extends GDIp.__SolidBrush {
 	}
 
 	GetColor() {
-		Local status
-
-		Static colors := new Structure(8)
+		static colors := Structure(8)
 
 		if (status := DllCall("Gdiplus\GdipGetLineColors", "Ptr", this.Ptr, "Ptr", colors.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return ([Format("0x{:08X}", colors.NumGet(0, "UInt")), Format("0x{:08X}", colors.NumGet(4, "UInt"))])
 	}
 
 	SetColor(color1, color2) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetLineColors", "Ptr", this.Ptr, "UInt", color1, "UInt", color2, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	WrapMode[] {
+	WrapMode {
 		Get {
 			return (this.GetWrapMode())
 		}
@@ -922,44 +831,38 @@ Class __LinearBrush extends GDIp.__SolidBrush {
 	}
 
 	GetWrapMode() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetLineWrapMode", "Ptr", this.Ptr, "Int*", wrapMode := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetLineWrapMode", "Ptr", this.Ptr, "Int*", &(wrapMode := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (wrapMode)
 	}
 
 	SetWrapMode(wrapMode) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetLineWrapMode", "Ptr", this.Ptr, "Int", wrapMode, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Rect[] {
+	Rect {
 		Get {
 			return (this.GetRect())
 		}
 	}
 
 	GetRect() {
-		Local status
-
-		Static rect := CreateRect(0, 0, 0, 0, "Float")
+		static rect := Structure.CreateRect(0, 0, 0, 0, "Float")
 
 		if (status := DllCall("Gdiplus\GdipGetLineRect", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"x": rect.NumGet(0, "Float"), "y": rect.NumGet(4, "Float"), "Width": rect.NumGet(8, "Float"), "Height": rect.NumGet(12, "Float")})
+		return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
 	}
 
-	GammaCorrection[] {
+	GammaCorrection {
 		Get {
 			return (this.GetGammaCorrection())
 		}
@@ -975,26 +878,22 @@ Class __LinearBrush extends GDIp.__SolidBrush {
 	;* Return:
 		;* * - Bool that indicates if gamma correction is enabled or not.
 	GetGammaCorrection() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetLineGammaCorrection", "Ptr", this.Ptr, "Int*", enabled := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetLineGammaCorrection", "Ptr", this.Ptr, "Int*", &(enabled := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (enabled)
 	}
 
 	SetGammaCorrection(useGammaCorrection) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetLineGammaCorrection", "Ptr", this.Ptr, "Int", useGammaCorrection, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Transform[] {
+	Transform {
 		Get {
 			return (this.GetTransform())
 		}
@@ -1007,21 +906,17 @@ Class __LinearBrush extends GDIp.__SolidBrush {
 	}
 
 	GetTransform() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetLineTransform", "Ptr", this.Ptr, "Ptr*", pMatrix := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetLineTransform", "Ptr", this.Ptr, "Ptr*", &(pMatrix := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"Ptr": pMatrix
-			, "Base": GDIp.__Matrix})
+		(instance := this.Matrix()).Ptr := pMatrix
+		return (instance)
 	}
 
 	SetTransform(matrix) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetLineTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
@@ -1031,50 +926,40 @@ Class __LinearBrush extends GDIp.__SolidBrush {
 	;-----------------------------------------------------  Transform  -------------;
 
 	TranslateTransform(x, y, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipTranslateLineTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	RotateTransform(angle, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipRotateLineTransform", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	MultiplyTransform(matrix, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipMultiplyLineTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	ScaleTransform(x, y, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipScaleLineTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
 	ResetTransform() {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipResetLineTransform", "Ptr", this.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)

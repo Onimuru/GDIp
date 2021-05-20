@@ -48,56 +48,60 @@
 
 ;* GDIp.CreatePen(color[, width, unit])
 ;* Parameter:
-	;* unit - See Unit enumeration.
-CreatePen(color, width := 1, unit := 2) {
-	Local
-
-	if (status := DllCall("Gdiplus\GdipCreatePen1", "UInt", color, "Float", width, "Int", unit, "Ptr*", pPen := 0, "Int")) {
-		throw (Exception(FormatStatus(status)))
+	;* [Integer] color
+	;* [Integer] width
+	;* [Integer] unit - See Unit enumeration.
+;* Return:
+	;* [Pen]
+static CreatePen(color, width := 1, unit := 2) {
+	if (status := DllCall("Gdiplus\GdipCreatePen1", "UInt", color, "Float", width, "Int", unit, "Ptr*", &(pPen := 0), "Int")) {
+		throw (ErrorFromStatus(status))
 	}
 
-	return ({"Ptr": pPen
-		, "Base": this.__Pen})
+	(instance := this.Pen()).Ptr := pPen
+	return (instance)
 }
 
-;* GDIp.CreatePenFromBrush([__Brush] brush[, width, unit])
+;* GDIp.CreatePenFromBrush(brush[, width, unit])
 ;* Parameter:
-	;* unit - See Unit enumeration.
-CreatePenFromBrush(brush, width := 1, unit := 2) {
-	Local
-
-	if (status := DllCall("Gdiplus\GdipCreatePen2", "Ptr", brush.Ptr, "Float", width, "Int", 2, "Ptr*", pPen := 0, "Int", unit, "Int")) {
-		throw (Exception(FormatStatus(status)))
+	;* [Brush] brush
+	;* [Integer] width
+	;* [Integer] unit - See Unit enumeration.
+;* Return:
+	;* [Pen]
+static CreatePenFromBrush(brush, width := 1, unit := 2) {
+	if (status := DllCall("Gdiplus\GdipCreatePen2", "Ptr", brush.Ptr, "Float", width, "Int", 2, "Ptr*", &(pPen := 0), "Int", unit, "Int")) {
+		throw (ErrorFromStatus(status))
 	}
 
-	return ({"Ptr": pPen
-		, "Base": this.__Pen})
+	(instance := this.Pen()).Ptr := pPen
+	return (instance)
 }
 
-Class __Pen {
+class Pen {
+	Class := "Pen"
+
+	;* pen.Clone()
+	;* Return:
+		;* [Pen]
+	Clone() {
+		if (status := DllCall("Gdiplus\GdipClonePen", "Ptr", this.Ptr, "Ptr*", &(pPen := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		(instance := GDIp.Pen()).Ptr := pPen
+		return (instance)
+	}
 
 	__Delete() {
-		if (!this.HasKey("Ptr")) {
-			MsgBox("Pen.__Delete()")
+		if (status := DllCall("Gdiplus\GdipDeletePen", "Ptr", this.Ptr, "Int")) {
+			throw (ErrorFromStatus(status))
 		}
-
-		DllCall("Gdiplus\GdipDeletePen", "Ptr", this.Ptr)
-	}
-
-	Clone() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipClonePen", "Ptr", this.Ptr, "Ptr*", pPen := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
-		}
-
-		return ({"Ptr": pPen
-			, "Base": this.Base})
 	}
 
 	;-------------- Property ------------------------------------------------------;
 
-	Color[] {
+	Color {
 		Get {
 			return (this.GetColor())
 		}
@@ -109,27 +113,29 @@ Class __Pen {
 		}
 	}
 
+	;* pen.GetColor()
+	;* Return:
+		;* [Integer]
 	GetColor() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenColor", "Ptr", this.Ptr, "UInt*", color := 0, "Int")) {  ;* `GetColor()` throws an exception if the Pen object inherited it's color from a LineBrush object.
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenColor", "Ptr", this.Ptr, "UInt*", &(color := 0), "Int")) {  ;* `GetColor()` throws an exception if the Pen object inherited it's color from a LineBrush object.
+			throw (ErrorFromStatus(status))
 		}
 
 		return (Format("0x{:08X}", color))
 	}
 
+	;* pen.SetColor(color)
+	;* Parameter:
+		;* [Integer] color
 	SetColor(color) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenColor", "Ptr", this.Ptr, "UInt", color, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Width[] {
+	Width {
 		Get {
 			return (this.GetWidth())
 		}
@@ -141,27 +147,29 @@ Class __Pen {
 		}
 	}
 
+	;* pen.GetWidth()
+	;* Return:
+		;* [Integer]
 	GetWidth() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", this.Ptr, "Float*", width := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", this.Ptr, "Float*", &(width := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		return (~~width)
+		return (Round(width))
 	}
 
+	;* pen.SetWidth(width)
+	;* Parameter:
+		;* [Integer] width
 	SetWidth(width) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenWidth", "Ptr", this.Ptr, "Float", width, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Unit[] {
+	Unit {
 		Get {
 			return (this.GetUnit())
 		}
@@ -175,31 +183,27 @@ Class __Pen {
 
 	;* pen.GetUnit()
 	;* Return:
-		;* * - See Unit enumeration.
+		;* [Integer] - See Unit enumeration.
 	GetUnit() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenUnit", "Ptr", this.Ptr, "Int*", unit := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenUnit", "Ptr", this.Ptr, "Int*", &(unit := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (unit)
 	}
 
-	;* pen.SetUnit()
+	;* pen.SetUnit(unit)
 	;* Parameter:
-		;* unit - See Unit enumeration.
+		;* [Integer] unit - See Unit enumeration.
 	SetUnit(unit) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenUnit", "Ptr", this.Ptr, "Int", unit, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Brush[] {
+	Brush {
 		Get {
 			return (this.GetBrush())
 		}
@@ -211,33 +215,48 @@ Class __Pen {
 		}
 	}
 
-	GetBrush() {  ;* Gets the pBrush object that is currently set for this pen object.
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenBrushFill", "Ptr", this.Ptr, "Ptr*", pBrush := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+	;* pen.GetBrush()
+	;* Description:
+		;* Gets the brush object that is currently set for this pen object.
+	;* Return:
+		;* [Brush]
+	GetBrush() {
+		if (status := DllCall("Gdiplus\GdipGetPenBrushFill", "Ptr", this.Ptr, "Ptr*", &(pBrush := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		if (status := DllCall("Gdiplus\GdipGetBrushType", "Ptr", pBrush, "Int*", type := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetBrushType", "Ptr", pBrush, "Int*", &(type := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"Ptr": pBrush
-			, "Base": (type == 0) ? (GDIp.__SolidBrush) : ((type == 1) ? (GDIp.__HatchBrush) : ((type == 2) ? (GDIp.__TextureBrush) : ((type == 3) ? (GDIp.__PathBrush) : (GDIp.__LinearBrush))))})
+		switch (type) {
+			case 0:
+				(instance := GDIp.SolidBrush()).Ptr := pBrush
+			case 1:
+				(instance := GDIp.HatchBrush()).Ptr := pBrush
+			case 2:
+				(instance := GDIp.TextureBrush()).Ptr := pBrush
+			case 3:
+				(instance := GDIp.PathBrush()).Ptr := pBrush
+			case 4:
+				(instance := GDIp.LinearBrush()).Ptr := pBrush
+		}
+
+		return (instance)
 	}
 
-	;* pen.SetBrush([__Brush] brush)
+	;* pen.SetBrush(brush)
+	;* Parameter:
+		;* [Brush] brush
 	SetBrush(brush) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenBrushFill", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Type[] {
+	Type {
 		Get {
 			return (this.GetType())
 		}
@@ -245,18 +264,16 @@ Class __Pen {
 
 	;* pen.GetType()
 	;* Return:
-		;* * - See PenType enumeration.
+		;* [Integer] - See PenType enumeration.
 	GetType() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenFillType", "Ptr", this.Ptr, "Int*", type := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenFillType", "Ptr", this.Ptr, "Int*", &(type := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (type)
 	}
 
-	Alignment[] {
+	Alignment {
 		Get {
 			return (this.GetAlignment())
 		}
@@ -270,61 +287,59 @@ Class __Pen {
 
 	;* pen.GetAlignment()
 	;* Return:
-		;* * - See PenAlignment enumeration.
+		;* [Integer] - See PenAlignment enumeration.
 	GetAlignment() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenMode", "Ptr", this.Ptr, "Int*", alignment := 0, "Int")) {  ;* If you set the alignment of a Pen object to Inset, you cannot use that pen to draw compound lines or triangular dash caps.
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenMode", "Ptr", this.Ptr, "Int*", &(alignment := 0), "Int")) {  ;~ If you set the alignment of a Pen object to Inset, you cannot use that pen to draw compound lines or triangular dash caps.
+			throw (ErrorFromStatus(status))
 		}
 
 		return (alignment)
 	}
 
-	;* pen.SetAlignment()
+	;* pen.SetAlignment(alignment)
 	;* Parameter:
-		;* alignment - See PenAlignment enumeration.
+		;* [Integer] alignment - See PenAlignment enumeration.
 	SetAlignment(alignment) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenMode", "Ptr", this.Ptr, "Int", alignment, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
+	;* pen.SetCompoundArray(compoundArray)
+	;* Parameter:
+		;* [Array] compoundArray
 	SetCompoundArray(compoundArray) {
-		Local index, number, compounds
-
-		for index, number in (compoundArray, compounds := new Structure(compoundArray.Length*4)) {
+		for index, number in (compounds := Structure(compoundArray.Length*4), compoundArray) {
 			compounds.NumPut(index*4, "Float", number)
 		}
 
-		if (status := DllCall("Gdiplus\GdipSetPenCompoundArray", "Ptr", this.Ptr, "Ptr", compounds.Ptr, "Int", index, "Int")) {  ;* If you set the alignment of a Pen object to PenAlignmentInset, you cannot use that pen to draw compound lines.
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipSetPenCompoundArray", "Ptr", this.Ptr, "Ptr", compounds.Ptr, "Int", index, "Int")) {  ;~ If you set the alignment of a Pen object to PenAlignmentInset, you cannot use that pen to draw compound lines.
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	CompoundCount[] {
+	CompoundCount {
 		Get {
 			return (this.GetCompoundCount())
 		}
 	}
 
+	;* pen.GetCompoundCount()
+	;* Return:
+		;* [Integer]
 	GetCompoundCount() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenCompoundCount", "Ptr", this.Ptr, "Int*", compoundCount := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenCompoundCount", "Ptr", this.Ptr, "Int*", &(compoundCount := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (compoundCount)
 	}
 
-	StartCap[] {
+	StartCap {
 		Get {
 			return (this.GetStartCap())
 		}
@@ -338,12 +353,10 @@ Class __Pen {
 
 	;* pen.GetStartCap()
 	;* Return:
-		;* * - See LineCap enumeration.
+		;* [Integer] - See LineCap enumeration.
 	GetStartCap() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenStartCap", "Ptr", this.Ptr, "UInt*", lineCap := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenStartCap", "Ptr", this.Ptr, "UInt*", &(lineCap := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (Format("0x{:02X}", lineCap))
@@ -351,18 +364,16 @@ Class __Pen {
 
 	;* pen.SetStartCap(lineCap)
 	;* Parameter:
-		;* lineCap - See LineCap enumeration.
+		;* [Integer] lineCap - See LineCap enumeration.
 	SetStartCap(lineCap) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenStartCap", "Ptr", this.Ptr, "UInt", lineCap, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	EndCap[] {
+	EndCap {
 		Get {
 			return (this.GetEndCap())
 		}
@@ -376,12 +387,10 @@ Class __Pen {
 
 	;* pen.GetEndCap()
 	;* Return:
-		;* * - See LineCap enumeration.
+		;* [Integer] - See LineCap enumeration.
 	GetEndCap() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenEndCap", "Ptr", this.Ptr, "UInt*", lineCap := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenEndCap", "Ptr", this.Ptr, "UInt*", &(lineCap := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (Format("0x{:02X}", lineCap))
@@ -389,18 +398,16 @@ Class __Pen {
 
 	;* pen.SetEndCap(lineCap)
 	;* Parameter:
-		;* lineCap - See LineCap enumeration.
+		;* [Integer] lineCap - See LineCap enumeration.
 	SetEndCap(lineCap) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenEndCap", "Ptr", this.Ptr, "UInt", lineCap, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	DashCap[] {
+	DashCap {
 		Get {
 			return (this.GetDashCap())
 		}
@@ -414,12 +421,10 @@ Class __Pen {
 
 	;* pen.GetDashCap()
 	;* Return:
-		;* * - See DashCap enumeration.
+		;* [Integer] - See DashCap enumeration.
 	GetDashCap() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenDashCap197819", "Ptr", this.Ptr, "Int*", dashCap := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenDashCap197819", "Ptr", this.Ptr, "Int*", &(dashCap := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (dashCap)
@@ -427,12 +432,10 @@ Class __Pen {
 
 	;* pen.SetDashCap(dashCap)
 	;* Parameter:
-		;* dashCap - See DashCap enumeration.
+		;* [Integer] dashCap - See DashCap enumeration.
 	SetDashCap(dashCap) {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipSetPenDashCap197819", "Ptr", this.Ptr, "Int", dashCap, "Int")) {  ;* If you set the alignment of a Pen object to Pen Alignment Inset, you cannot use that pen to draw triangular dash caps.
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipSetPenDashCap197819", "Ptr", this.Ptr, "Int", dashCap, "Int")) {  ;~ If you set the alignment of a Pen object to Pen Alignment Inset, you cannot use that pen to draw triangular dash caps.
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
@@ -440,20 +443,18 @@ Class __Pen {
 
 	;* pen.SetLineCap(startCap, endCap, dashCap)
 	;* Parameter:
-		;* startCap - See LineCap enumeration.
-		;* endCap - See LineCap enumeration.
-		;* dashCap - See DashCap enumeration.
+		;* [Integer] startCap - See LineCap enumeration.
+		;* [Integer] endCap - See LineCap enumeration.
+		;* [Integer] dashCap - See DashCap enumeration.
 	SetLineCap(startCap, endCap, dashCap) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenLineCap197819", "Ptr", this.Ptr, "Int", startCap, "Int", endCap, "Int", dashCap, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	DashOffset[] {
+	DashOffset {
 		Get {
 			return (this.GetDashOffset())
 		}
@@ -465,27 +466,29 @@ Class __Pen {
 		}
 	}
 
+	;* pen.GetDashOffset()
+	;* Return:
+		;* [Float]
 	GetDashOffset() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenDashOffset", "Ptr", this.Ptr, "Float*", dashOffset := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenDashOffset", "Ptr", this.Ptr, "Float*", &(dashOffset := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (dashOffset)
 	}
 
+	;* pen.SetDashOffset(dashOffset)
+	;* Parameter:
+		;* [Float] dashOffset
 	SetDashOffset(dashOffset) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenDashOffset", "Ptr", this.Ptr, "Float", dashOffset, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	DashStyle[] {
+	DashStyle {
 		Get {
 			return (this.GetDashStyle())
 		}
@@ -499,31 +502,27 @@ Class __Pen {
 
 	;* pen.GetDashStyle()
 	;* Return:
-		;* * - See DashStyle enumeration.
+		;* [Integer] - See DashStyle enumeration.
 	GetDashStyle() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenDashStyle", "Ptr", this.Ptr, "Int*", dashStyle := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenDashStyle", "Ptr", this.Ptr, "Int*", &(dashStyle := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
 		return (dashStyle)
 	}
 
-	;* pen.SetDashStyle()
+	;* pen.SetDashStyle(dashStyle)
 	;* Parameter:
-		;* dashStyle - See DashStyle enumeration.
+		;* [Integer] dashStyle - See DashStyle enumeration.
 	SetDashStyle(dashStyle) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenDashStyle", "Ptr", this.Ptr, "Int", dashStyle, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
-	Transform[] {
+	Transform {
 		Get {
 			return (this.GetTransform())
 		}
@@ -535,22 +534,24 @@ Class __Pen {
 		}
 	}
 
+	;* pen.GetTransform()
+	;* Return:
+		;* [Matrix]
 	GetTransform() {
-		Local
-
-		if (status := DllCall("Gdiplus\GdipGetPenTransform", "Ptr", this.Ptr, "Ptr*", pMatrix := 0, "Int")) {
-			throw (Exception(FormatStatus(status)))
+		if (status := DllCall("Gdiplus\GdipGetPenTransform", "Ptr", this.Ptr, "Ptr*", &(pMatrix := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		return ({"Ptr": pMatrix
-			, "Base": GDIp.__Matrix})
+		(instance := GDIp.Matrix()).Ptr := pMatrix
+		return (instance)
 	}
 
+	;* pen.SetTransform(matrix)
+	;* Parameter:
+		;* [Matrix] matrix
 	SetTransform(matrix) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipSetPenTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
@@ -559,51 +560,60 @@ Class __Pen {
 	;--------------- Method -------------------------------------------------------;
 	;-----------------------------------------------------  Transform  -------------;
 
+	;* pen.TranslateTransform(x, y[, matrixOrder])
+	;* Parameter:
+		;* [Integer] x
+		;* [Integer] y
+		;* [Integer] matrixOrder
 	TranslateTransform(x, y, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipTranslatePenTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
+	;* pen.RotateTransform(angle[, matrixOrder])
+	;* Parameter:
+		;* [Float] angle
+		;* [Integer] matrixOrder
 	RotateTransform(angle, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipRotatePenTransform", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
+	;* pen.MultiplyTransform(matrix[, matrixOrder])
+	;* Parameter:
+		;* [Matrix] matrix
+		;* [Integer] matrixOrder
 	MultiplyTransform(matrix, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipMultiplyPenTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
+	;* pen.ScaleTransform(x, y[, matrixOrder])
+	;* Parameter:
+		;* [Integer] x
+		;* [Integer] y
+		;* [Integer] matrixOrder
 	ScaleTransform(x, y, matrixOrder := 0) {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipScalePenTransform", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)
 	}
 
+	;* pen.ResetTransform()
 	ResetTransform() {
-		Local
-
 		if (status := DllCall("Gdiplus\GdipResetPenTransform", "Ptr", this.Ptr, "Int")) {
-			throw (Exception(FormatStatus(status)))
+			throw (ErrorFromStatus(status))
 		}
 
 		return (True)

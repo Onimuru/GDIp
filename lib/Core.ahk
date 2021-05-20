@@ -5,15 +5,15 @@
 
 ;======================================================  Include  ==============;
 
-#Include %A_LineFile%\..\ObjectOriented\Array.lib
-#Include %A_LineFile%\..\ObjectOriented\Object.lib
-#Include %A_LineFile%\..\String\String.lib
+#Include %A_LineFile%\..\ObjectOriented\Array.ahk
+#Include %A_LineFile%\..\ObjectOriented\Object.ahk
+#Include %A_LineFile%\..\String\String.ahk
 
-#Include %A_LineFile%\..\Structure\Structure.lib
-;#Include %A_LineFile%\..\Math\Math.lib
+#Include %A_LineFile%\..\Structure\Structure.ahk
+;#Include %A_LineFile%\..\Math\Math.ahk
 
-#Include %A_LineFile%\..\Core\GDI.lib
-#Include %A_LineFile%\..\Core\GDIp.lib
+#Include %A_LineFile%\..\Core\GDI.ahk
+#Include %A_LineFile%\..\Core\GDIp.ahk
 
 ;============== Function ======================================================;
 ;======================================================  Library  ==============;
@@ -114,7 +114,7 @@ ErrorFromStatus(status) {
 	return (Error(status, -2, statusLookup[status]))
 }
 
-;=================================================== User32 ===========;
+;======================================================= User32 ===============;
 
 /*
 ** User32_Enums: https://github.com/lstratman/Win32Interop/blob/master/User32/Enums.cs **

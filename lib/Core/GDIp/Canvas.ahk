@@ -2,7 +2,20 @@
 ** About Windows: https://docs.microsoft.com/en-us/windows/win32/winmsg/about-windows. **
 */
 
-;* GDIp.CreateCanvas(x, y, width, height[, guiOptions, showOptions, smoothing, interpolation])
+;* GDIp.CreateCanvas(x, y, width, height[, windowProc, windowClassName, windowClassStyles, title, extendedWindowStyles, windowStyles, smoothing, interpolation])
+;* Parameter:
+	;* [Integer] x
+	;* [Integer] y
+	;* [Integer] width
+	;* [Integer] height
+	;* [Func || Closure] windowProc
+	;* [String] windowClassName
+	;* [Integer] windowClassStyles
+	;* [String] title
+	;* [Integer] extendedWindowStyles
+	;* [Integer] windowStyles
+	;* [Integer] smoothing
+	;* [Integer] interpolation
 static CreateCanvas(x, y, width, height, windowProc := False, windowClassName := "Canvas", windowClassStyles := 0x00000000, title := "Title", extendedWindowStyles := 0x00000000, windowStyles := 0x00000000, smoothing := 4, interpolation := 7) {
 	if (windowProc && !(windowProc is Func || windowProc is Closure)) {
 		throw (TypeError(Format("{} is not a valid callback function.", Type(windowProc)), -1))
@@ -55,7 +68,7 @@ static CreateCanvas(x, y, width, height, windowProc := False, windowClassName :=
 		windowStyles := windowStyles.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0)
 	}
 
-	if (!hWnd := DllCall("User32\CreateWindowEx", "UInt", extendedWindowStyles, "Str", windowClassName, "Str", title, "UInt", windowStyles, "Int", x, "Int", y, "Int", width, "Int", height, "Ptr", A_ScriptHwnd, "Ptr", 0, "Ptr", DllCall("GetModuleHandle", "Ptr", 0, "Ptr"), "Ptr", 0, "Ptr")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
+	if (!(hWnd := DllCall("User32\CreateWindowEx", "UInt", extendedWindowStyles, "Str", windowClassName, "Str", title, "UInt", windowStyles, "Int", x, "Int", y, "Int", width, "Int", height, "Ptr", A_ScriptHwnd, "Ptr", 0, "Ptr", DllCall("GetModuleHandle", "Ptr", 0, "Ptr"), "Ptr", 0, "Ptr"))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
 
@@ -108,24 +121,39 @@ class Canvas {
 		}
 	}
 
+	;* canvas.Show([nCmdShow])
 	Show(nCmdShow := "SW_SHOWNA") {
 		static SW_HIDE := 0, SW_NORMAL := 1, SW_SHOWNORMAL := 1, SW_SHOWMINIMIZED := 2, SW_MAXIMIZE := 3, SW_SHOWMAXIMIZED := 3, SW_SHOWNOACTIVATE := 4, SW_SHOW := 5, SW_MINIMIZE := 6, SW_SHOWMINNOACTIVE := 7, SW_SHOWNA := 8, SW_RESTORE := 9, SW_SHOWDEFAULT := 10, SW_FORCEMINIMIZE := 11
 
 		DllCall("User32\ShowWindow", "Ptr", this.Handle, "Int", %nCmdShow%)  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showwindow
+
+		return (True)
 	}
 
+	;* canvas.Hide()
 	Hide() {
 		DllCall("User32\ShowWindow", "Ptr", this.Handle, "Int", 0)
+
+		return (True)
 	}
 
+	;* canvas.Clear()
 	Clear() {
-		this.Graphics.Clear()
+		return (this.Graphics.Clear())
 	}
 
+	;* canvas.Reset()
 	Reset() {
-		this.Graphics.Reset()
+		return (this.Graphics.Reset())
 	}
 
+	;* canvas.Reset([x, y, width, height, alpha])
+	;* Parameter:
+		;* [Integer] x
+		;* [Integer] y
+		;* [Integer] width
+		;* [Integer] height
+		;* [Integer] alpha
 	Update(x := unset, y := unset, width := unset, height := unset, alpha := unset) {
 		static point := Structure.CreatePoint(0, 0, "UInt"), size := Structure.CreateSize(0, 0), blend := Structure.CreateBlendFunction(0xFF)
 

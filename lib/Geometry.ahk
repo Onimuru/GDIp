@@ -1,8 +1,8 @@
 ﻿;==============  Include  ======================================================;
 
-#Include, %A_LineFile%\..\Core.ahk
+#Include, %A_LineFile%\..\Core.lib
 
-#Include, %A_LineFile%\..\Math\Math.ahk
+#Include, %A_LineFile%\..\Math\Math.lib
 
 ;============== Function ======================================================;
 
