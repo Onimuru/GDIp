@@ -25,6 +25,3 @@
 [submodule "lib/Structure"]
 	path = lib/Structure
 	url = https://github.com/Onimuru/Structure
-[submodule "ObjectOriented"]
-	path = ObjectOriented
-	url = https://github.com/Onimuru/ObjectOriented
