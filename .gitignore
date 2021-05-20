@@ -1,16 +1,19 @@
 # VS Code
 .vscode
 
+# Ignore default text files
+/CHANGELOG.*
+/LICENSE
+/README.*
+
 # AutoHotkey
 */__Template
-bin/*
-build
-cfg
-doc
-res
-test
-LICENSE
-README.*
+/bin
+/build
+/cfg
+/doc
+/res
+/test
 
 # Prerequisites
 *.d
@@ -38,6 +41,7 @@ README.*
 *.lai
 *.la
 *.a
+*.lib
 
 # Executables
 *.exe
