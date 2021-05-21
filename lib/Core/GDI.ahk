@@ -116,7 +116,7 @@ Class GDI {
 		;* [Integer] sWidth
 		;* [Integer] sHeight
 		;* [Integer] operation - See TernaryRasterOperations enumeration.
-	static StretchBlt(dDC, dx, dy, dWidth, dHeight, sDC, sx, sy, sWidth, sHeight, operation := 0x00CC0020) {
+	static StretchBlt(dDC, dx, dy, dWidth, dHeight, sDC, sx, sy, sWidth, sHeight, operation := 0x00CC0020) {  ;? 0x00CC0020 = SRCCOPY
 		if (!(DllCall("Gdi32\StretchBlt", "Ptr", dDC.Handle, "Int", dx, "Int", dy, "Int", dWidth, "Int", dHeight, "Ptr", sDC.Handle, "Int", sx, "Int", sy, "Int", sWidth, "Int", sHeight, "UInt", operation, "UInt"))) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}

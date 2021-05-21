@@ -62,7 +62,7 @@ static CreateCanvas(x, y, width, height, windowProc := False, windowClassName :=
 	static WS_BORDER := 0x00800000, WS_CAPTION := 0x00C00000, WS_CHILD := 0x40000000, WS_CHILDWINDOW := 0x40000000, WS_CLIPCHILDREN := 0x02000000, WS_CLIPSIBLINGS := 0x04000000, WS_DISABLED := 0x08000000, WS_DLGFRAME := 0x00400000, WS_GROUP := 0x00020000, WS_HSCROLL := 0x00100000, WS_ICONIC := 0x20000000, WS_MAXIMIZE := 0x01000000, WS_MAXIMIZEBOX := 0x00010000, WS_MINIMIZE := 0x20000000, WS_MINIMIZEBOX := 0x00020000, WS_OVERLAPPED := 0x00000000, WS_OVERLAPPEDWINDOW := 0x00CF0000, WS_POPUP := 0x80000000, WS_POPUPWINDOW := 0x80880000, WS_SIZEBOX := 0x00040000, WS_SYSMENU := 0x00080000, WS_TABSTOP := 0x00010000, WS_THICKFRAME := 0x00040000, WS_TILED := 0x00000000, WS_TILEDWINDOW := 0xCF0000, WS_VISIBLE := 0x10000000, WS_VSCROLL := 0x00200000  ;: https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
 
 	if (!(windowStyles)) {
-		windowStyles := WS_TILEDWINDOW | WS_VISIBLE
+		windowStyles := WS_TILEDWINDOW
 	}
 	else if (windowStyles is Array) {
 		windowStyles := windowStyles.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0)
@@ -82,6 +82,7 @@ static CreateCanvas(x, y, width, height, windowProc := False, windowClassName :=
 	(instance.Graphics := this.CreateGraphicsFromDC(instance.DC)).SetSmoothingMode(smoothing)
 		, instance.Graphics.SetInterpolationMode(interpolation)
 
+	instance.Show()
 	instance.Update(x, y, width, height)
 
 	return (instance)
@@ -109,6 +110,53 @@ class Canvas {
 		}
 	}
 
+	Rect[which := ""] {
+		Get {
+			static rect := Structure.CreateRect(0, 0, 0, 0, "Int")
+
+			if (!(DllCall("User32\GetWindowRect", "Ptr", this.Handle, "Ptr", pointer := rect.Ptr, "UInt"))) {
+				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+			}
+
+			switch (which) {
+				case "x":
+					return (NumGet(pointer, "Int"))
+				case "y":
+					return (NumGet(pointer + 4, "Int"))
+				case "Width":
+					return (NumGet(pointer + 8, "Int") - NumGet(pointer, "Int"))
+				case "Height":
+					return (NumGet(pointer + 12, "Int") - NumGet(pointer + 4, "Int"))
+				default:
+					return ({x: x := NumGet(pointer, "Int"), y: y := NumGet(pointer + 4, "Int"), Width: NumGet(pointer + 8, "Int") - x, Height: NumGet(pointer + 12, "Int") - y})
+			}
+		}
+	}
+
+	x {
+		Get {
+			return (this.Rect["x"])
+		}
+	}
+
+	y {
+		Get {
+			return (this.Rect["y"])
+		}
+	}
+
+	Width {
+		Get {
+			return (this.Rect["Width"])
+		}
+	}
+
+	Height {
+		Get {
+			return (this.Rect["Height"])
+		}
+	}
+
 	Title {
 		Get {
 			return (WinGetTitle(this.Handle))
@@ -122,7 +170,7 @@ class Canvas {
 	}
 
 	;* canvas.Show([nCmdShow])
-	Show(nCmdShow := "SW_SHOWNA") {
+	Show(nCmdShow := "SW_SHOWNOACTIVATE") {
 		static SW_NORMAL := 1, SW_SHOWNORMAL := 1, SW_SHOWMINIMIZED := 2, SW_MAXIMIZE := 3, SW_SHOWMAXIMIZED := 3, SW_SHOWNOACTIVATE := 4, SW_SHOW := 5, SW_MINIMIZE := 6, SW_SHOWMINNOACTIVE := 7, SW_SHOWNA := 8, SW_RESTORE := 9, SW_SHOWDEFAULT := 10, SW_FORCEMINIMIZE := 11
 
 		try {

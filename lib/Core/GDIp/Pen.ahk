@@ -121,7 +121,7 @@ class Pen {
 			throw (ErrorFromStatus(status))
 		}
 
-		return (Format("0x{:08X}", color))
+		return (color)
 	}
 
 	;* pen.SetColor(color)

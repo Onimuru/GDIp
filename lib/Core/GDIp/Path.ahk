@@ -269,11 +269,11 @@ class Path {
 		;* [Object]* objects - Any number of objects with `x` and `y` properties.
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
 	AddClosedCurve(objects*) {
-		if (IsNumber(objects[(length := objects.Length) - 1])) {
-			tension := objects.Pop(), length--
+		if (IsNumber(objects[-1])) {
+			tension := objects.Pop()
 		}
 
-		for index, object in (points := Structure(length*8), objects) {
+		for index, object in (points := Structure((length := objects.Length)*8), objects) {
 			points.NumPut(index*8, "Float", object.x, "Float", object.y)
 		}
 
@@ -289,11 +289,11 @@ class Path {
 		;* [Object]* objects - Any number of objects with `x` and `y` properties.
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
 	AddCurve(objects*) {
-		if (IsNumber(objects[(length := objects.Length) - 1])) {
-			tension := objects.Pop(), length--
+		if (IsNumber(objects[-1])) {
+			tension := objects.Pop()
 		}
 
-		for index, object in (points := Structure(length*8), objects) {
+		for index, object in (points := Structure((length := objects.Length)*8), objects) {
 			points.NumPut(index*8, "Float", object.x, "Float", object.y)
 		}
 

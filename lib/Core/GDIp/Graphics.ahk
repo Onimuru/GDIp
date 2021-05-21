@@ -575,16 +575,11 @@ class Graphics {
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
 		;* [Integer] fillMode - See FillMode enumeration.
 	FillClosedCurve(brush, objects*) {
-		if (IsNumber(objects[index := (length := objects.Length) - 1])) {
-			if (IsNumber(objects[index - 1])) {
-				fillMode := objects.Pop(), tension := objects.Pop(), length -= 2
-			}
-			else {
-				tension := objects.Pop(), length--
-			}
+		if (IsNumber(objects[-1])) {
+			fillMode := (IsNumber(objects[-2])) ? (objects.Pop()) : (0), tension := objects.Pop()
 		}
 
-		for index, object in (points := Structure(length*8), objects) {
+		for index, object in (points := Structure((length := objects.Length)*8), objects) {
 			points.NumPut(index*8, "Float", object.x, "Float", object.y)
 		}
 
@@ -633,11 +628,9 @@ class Graphics {
 		;* [Object]* objects
 		;* [Integer] fillMode - See FillMode enumeration.
 	FillPolygon(brush, objects*) {
-		if (IsNumber(objects[(length := objects.Length) - 1])) {
-			fillMode := objects.Pop(), length--
-		}
+		fillMode := (IsNumber(objects[-1])) ? (objects.Pop()) : (0)
 
-		for index, object in (points := Structure(length*8), objects) {
+		for index, object in (points := Structure((length := objects.Length)*8), objects) {
 			points.NumPut(index*8, "Float", object.x, "Float", object.y)
 		}
 
@@ -665,7 +658,7 @@ class Graphics {
 		state := this.Save()
 			, pGraphics := this.Ptr
 
-		DllCall("Gdiplus\GdipSetPixelOffsetMode", "Ptr", pGraphics, "Int", 2), DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", pGraphics, "Int", 1), DllCall("Gdiplus\GdipSetCompositingQuality", "Ptr", pGraphics, "Int", 0), DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", pGraphics, "Int", 0), DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", pGraphics, "Int", 7)
+		DllCall("Gdiplus\GdipSetPixelOffsetMode", "Ptr", pGraphics, "Int", 2)
 
 		(path := GDIp.CreatePath()).AddRoundedRectangle(object, radius)
 
@@ -749,11 +742,11 @@ class Graphics {
 		;* [Object]* objects
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
 	DrawClosedCurve(pen, objects*) {
-		if (IsNumber(objects[(length := objects.Length) - 1])) {
-			tension := objects.Pop(), length--
+		if (IsNumber(objects[-1])) {
+			tension := objects.Pop()
 		}
 
-		for index, object in (points := Structure(length*8), objects) {
+		for index, object in (points := Structure((length := objects.Length)*8), objects) {
 			points.NumPut(index*8, "Float", object.x, "Float", object.y)
 		}
 
@@ -770,11 +763,11 @@ class Graphics {
 		;* [Object]* objects
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
 	DrawCurve(pen, objects*) {
-		if (IsNumber(objects[(length := objects.Length) - 1])) {
-			tension := objects.Pop(), length--
+		if (IsNumber(objects[-1])) {
+			tension := objects.Pop()
 		}
 
-		for index, object in (points := Structure(length*8), objects) {
+		for index, object in (points := Structure((length := objects.Length)*8), objects) {
 			points.NumPut(index*8, "Float", object.x, "Float", object.y)
 		}
 
@@ -872,13 +865,8 @@ class Graphics {
 		;* [Object] object - Object with `x`, `y`, `Width` and `Height` properties that defines the rectangle to be rounded.
 		;* [Float] radius - Radius of the rounded corners.
 	DrawRoundedRectangle(pen, object, radius) {
-		state := this.Save()
-			, pGraphics := this.Ptr
-
-		DllCall("Gdiplus\GdipSetPixelOffsetMode", "Ptr", pGraphics, "Int", 2), DllCall("Gdiplus\GdipSetCompositingMode", "Ptr", pGraphics, "Int", 1), DllCall("Gdiplus\GdipSetCompositingQuality", "Ptr", pGraphics, "Int", 0), DllCall("Gdiplus\GdipSetSmoothingMode", "Ptr", pGraphics, "Int", 0), DllCall("Gdiplus\GdipSetInterpolationMode", "Ptr", pGraphics, "Int", 7)
-
-		diameter := radius*2, offset := Round(pen.Width)
-			, width := object.Width - diameter - offset, height := object.Height - diameter - offset, x := object.x + (offset := (offset + 1)//2), y := object.y + offset
+		diameter := radius*2
+			, width := object.Width - diameter - (offset := pen.Width), height := object.Height - diameter - offset, x := object.x, y := object.y
 
 		DllCall("Gdiplus\GdipCreatePath", "UInt", 0, "Ptr*", &(pPath := 0))
 
@@ -888,11 +876,9 @@ class Graphics {
 		DllCall("Gdiplus\GdipAddPathArc", "Ptr", pPath, "Float", x, "Float", y + height, "Float", diameter, "Float", diameter, "Float", 90, "Float", 90)
 		DllCall("Gdiplus\GdipClosePathFigure", "Ptr", pPath)
 
-		if (status := DllCall("Gdiplus\GdipDrawPath", "Ptr", pGraphics, "Ptr", pen.Ptr, "Ptr", pPath, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawPath", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", pPath, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-
-		this.Restore(state)
 
 		DllCall("Gdiplus\GdipDeletePath", "Ptr", pPath)
 	}

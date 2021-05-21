@@ -139,7 +139,7 @@ class SolidBrush {
 			throw (ErrorFromStatus(status))
 		}
 
-		return (Format("0x{:08X}", color))
+		return (color)
 	}
 
 	;* brush.SetColor(color)
@@ -188,7 +188,6 @@ static CreateHatchBrush(foregroundColor, backgroundColor, style := 0) {
 }
 
 class HatchBrush extends GDIp.SolidBrush {
-	Class := "Brush"
 
 	Color[which] {
 		Get {
@@ -208,7 +207,7 @@ class HatchBrush extends GDIp.SolidBrush {
 			throw (ErrorFromStatus(status))
 		}
 
-		return ({ForegroundColor: Format("0x{:08X}", foregroundColor), BackgroundColor: Format("0x{:08X}", backgroundColor)})
+		return ({ForegroundColor: foregroundColor, BackgroundColor: backgroundColor})
 	}
 
 	HatchStyle[which] {
@@ -268,7 +267,6 @@ static CreateTextureBrush(bitmap, wrapMode := 0, x := unset, y := unset, width :
 }
 
 class TextureBrush extends GDIp.SolidBrush {
-	Class := "Brush"
 
 	;-------------- Property ------------------------------------------------------;
 
@@ -410,17 +408,16 @@ class TextureBrush extends GDIp.SolidBrush {
 
 ;-------------  PathBrush  -----------------------------------------------------;
 
-;* GDIp.CreatePathBrush(objects*)
+;* GDIp.CreatePathBrush(objects*[, wrapMode])
 ;* Parameter:
 	;* [Object]* objects
+	;* [Integer] wrapMode - See WrapMode enumeration.
 ;* Return:
 	;* [Brush]
 static CreatePathBrush(objects*)  {
-	if (IsNumber(objects[(length := objects.Length) - 1])) {
-		wrapMode := objects.Pop(), length--
-	}
+	wrapMode := (IsNumber(objects[-1])) ? (objects.Pop()) : (0)
 
-	for index, object in (points := Structure(length*8), objects) {
+	for index, object in (points := Structure((length := objects.Length)*8), objects) {
 		points.NumPut(index*8, "Float", object.x, "Float", object.y)
 	}
 
@@ -447,7 +444,6 @@ static CreatePathBrushFromPath(path) {
 }
 
 class PathBrush extends GDIp.SolidBrush {
-	Class := "Brush"
 
 	;-------------- Property ------------------------------------------------------;
 
@@ -606,7 +602,7 @@ class PathBrush extends GDIp.SolidBrush {
 			throw (ErrorFromStatus(status))
 		}
 
-		return (Format("0x{:08X}", color))
+		return (color)
 	}
 
 	;* pathBrush.SetCenterColor(color)
@@ -654,11 +650,11 @@ class PathBrush extends GDIp.SolidBrush {
 	;* Parameter:
 		;* [Integer]* colors
 	SetSurroundColors(colors*) {
-		for index, color in (struct := Structure(colors.Length*4), colors) {
+		for index, color in (struct := Structure((length := colors.Length)*4), colors) {
 			struct.NumPut(index*4, "UInt", color)
 		}
 
-		if (status := DllCall("Gdiplus\GdipSetPathGradientSurroundColorsWithCount", "Ptr", this.Ptr, "Ptr", struct.Ptr, "Int*", &index, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetPathGradientSurroundColorsWithCount", "Ptr", this.Ptr, "Ptr", struct.Ptr, "Int*", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -875,7 +871,6 @@ static CreateLinearBrushFromRectWithAngle(x, y, width, height, color1, color2, a
 }
 
 class LinearBrush extends GDIp.SolidBrush {
-	Class := "Brush"
 
 	;-------------- Property ------------------------------------------------------;
 
@@ -901,7 +896,7 @@ class LinearBrush extends GDIp.SolidBrush {
 			throw (ErrorFromStatus(status))
 		}
 
-		return ([Format("0x{:08X}", colors.NumGet(0, "UInt")), Format("0x{:08X}", colors.NumGet(4, "UInt"))])
+		return ([colors.NumGet(0, "UInt"), colors.NumGet(4, "UInt")])
 	}
 
 	;* linearBrush.SetColor(color1, color2)

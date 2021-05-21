@@ -37,14 +37,22 @@
 	0x001A400E = PixelFormat64bppPARGB
 
 ;* enum RotateFlipType  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-rotatefliptype
-	0 = RotateNoneFlipNone || Rotate180FlipXY
-	1 = Rotate90FlipNone || Rotate270FlipXY
-	2 = Rotate180FlipNone || RotateNoneFlipXY
-	3 = Rotate270FlipNone || Rotate90FlipXY
-	4 = RotateNoneFlipX || Rotate180FlipY
-	5 = Rotate90FlipX || Rotate270FlipY
-	6 = Rotate180FlipX || RotateNoneFlipY
-	7 = Rotate270FlipX || Rotate90FlipY
+	0 = RotateNoneFlipNone
+	1 = Rotate90FlipNone
+	2 = Rotate180FlipNone
+	3 = Rotate270FlipNone
+	4 = RotateNoneFlipX
+	5 = Rotate90FlipX
+	6 = Rotate180FlipX
+	7 = Rotate270FlipX
+	RotateNoneFlipY = Rotate180FlipX
+	Rotate90FlipY = Rotate270FlipX
+	Rotate180FlipY = RotateNoneFlipX
+	Rotate270FlipY = Rotate90FlipX
+	RotateNoneFlipXY = Rotate180FlipNone
+	Rotate90FlipXY = Rotate270FlipNone
+	Rotate180FlipXY = RotateNoneFlipNone
+	Rotate270FlipXY = Rotate90FlipNone
 */
 
 ;* GDIp.CreateBitmap(width, height[, pixelFormat, stride, scan0])
@@ -132,7 +140,7 @@ static CreateBitmapFromScreen(params*) {
 
 	GDI.BitBlt(DC, 0, 0, width, height, GetDC(), x, y, 0x40CC0020)  ;? 0x40CC0020 = SRCCOPY | CAPTUREBLT
 
-	if (status := DllCall("Gdiplus\GdipCreateBitmapFromHBITMAP", "Ptr", DC.Reset("__Bitmap"), "Ptr", 0, "Ptr*", &(pBitmap := 0), "Int")) {
+	if (status := DllCall("Gdiplus\GdipCreateBitmapFromHBITMAP", "Ptr", bitmap.Handle, "Ptr", 0, "Ptr*", &(pBitmap := 0), "Int")) {
 		throw (ErrorFromStatus(status))
 	}
 
@@ -149,8 +157,6 @@ static CreateBitmapFromScreen(params*) {
 ;* Return:
 	;* [Bitmap]
 static CreateBitmapFromWindow(hWnd, client := True) {
-	hWnd := RegExReplace(hWnd, "i)ahk_id\s?")
-
 	if (DllCall("User32\IsIconic", "Ptr", hWnd, "UInt")) {
 		DllCall("User32\ShowWindow", "ptr", hWnd, "Int", 4)  ;* Restore the window if it is minimized as it must be visible for capture.
 	}
@@ -158,7 +164,7 @@ static CreateBitmapFromWindow(hWnd, client := True) {
 	static rect := Structure.CreateRect(0, 0, 0, 0, "Int")
 
 	if (client) {
-		if (!DllCall("User32\GetClientRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt")) {
+		if (!(DllCall("User32\GetClientRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt"))) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}
@@ -176,7 +182,7 @@ static CreateBitmapFromWindow(hWnd, client := True) {
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
 
-	if (status := DllCall("Gdiplus\GdipCreateBitmapFromHBITMAP", "Ptr", DC.Reset("__Bitmap"), "Ptr", 0, "Ptr*", &(pBitmap := 0), "Int")) {
+	if (status := DllCall("Gdiplus\GdipCreateBitmapFromHBITMAP", "Ptr", bitmap.Handle, "Ptr", 0, "Ptr*", &(pBitmap := 0), "Int")) {
 		throw (ErrorFromStatus(status))
 	}
 
@@ -272,7 +278,7 @@ class Bitmap {
 			throw (ErrorFromStatus(status))
 		}
 
-		return (Format("0x{:08X}", flags))
+		return (flags)
 	}
 
 	Pixel[params*] {
@@ -297,7 +303,7 @@ class Bitmap {
 			DllCall(GdipBitmapGetPixel, "Ptr", this.Ptr, "Int", x, "Int", y, "UInt*", color)  ;~ No error handling.
 		}
 
-		return (Format("0x{:08X}", color))
+		return (color)
 	}
 
 	;* bitmap.SetPixel([x, y, width, height, ]color)
@@ -372,7 +378,7 @@ class Bitmap {
 			throw (ErrorFromStatus(status))
 		}
 
-		return (Format("0x{:08X}", pixelFormat))
+		return (pixelFormat)
 	}
 
 	;* bitmap.GetThumbnail(width, height)
