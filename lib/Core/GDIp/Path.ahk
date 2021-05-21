@@ -92,6 +92,19 @@ class Path {
 		return ({x: point.NumGet(0, "Float"), y: point.NumGet(4, "Float")})
 	}
 
+	;* path.GetWorldBounds()
+	;* Return:
+		;* [Object]
+	GetWorldBounds() {
+		static rect := Structure.CreateRect(0, 0, "Float")
+
+		if (status := DllCall("gdiplus\GdipGetPathWorldBounds", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
+	}
+
 	PointCount {
 		Get {
 			return (this.GetPointCount())
@@ -119,7 +132,7 @@ class Path {
 	;* Return:
 		;* [Array]
 	GetPoints() {
-		if (status := DllCall("Gdiplus\GdipGetPathPoints", "Ptr", this.Ptr, "Ptr", (struct := Structure(count*8)).Ptr, "Int*", &(count := this.GetPointCount()), "Int")) {
+		if (status := DllCall("Gdiplus\GdipGetPathPoints", "Ptr", this.Ptr, "Ptr", (struct := Structure((count := this.GetPointCount())*8)).Ptr, "Int*", &count, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 

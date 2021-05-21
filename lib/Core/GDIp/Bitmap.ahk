@@ -56,7 +56,7 @@
 	;* [Structure] scan0
 ;* Return:
 	;* [Bitmap]
-CreateBitmap(width, height, pixelFormat := 0x26200A, stride := 0, scan0 := 0) {
+static CreateBitmap(width, height, pixelFormat := 0x26200A, stride := 0, scan0 := 0) {
 	if (status := DllCall("Gdiplus\GdipCreateBitmapFromScan0", "UInt", width, "UInt", height, "UInt", stride, "UInt", pixelFormat, "Ptr", scan0, "Ptr*", &(pBitmap := 0), "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-bitmap(int_int_int_pixelformat_byte)
 		throw (ErrorFromStatus(status))
 	}
@@ -73,10 +73,10 @@ CreateBitmap(width, height, pixelFormat := 0x26200A, stride := 0, scan0 := 0) {
 	;* [Integer] useICM
 ;* Return:
 	;* [Bitmap]
-CreateBitmapFromFile(file, useICM := False) {
+static CreateBitmapFromFile(file, useICM := False) {
 	if (status := (useICM)
-		? (DllCall("Gdiplus\GdipCreateBitmapFromFileICM", "Ptr", &file, "Ptr*", &(pBitmap := 0), "Int"))
-		: (DllCall("Gdiplus\GdipCreateBitmapFromFile", "Ptr", &file, "Ptr*", &(pBitmap := 0), "Int"))) {
+		? (DllCall("Gdiplus\GdipCreateBitmapFromFileICM", "Ptr", StrPtr(file), "Ptr*", &(pBitmap := 0), "Int"))
+		: (DllCall("Gdiplus\GdipCreateBitmapFromFile", "Ptr", StrPtr(file), "Ptr*", &(pBitmap := 0), "Int"))) {
 		throw (ErrorFromStatus(status))
 	}
 
@@ -93,7 +93,7 @@ CreateBitmapFromFile(file, useICM := False) {
 	;* [Integer] height
 ;* Return:
 	;* [Bitmap]
-CreateBitmapFromGraphics(graphics, width, height) {
+static CreateBitmapFromGraphics(graphics, width, height) {
 	if (status := DllCall("Gdiplus\GdipCreateBitmapFromGraphics", "Int", width, "Int", height, "Ptr", graphics.Ptr, "Ptr*", &(pBitmap := 0), "Int")) {
 		throw (ErrorFromStatus(status))
 	}
@@ -114,7 +114,7 @@ CreateBitmapFromGraphics(graphics, width, height) {
 	;* [Integer] height
 ;* Return:
 	;* [Bitmap]
-CreateBitmapFromScreen(params*) {
+static CreateBitmapFromScreen(params*) {
 	switch (params.Length) {
 		case 4:
 			x := params[0], y := params[1]
@@ -148,7 +148,7 @@ CreateBitmapFromScreen(params*) {
 	;* [Integer] client
 ;* Return:
 	;* [Bitmap]
-CreateBitmapFromWindow(hWnd, client := True) {
+static CreateBitmapFromWindow(hWnd, client := True) {
 	hWnd := RegExReplace(hWnd, "i)ahk_id\s?")
 
 	if (DllCall("User32\IsIconic", "Ptr", hWnd, "UInt")) {
@@ -307,56 +307,56 @@ class Bitmap {
 		;* [Integer] width
 		;* [Integer] height
 		;* [Integer] color
-;	SetPixel(params*) {
-;		color := params.Pop()
-;
-;		if (this.HasProp("BitmapData")) {
-;			stride := this.BitmapData.NumGet(8, "Int"), scan0 := this.BitmapData.NumGet(16, "Ptr")
-;
-;			switch (params.Length) {  ;~ The Stride data member is negative if the pixel data is stored bottom-up.
-;				case 2:
-;					Numput("UInt", color, scan0 + Math.Max(params[0], 0)*4 + Math.Max(params[1], 0)*stride)
-;				case 4:
-;					reset := Math.Max(params[0], 0)
-;						, y := Math.Max(params[1], 0), width := Math.Clamp(params[2], 0, this.BitmapData.NumGet(0, "UInt")) - reset, height := Math.Clamp(params[3], 0, this.BitmapData.NumGet(4, "UInt")) - y
-;				default:
-;					reset := 0
-;						, y := 0, width := this.BitmapData.NumGet(0, "UInt"), height := this.BitmapData.NumGet(4, "UInt")
-;			}
-;
-;			loop (height) {
-;				loop (x := reset, width) {
-;					Numput("UInt", color, scan0 + 4*x++ + y*stride)
-;				}
-;
-;				y++
-;			}
-;		}
-;		else {
-;			static GdipBitmapSetPixel := DllCall("Kernel32\GetProcAddress", "Ptr", handle := DllCall("Kernel32\LoadLibrary", "Str", "Gdiplus", "Ptr"), "AStr", "GdipBitmapSetPixel", "Ptr") + !DllCall("Kernel32\FreeLibrary", "Ptr", handle, "UInt")
-;
-;			switch (params.Length) {
-;				case 2:
-;					DllCall(GdipBitmapSetPixel, "Ptr", this.Ptr, "Int", Math.Max(params[0], 0), "Int", Math.Max(params[1], 0), "Int", color)
-;				case 4:
-;					reset := Math.Max(params[0], 0)
-;						, y := Math.Max(params[1], 0), width := Math.Clamp(params[2], 0, this.Width) - reset, height := Math.Clamp(params[3], 0, this.Height) - y
-;				default:
-;					reset := 0
-;						, y := 0, width := this.Width, height := this.Height
-;			}
-;
-;			pBitmap := this.Ptr
-;
-;			loop (height) {
-;				loop (x := reset, width) {
-;					DllCall(GdipBitmapSetPixel, "Ptr", pBitmap, "Int", x++, "Int", y, "UInt", color)
-;				}
-;
-;				y++
-;			}
-;		}
-;	}
+	SetPixel(params*) {
+		color := params.Pop()
+
+		if (this.HasProp("BitmapData")) {
+			stride := this.BitmapData.NumGet(8, "Int"), scan0 := this.BitmapData.NumGet(16, "Ptr")
+
+			switch (params.Length) {
+				case 2:
+					Numput("UInt", color, scan0 + Math.Max(params[0], 0)*4 + Math.Max(params[1], 0)*stride)
+				case 4:
+					reset := Math.Max(params[0], 0)
+						, y := Math.Max(params[1], 0), width := Math.Clamp(params[2], 0, this.BitmapData.NumGet(0, "UInt")) - reset, height := Math.Clamp(params[3], 0, this.BitmapData.NumGet(4, "UInt")) - y
+				default:
+					reset := 0
+						, y := 0, width := this.BitmapData.NumGet(0, "UInt"), height := this.BitmapData.NumGet(4, "UInt")
+			}
+
+			loop (height) {
+				loop (x := reset, width) {
+					Numput("UInt", color, scan0 + 4*x++ + y*stride) ;~ The Stride data member is negative if the pixel data is stored bottom-up.
+				}
+
+				y++
+			}
+		}
+		else {
+			static GdipBitmapSetPixel := DllCall("Kernel32\GetProcAddress", "Ptr", handle := DllCall("Kernel32\LoadLibrary", "Str", "Gdiplus", "Ptr"), "AStr", "GdipBitmapSetPixel", "Ptr") + !DllCall("Kernel32\FreeLibrary", "Ptr", handle, "UInt")
+
+			switch (params.Length) {
+				case 2:
+					DllCall(GdipBitmapSetPixel, "Ptr", this.Ptr, "Int", Math.Max(params[0], 0), "Int", Math.Max(params[1], 0), "Int", color)
+				case 4:
+					reset := Math.Max(params[0], 0)
+						, y := Math.Max(params[1], 0), width := Math.Clamp(params[2], 0, this.Width) - reset, height := Math.Clamp(params[3], 0, this.Height) - y
+				default:
+					reset := 0
+						, y := 0, width := this.Width, height := this.Height
+			}
+
+			pBitmap := this.Ptr
+
+			loop (height) {
+				loop (x := reset, width) {
+					DllCall(GdipBitmapSetPixel, "Ptr", pBitmap, "Int", x++, "Int", y, "UInt", color)
+				}
+
+				y++
+			}
+		}
+	}
 
 	PixelFormat {
 		Get {
@@ -409,18 +409,18 @@ class Bitmap {
 		;* [Integer] lockMode - See ImageLockMode enumeration.
 	;* Return:
 		;* [Integer] - Boolean value that indicates if the bitmap was locked.
-	LockBits(x := unset, y := unset, width := unset, height := unset, lockMode := 0x0003, pixelFormat := unset) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
+	LockBits(x := 0, y := 0, width := unset, height := unset, lockMode := 0x0003, pixelFormat := unset) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
 		if (!(this.HasProp("BitmapData"))) {
 			if (!(IsSet(width))) {
 				if (!(IsSet(height))) {
 					DllCall("Gdiplus\GdipGetImageDimension", "Ptr", this.Ptr, "Float*", &(width := 0), "Float*", &(height := 0))
 				}
 				else {
-					DllCall("Gdiplus\GdipGetImageWidth", "Ptr", this.Ptr, "UInt*", &(width := 0), "Int")
+					DllCall("Gdiplus\GdipGetImageWidth", "Ptr", this.Ptr, "UInt*", &(width := 0))
 				}
 			}
 			else if (!(IsSet(height))) {
-				DllCall("Gdiplus\GdipGetImageHeight", "Ptr", this.Ptr, "UInt*", &(height := 0), "Int")
+				DllCall("Gdiplus\GdipGetImageHeight", "Ptr", this.Ptr, "UInt*", &(height := 0))
 			}
 
 			static bitmapData := Structure.CreateBitmapData()
@@ -429,9 +429,7 @@ class Bitmap {
 				throw (ErrorFromStatus(status))
 			}
 
-			this.BitmapData := bitmapData  ;~ LockBits returning too much data: https://github.com/dotnet/runtime/issues/28600.
-
-			return (True)
+			return (!!(this.BitmapData := bitmapData))  ;~ LockBits returning too much data: https://github.com/dotnet/runtime/issues/28600.
 		}
 
 		return (False)
@@ -442,7 +440,7 @@ class Bitmap {
 		;* [Integer] - Boolean value that indicates if the bitmap was unlocked.
 	UnlockBits() {
 		if (this.HasProp("BitmapData")) {
-			if (status := DllCall("Gdiplus\GdipBitmapUnlockBits", "Ptr", this.Ptr, "Ptr", this.Remove("BitmapData").Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+			if (status := DllCall("Gdiplus\GdipBitmapUnlockBits", "Ptr", this.Ptr, "Ptr", this.DeleteProp("BitmapData").Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
 				throw (ErrorFromStatus(status))
 			}
 
@@ -465,7 +463,7 @@ class Bitmap {
 	;* Parameter:
 		;* [String] file
 	SaveToFile(file) {
-		if (status := DllCall("Gdiplus\GdipGetImageEncodersSize", "UInt*", &(number := 0), "UInt*", &(size := 0)), "Int") {
+		if (status := DllCall("Gdiplus\GdipGetImageEncodersSize", "UInt*", &(number := 0), "UInt*", &(size := 0), "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
@@ -473,9 +471,7 @@ class Bitmap {
 			throw (ErrorFromStatus(status))
 		}
 
-		RegExMatch(file, "\.\w+$", extension), extension := extension[0]
-
-		loop (number) {
+		loop (extension := RegExReplace(file, ".*(\.\w+)$", "$1"), number) {
 			if (InStr(StrGet(imageCodecInfo.NumGet(A_PtrSize*3 + (offset := (48 + A_PtrSize*7)*(A_Index - 1)) + 32, "Ptr"), "UTF-16"), "*" . extension)) {
 				pCodec := imageCodecInfo.Ptr + offset  ;* Get the pointer to the matching encoder.
 
@@ -487,7 +483,7 @@ class Bitmap {
 			throw (Error("Could not find a matching encoder for the specified file format."))
 		}
 
-		if (status := DllCall("Gdiplus\GdipSaveImageToFile", "Ptr", this.Ptr, "Ptr", &file, "Ptr", pCodec, "UInt", 0, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSaveImageToFile", "Ptr", this.Ptr, "Ptr", StrPtr(file), "Ptr", pCodec, "UInt", 0, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -499,7 +495,7 @@ class Bitmap {
 	;* [Graphics] graphics
 ;* Return:
 	;* [CachedBitmap]
-CreateCachedBitmap(bitmap, graphics) {
+static CreateCachedBitmap(bitmap, graphics) {
 	if (status := DllCall("Gdiplus\GdipCreateCachedBitmap", "Ptr", bitmap.Ptr, "Ptr", graphics.Ptr, "Ptr*", &(pCachedBitmap := 0), "Int")) {
 		throw (ErrorFromStatus(status))
 	}

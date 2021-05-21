@@ -2,6 +2,11 @@
 ;======================================================  Setting  ==============;
 
 #Requires AutoHotkey v2.0-a134-d3d43350
+#DllLoad "Gdiplus"
+
+;======================================================  Include  ==============;
+
+#Include %A_LineFile%\..\..\Math\Math.ahk
 
 ;============== Function ======================================================;
 
@@ -94,21 +99,17 @@ class GDIp {
 
 	;* GDIp.Startup()
 	static Startup() {
-		if (!(this.HasProp("Token"))) {
-			LoadLibrary("Gdiplus")
-
-			static input := Structure.CreateGDIplusStartupInput()
-
-			if (status := DllCall("Gdiplus\GdiplusStartup", "Ptr*", &(pToken := 0), "Ptr", input.Ptr, "Ptr", 0, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusinit/nf-gdiplusinit-gdiplusstartup
-				throw (ErrorFromStatus(status))
-			}
-
-			this.Token := pToken
-
-			return (True)
+		if (this.HasProp("Token")) {
+			return (False)
 		}
 
-		return (False)
+		static input := Structure.CreateGDIplusStartupInput()
+
+		if (status := DllCall("Gdiplus\GdiplusStartup", "Ptr*", &(pToken := 0), "Ptr", input.Ptr, "Ptr", 0, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusinit/nf-gdiplusinit-gdiplusstartup
+			throw (ErrorFromStatus(status))
+		}
+
+		return (!!(this.Token := pToken))
 	}
 
 	;* GDIp.Shutdown()
@@ -118,7 +119,7 @@ class GDIp {
 				throw (ErrorFromStatus(status))
 			}
 
-			return (FreeLibrary("Gdiplus"))
+			return (True)
 		}
 
 		return (False)
@@ -269,7 +270,7 @@ class GDIp {
 		}
 	}
 
-	;----------------------------------------------------- FontFamily -------------;
+	;----------------------------------------------------- FontFamily -------------;  ;~ A font family is a group of fonts that have the same typeface but different styles.
 
 	;* GDIp.CreateFontFamilyFromName([name, fontCollection])
 	;* Parameter:
@@ -278,7 +279,7 @@ class GDIp {
 	;* Return:
 		;* [FontFamily]
 	static CreateFontFamilyFromName(name := "Fira Code Retina", fontCollection := 0) {
-		if (status := DllCall("Gdiplus\GdipCreateFontFamilyFromName", "Ptr", &name, "Ptr", fontCollection, "Ptr*", &(pFontFamily := 0), "Int")) {
+		if (status := DllCall("Gdiplus\GdipCreateFontFamilyFromName", "Ptr", StrPtr(name), "Ptr", fontCollection, "Ptr*", &(pFontFamily := 0), "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
@@ -309,24 +310,24 @@ class GDIp {
 
 		;-------------- Property ------------------------------------------------------;
 
-;		Name {
-;			Get {
-;				return (this.GetName())
-;			}
-;		}
-;
+		Name {
+			Get {
+				return (this.GetName())
+			}
+		}
+
 		;* fontFamily.GetName()
+		;* Parameter:
+			;* [Integer] language - See https://robotics.ee.uwa.edu.au/courses/robotics/project/festo/(D)%20FST4.21-110802/SDK/Localization/LANGID.H.
 		;* Return:
-			;* [String]
-;		GetName() {
-;			VarSetCapacity(fontName, 80)
-;
-;			if (status := DllCall("Gdiplus\GdipGetFamilyName", "Ptr", this.Ptr, "Ptr", &fontName, "Int")) {
-;				throw (ErrorFromStatus(status))
-;			}
-;
-;			return (fontName)
-;		}
+			;* [String] - The name of this font family.
+		GetName(language := 0x00) {
+			if (status := DllCall("Gdiplus\GdipGetFamilyName", "Ptr", this.Ptr, "Ptr", (name := Structure(64)).Ptr, "UShort", language, "Int")) {  ;? LF_FACESIZE = 32
+				throw (ErrorFromStatus(status))
+			}
+
+			return (name.StrGet())
+		}
 	}
 
 	;-------------------------------------------------------- Font ----------------;
@@ -462,11 +463,11 @@ class GDIp {
 
 		;* font.GetHeight([graphics])
 		;* Parameter:
-			;* [Graphics] graphics
+			;* [Graphics] graphics - A Graphics object whose unit and vertical resolution are used in the height calculation.
 		;* Return:
 			;* [Float]
 		GetHeight(graphics := 0) {
-			if (status := DllCall("Gdiplus\GdipGetFontHeight", "Ptr", this.Ptr, "Ptr", graphics.Ptr, "Float*", &(height := 0), "Int")) {
+			if (status := DllCall("Gdiplus\GdipGetFontHeight", "Ptr", this.Ptr, "Ptr", graphics, "Float*", &(height := 0), "Int")) {
 				throw (ErrorFromStatus(status))
 			}
 

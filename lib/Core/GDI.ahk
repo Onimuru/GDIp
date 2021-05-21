@@ -262,7 +262,7 @@ Class GDI {
 	;* Return:
 		;* [HBitmap]
 	static CreateBitmap(width, height, bitCount := 32, planes := 1, &pBits := 0) {
-		if (!(hBitmap := DllCall("Gdi32\CreateBitmap", "Int", width, "Int", height, "UInt", planes, "UInt", bitCount, "Ptr", pBits, "Ptr"))) {   ;~ DDB (monochrome)
+		if (!(hBitmap := DllCall("Gdi32\CreateBitmap", "Int", width, "Int", height, "UInt", planes, "UInt", bitCount, "Ptr", pBits, "Ptr"))) {  ;~ DDB (monochrome)
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 

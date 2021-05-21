@@ -116,7 +116,6 @@ class Graphics {
 	States {
 		Get {
 			this.DefineProp("States", {Value: object := []})  ;* Only initialize this object as needed.
-
 			return (object)
 		}
 	}
@@ -128,7 +127,6 @@ class Graphics {
 
 		Set {
 			this.SetCompositingMode(value)
-
 			return (value)
 		}
 	}
@@ -466,9 +464,30 @@ class Graphics {
 
 	;* graphics.Flush(intention)
 	;* Parameter:
-		;* [Integer] intention - See FlushIntention enumeration.
+		;* [Integer] intention - Element that specifies whether pending operations are flushed immediately (not executed) or executed as soon as possible. See FlushIntention enumeration.
 	Flush(intention) {
 		if (status := DllCall("Gdiplus\GdipFlush", "Ptr", this.Ptr, "Int", intention, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+
+	;* Note:
+		;~ When you call GdipEndContainer, all information blocks placed on the stack (by GdipSaveGraphics or by GdipBeginContainer) after the corresponding call to GdipBeginContainerare removed from the stack. Likewise, when you call GdipRestoreGraphics, all information blocks placed on the stack (by GdipSaveGraphics or by GdipBeginContainer) after the corresponding call to GdipSaveGraphics are removed from the stack.
+	Begin(dstRect := unset, srcRect := unset, unit := 2) {
+		if (IsSet(dstRect) && IsSet(srcRect)) {
+			if (status := DllCall("Gdiplus\GdipBeginContainer", "Ptr", this.Ptr, "Ptr", dstRect, "Ptr", srcRect, "Int", unit, "UInt*", &(state := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+		else if (status := DllCall("Gdiplus\GdipBeginContainer2", "Ptr", this.Ptr, "UInt*", &(state := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (state)
+	}
+
+	End(state) {
+		if (status := DllCall("Gdiplus\GdipEndContainer", "Ptr", this.Ptr, "UInt", state, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -516,9 +535,9 @@ class Graphics {
 		;* [Object] sourceObject
 		;* [Integer] unit - See Unit enumeration.
 		;* [ImageAttributes] imageAttributes
-	DrawBitmap(bitmap, destinationObject := unset, sourceObject := unset, unit := 2, imageAttributes := unset) {
+	DrawBitmap(bitmap, destinationObject := unset, sourceObject := unset, unit := 2, imageAttributes := 0) {
 		if (status := (IsSet(sourceObject))
-			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Float", sourceObject.x, "Float", sourceObject.y, "Float", sourceObject.Width, "Float", sourceObject.Height, "Int", unit, "Ptr", (IsSet(imageAttributes)) ? (imageAttributes.Ptr) : (0), "Ptr", 0, "Ptr", 0, "Int"))
+			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Float", sourceObject.x, "Float", sourceObject.y, "Float", sourceObject.Width, "Float", sourceObject.Height, "Int", unit, "Ptr", imageAttributes, "Ptr", 0, "Ptr", 0, "Int"))
 			: ((IsSet(destinationObject))
 				? (DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Int"))
 				: (DllCall("Gdiplus\GdipDrawImage", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", 0, "Float", 0, "Int")))) {
@@ -531,11 +550,9 @@ class Graphics {
 		;* [CachedBitmap] bitmap
 		;* [Object] object
 	DrawCachedBitmap(bitmap, object := unset) {
-		if (!(IsSet(object))) {
-			object := {x: 0, y:0}
-		}
-
-		if (status := DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", object.x, "Int", object.y, "Int")) {
+		if (status := (IsSet(object))
+			? (DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", object.x, "Int", object.y, "Int"))
+			: (DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", 0, "Int", 0, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
