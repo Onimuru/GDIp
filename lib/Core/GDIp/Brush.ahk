@@ -7,16 +7,16 @@
 	4 = BrushTypeLinearGradient
 
 ;* enum HatchStyle  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-hatchstyle
-	0 = HatchStyleHorizontal || HatchStyleMin
-	1 = HatchStyleVertical
-	2 = HatchStyleForwardDiagonal
-	3 = HatchStyleBackwardDiagonal
-	4 = HatchStyleCross || HatchStyleLargeGrid
-	5 = HatchStyleDiagonalCross
-	6 = HatchStyle05Percent
-	7 = HatchStyle10Percent
-	8 = HatchStyle20Percent
-	9 = HatchStyle25Percent
+	 0 = HatchStyleHorizontal || HatchStyleMin
+	 1 = HatchStyleVertical
+	 2 = HatchStyleForwardDiagonal
+	 3 = HatchStyleBackwardDiagonal
+	 4 = HatchStyleCross || HatchStyleLargeGrid
+	 5 = HatchStyleDiagonalCross
+	 6 = HatchStyle05Percent
+	 7 = HatchStyle10Percent
+	 8 = HatchStyle20Percent
+	 9 = HatchStyle25Percent
 	10 = HatchStyle30Percent
 	11 = HatchStyle40Percent
 	12 = HatchStyle50Percent

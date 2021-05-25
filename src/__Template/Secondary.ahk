@@ -1,52 +1,51 @@
 ﻿;============ Auto-execute ====================================================;
 ;======================================================  Setting  ==============;
 
-#InstallKeybdHook
-#InstallMouseHook
-#KeyHistory, 0
-#NoEnv
 ;#NoTrayIcon
-;#Persistent
-#SingleInstance, Force
-#Warn, ClassOverwrite, MsgBox
+#SingleInstance
+#Warn All, MsgBox
+#Warn LocalSameAsGlobal, Off
+#WinActivateForce
 
-CoordMode, Mouse, Screen
-CoordMode, ToolTip, Screen
-;DetectHiddenWindows, On
-ListLines, Off
-Process, Priority, , High
-SendMode, Input
-SetBatchLines, -1
-SetTitleMatchMode, 2
-SetWorkingDir, % A_ScriptDir . "\..\.."
+CoordMode("Mouse", "Screen")
+CoordMode("ToolTip", "Screen")
+;DetectHiddenWindows(True)
+InstallKeybdHook(True)
+InstallMouseHook(True)
+ListLines(False)
+Persistent(True)
+ProcessSetPriority("High")
+SetKeyDelay(-1, -1)
+SetWinDelay(-1)
+SetWorkingDir(A_ScriptDir . "\..\..")
 
 ;==============  Include  ======================================================;
 
-#Include, %A_ScriptDir%\..\..\lib\Core.ahk
-#Include, %A_ScriptDir%\..\..\lib\Assert\Assert.ahk
+#Include %A_ScriptDir%\..\..\lib\Core.ahk
 
-#Include, %A_ScriptDir%\..\..\lib\General\General.ahk
+#Include %A_ScriptDir%\..\..\lib\Console\Console.ahk
+#Include %A_ScriptDir%\..\..\lib\General\General.ahk
 
-#Include, %A_ScriptDir%\..\..\lib\Color\Color.ahk
-#Include, %A_ScriptDir%\..\..\lib\Math\Math.ahk
-#Include, %A_ScriptDir%\..\..\lib\Geometry.ahk
+#Include %A_ScriptDir%\..\..\lib\Color\Color.ahk
+#Include %A_ScriptDir%\..\..\lib\Math\Math.ahk
+;#Include %A_ScriptDir%\..\..\lib\Geometry.ahk
 
 ;======================================================== Menu ================;
 
-Menu, Tray, Icon, % A_WorkingDir . "\res\Image\Icon\2.ico"
+TraySetIcon(A_WorkingDir . "\res\Image\Icon\2.ico")
 
 ;====================================================== Variable ==============;
 
-Global Debug := Settings.Debug
-	, WindowMessage := DllCall("RegisterWindowMessage", "Str", "WindowMessage", "UInt")
+global A_Debug := IniRead(A_WorkingDir . "\cfg\Settings.ini", "Debug", "Debug")
+	, A_WindowMessage := DllCall("RegisterWindowMessage", "Str", "WindowMessage", "UInt")
 
 ;======================================================== GDIp ================;
 
 ;======================================================== Hook ================;
 
-OnMessage(WindowMessage, "WindowMessage")
+OnMessage(A_WindowMessage, __WindowMessage)
 
-OnExit("Exit")
+OnExit(__Exit)
 
 ;======================================================== Test ================;
 
@@ -56,32 +55,31 @@ exit
 
 ;=============== Hotkey =======================================================;
 
-#If (WinActive(A_ScriptName))
+#HotIf (WinActive(A_ScriptName) || WinActive("ahk_group Library"))
 
-	$F10::
+	$F10:: {
 		ListVars
-		return
+	}
 
-	~$^s::
-		Critical, On
+	~$^s:: {
+		Critical(True)
 
-		Sleep, 200
+		Sleep(200)
 		Reload
+	}
 
-		return
+#HotIf
 
-#If
+#HotIf (A_Debug)
 
-#If (Debug)
-
-#If
+#HotIf
 
 ;===============  Label  =======================================================;
 
 ;============== Function ======================================================;
 ;======================================================== Hook ================;
 
-WindowMessage(wParam := 0, lParam := 0) {
+__WindowMessage(wParam := 0, lParam := 0, msg := 0, hWnd := 0) {
 	switch (wParam) {
 		case 0xCE01:
 			MsgBox(111)
@@ -93,38 +91,29 @@ WindowMessage(wParam := 0, lParam := 0) {
 			MsgBox(444)
 		case 0xCE05:
 			MsgBox(555)
-		case -1:
-			IniRead, Debug, % A_WorkingDir . "\cfg\Settings.ini", Debug, Debug
-
-			if (!Debug) {
-				ToolTip, , , , 20
+		case 0x1000:
+			if (!(A_Debug := IniRead(A_WorkingDir . "\cfg\Settings.ini", "Debug", "Debug"))) {
+				ToolTip("", , , 20)
 			}
 
-			return (0)
+			return (True)
 	}
 
 	return (-1)
 }
 
-Exit() {
-	Critical, On
+__Exit(exitReason, exitCode) {
+	Critical(True)
 
 	ExitApp
 }
 
 ;=======================================================  Other  ===============;
 
-;===============  Class  =======================================================;
+GetTime() {
+	DllCall("QueryPerformanceCounter", "Int64*", &(current := 0))
 
-Class Settings {
-	Debug[] {
-		Get {
-			Local
-
-			IniRead, debug, % A_ScriptDir . "\..\cfg\Settings.ini", Debug, Debug
-			ObjRawSet(this, "Debug", debug)
-
-			return (debug)
-		}
-	}
+	return (current)
 }
+
+;===============  Class  =======================================================;

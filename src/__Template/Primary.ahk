@@ -1,91 +1,77 @@
 ﻿;============ Auto-execute ====================================================;
-;=======================================================  Admin  ===============;
-
-if (!A_IsAdmin || !(DllCall("GetCommandLine", "Str") ~= " /restart(?!\S)")) {
-	try {
-		Run, % Format("*RunAs {}", (A_IsCompiled) ? (A_ScriptFullPath . " /restart") : (A_AhkPath . " /restart " . A_ScriptFullPath))
-	}
-
-	ExitApp
-}
-
 ;======================================================  Setting  ==============;
 
-#InstallKeybdHook
-#InstallMouseHook
-#KeyHistory, 0
-#NoEnv
 ;#NoTrayIcon
-;#Persistent
-#SingleInstance, Force
-#Warn, ClassOverwrite, MsgBox
+#SingleInstance
+#Warn All, MsgBox
+#Warn LocalSameAsGlobal, Off
 #WinActivateForce
 
-CoordMode, Mouse, Screen
-CoordMode, ToolTip, Screen
-;DetectHiddenWindows, On
-ListLines, Off
-Process, Priority, , High
-SendMode, Input
-SetBatchLines, -1
-SetKeyDelay, -1, -1
-SetTitleMatchMode, 2
-SetWinDelay, -1
-SetWorkingDir, % A_ScriptDir . "\..\..\.."
+CoordMode("Mouse", "Screen")
+CoordMode("ToolTip", "Screen")
+;DetectHiddenWindows(True)
+InstallKeybdHook(True)
+InstallMouseHook(True)
+ListLines(False)
+Persistent(True)
+ProcessSetPriority("High")
+SetKeyDelay(-1, -1)
+SetWinDelay(-1)
+SetWorkingDir(A_ScriptDir . "\..\..")
 
 ;==============  Include  ======================================================;
 
-#Include, %A_ScriptDir%\..\lib\Core.ahk
-;#Include, %A_ScriptDir%\..\lib\Assert\Assert.ahk
+#Include %A_ScriptDir%\..\..\lib\Core.ahk
 
-#Include, %A_ScriptDir%\..\lib\Console\Console.ahk
-#Include, %A_ScriptDir%\..\lib\String\String.ahk
-#Include, %A_ScriptDir%\..\lib\General\General.ahk
+#Include %A_ScriptDir%\..\..\lib\Console\Console.ahk
+#Include %A_ScriptDir%\..\..\lib\General\General.ahk
 
-#Include, %A_ScriptDir%\..\lib\Color\Color.ahk
-#Include, %A_ScriptDir%\..\lib\Math\Math.ahk
-#Include, %A_ScriptDir%\..\lib\Geometry.ahk
+#Include %A_ScriptDir%\..\..\lib\Color\Color.ahk
+#Include %A_ScriptDir%\..\..\lib\Math\Math.ahk
+;#Include %A_ScriptDir%\..\..\lib\Geometry.ahk
 
 ;======================================================== Menu ================;
 
-Menu, Tray, Icon, % A_WorkingDir . "\res\Image\Icon\___.ico"
+TraySetIcon(A_WorkingDir . "\res\Image\Icon\1.ico")
+
+;=======================================================  Group  ===============;
+
+for i, v in ["Core.ahk", "GDI.ahk", "GDIp.ahk", "Canvas.ahk", "Bitmap.ahk", "Graphics.ahk", "Brush.ahk", "Pen.ahk", "Path.ahk", "Matrix.ahk",
+		"Assert.ahk", "Console.ahk", "General.ahk",
+		"Color.ahk", "Math.ahk", "Geometry.ahk"] {
+	GroupAdd("Library", v)
+}
 
 ;====================================================== Variable ==============;
 
-Global Debug := Setting.Debug
-	, WindowMessage := DllCall("RegisterWindowMessage", "Str", "WindowMessage", "UInt")
+global A_Debug := IniRead(A_WorkingDir . "\cfg\Settings.ini", "Debug", "Debug")
+	, A_WindowMessage := DllCall("RegisterWindowMessage", "Str", "WindowMessage", "UInt")
 
 ;======================================================== GDIp ================;
 
 GDIp.Startup()
 
-Global Canvas := GDIp.CreateCanvas(A_ScreenWidth - (150*2 + 50 + 10), 50, 150*2, 150*2, "+AlwaysOnTop -Caption +ToolWindow +E0x20", "NA", "Canvas", 4, 7)
-	, Brush := [GDIp.CreateSolidBrush(Color.Random(0xFF)), GDIp.CreateLinearBrushFromRect(0, 0, Canvas.Width, Canvas.Height, 0xFF << 24 | Color.Honeydew, 0xFF << 24 | Color.Sienna, 2, 0)]
+global Canvas := GDIp.CreateCanvas(A_ScreenWidth - (150*2 + 50 + 10), 50, 150*2, 150*2, "", "Canvas", 0, "Title", 0, 0, 4, 7)
+	, Brush := [GDIp.CreateSolidBrush(Color("AliceBlue")), GDIp.CreateLinearBrushFromRect(0, 0, Canvas.Width, Canvas.Height, Color("Honeydew"), Color("Sienna"), 2, 0)]
 	, Pen := [GDIp.CreatePenFromBrush(Brush[0]), GDIp.CreatePenFromBrush(Brush[1])]
 
-	, ScriptObject := {"Border": new Rect(0, 0, Canvas.Width, Canvas.Height)
-		, "SpeedRatio": 1.0}
+;	, ScriptObject := {Border: Rect(0, 0, 300, 300)
+	, ScriptObject := {Border: {x: 0, y: 0, Width: 300, Height: 300}
+		, SpeedRatio: 1.0}
 
-	, Started := False
-	, Running := False
-
-;=======================================================  Group  ===============;
-
-for i, v in [A_ScriptName, "Secondary.ahk", "Color.ahk", "Math.ahk", "GDIp.ahk", "Geometry.ahk"] {
-	GroupAdd, % "Editing", % v
-}
+	, Started := False, Running := False
 
 ;======================================================== Hook ================;
 
-OnMessage(WindowMessage, "WindowMessage")
+OnMessage(A_WindowMessage, __WindowMessage)
 
-OnExit("Exit")
+OnExit(__Exit)
 
 ;========================================================  Run  ================;
 
-for i, v in ["Secondary"] {
-	Run, % A_ScriptDir . "\" . v . ".ahk"
-}
+Run(A_ScriptDir . "\Secondary.ahk")
+
+;======================================================== Test ================;
 
 ;=======================================================  Other  ===============;
 
@@ -98,34 +84,33 @@ exit
 
 ;====================================================== Keyboard ==============;
 
-#If (WinActive("ahk_group Editing"))
+#HotIf (WinActive(A_ScriptName) || WinActive("ahk_group Library"))
 
-	$F10::
+	$F10:: {
 		ListVars
-		return
+	}
 
-	~$^s::
-		Critical, On
+	~$^s:: {
+		Critical(True)
 
-		Sleep, 200
+		Sleep(200)
 		Reload
+	}
 
-		return
+#HotIf
 
-#If
+#HotIf (A_Debug)
 
-#If (Debug)
-
-	~*$RShift::
-		if (!Running) {
+	~*$RShift:: {
+		if (!(Running)) {
 			Update(1000/Settings.TargetFPS)
 			Draw()
 		}
 
 		KeyWait("RShift")
-		return
+	}
 
-	$#::
+	$#:: {
 		if (KeyWait("#", "T1")) {
 			if (Started) {
 				Stop()
@@ -137,60 +122,47 @@ exit
 			KeyWait("#")
 		}
 		else {
-			Send, {#}
+			Send("{#}")
 		}
-
-		return
-
-#If
-
-~$Esc::
-	if (KeyWait("Esc", "T1")) {
-		Exit()
 	}
 
-	return
+#HotIf
 
-~$Left::
+~$Left:: {
 	ScriptObject.SpeedRatio /= 2
 
 	KeyWait("Left")
-	return
+}
 
-~$Right::
+~$Right:: {
 	ScriptObject.SpeedRatio *= 2
 
 	KeyWait("Right")
-	return
+}
 
 ;===============  Label  =======================================================;
 
 ;============== Function ======================================================;
 ;======================================================== Hook ================;
 
-WindowMessage(wParam := 0, lParam := 0) {
+__WindowMessage(wParam := 0, lParam := 0, msg := 0, hWnd := 0) {
 	switch (wParam) {
-		case 0xCE00: {
-
-		}
-		case 0x1000: {
-			IniRead, Debug, % A_WorkingDir . "\cfg\Settings.ini", Debug, Debug
-
-			if (!Debug) {
-				ToolTip, , , , 20
+		case 0xCE00:
+		case 0x1000:
+			if (!(A_Debug := IniRead(A_WorkingDir . "\cfg\Settings.ini", "Debug", "Debug"))) {
+				ToolTip("", , , 20)
 			}
 
-			return (0)
-		}
+			return (True)
 	}
 
 	return (-1)
 }
 
-Exit() {
-	Critical, On
+__Exit(exitReason, exitCode) {
+	Critical(True)
 
-	GDIp.Shutdown()
+;	GDIp.Shutdown()
 
 	ExitApp
 }
@@ -198,138 +170,144 @@ Exit() {
 ;=======================================================  Other  ===============;
 
 GetTime() {
-	DllCall("QueryPerformanceCounter", "Int64*", current)
+	DllCall("QueryPerformanceCounter", "Int64*", &(current := 0))
 
 	return (current)
 }
 
-;======================================================== GDIp ================;
+;======================================================== GDIp ================;  ;* All of the following code is based on this amazing tutorial: https://www.isaacsukin.com/news/2015/01/detailed-explanation-javascript-game-loops-and-timing.
 
 Start() {
-	if (!Started) {
+	global Started
+	if (!(Started)) {
 		Started := True
 
 		Draw()
 
 		Running := True
 
-		SetTimer(Func("Main").Bind(True), -1)
+		SetTimer(MainLoop.Bind(True), -1)
 	}
 }
 
 Stop() {
-	Running := Started := False
+	Running := False, Started := False
 
-	SetTimer("Main", "Delete")
+	SetTimer(MainLoop, 0)
 }
 
-Main(reset := 0) {
-	Static slow := 1  ;* Slow motion scaling factor.
-		, timeStep := 1000/Setting("TargetFPS"), slowStep := timeStep*slow  ;* The amount of time (in milliseconds) to simulate each time `Update()` is called.
+MainLoop(reset := unset) {
+	static previous := 0  ;* The timestamp of the last time the main loop was run. Used to compute the time elapsed between frames.
 
-		, maxFPS := 1000/Setting("TargetFPS")  ;* Used to throttle the frame rate.
-		, previous  ;* The timestamp of the last time the main loop was run. Used to compute the time elapsed between frames.
-		, delta := 0  ;* The cumulative amount of time that hasn't been simulated yet.
+	if (IsSet(reset)) {
+		current := GetTime()
+			, elapsed := 0
+	}
+	else {
+		current := GetTime()
 
-	if (reset) {
-		previous := GetTime()
+		static throttle := 1000/Settings.MaxFPS
+
+		if ((elapsed := (current - previous)/10000) < throttle) {  ;* Throttle the frame rate.
+			return (SetTimer(MainLoop, -elapsed))
+		}
 	}
 
-	current := GetTime()
+	previous := current
 
-	if ((elapsed := (current - previous)/10000) < maxFPS) {
-		SetTimer("Main", -elapsed)
-
-		return
-	}
+	;---------------  Begin  -------------------------------------------------------;
 
 	Begin()
 
-	previous := current
-		, delta += Math.Min(1000, elapsed)  ;* Track the accumulated time that hasn't been simulated yet. This approach avoids inconsistent rounding errors and ensures that there are no giant leaps between frames.
+	;--------------- Update -------------------------------------------------------;
 
-	Static ticks := 0, frames := 0
+	static delta := 0  ;* The cumulative amount of time that hasn't been simulated yet.
 
-	numUpdateSteps := 0  ;* The number of times `Update()` is called in a given frame.
+	delta += elapsed  ;* Track the accumulated time that hasn't been simulated yet. This approach avoids inconsistent rounding errors and ensures that there are no giant leaps between frames.
+
+	static slowFactor := 1  ;* Slow motion scaling factor.
+		, timeStep := 1000/Settings.TargetFPS, slowStep := timeStep*slowFactor  ;* The amount of time (in milliseconds) to simulate each time `Update()` is called.
+
+	static ticks := 0
+
+	updateCount := 0  ;* The number of times `Update()` is called in a given frame.
+		, panic := False
+
 	while (delta >= slowStep) {
-		++ticks
-		Update(timeStep)
+		++ticks, Update(timeStep)
 
 		delta -= slowStep
 
-		if (++numUpdateSteps >= 240) {
-			panic := True  ;* Whether the simulation has fallen too far behind real time.
+		if (++updateCount == 240) {
+			panic := True  ;* Indicates too many updates have taken place because the simulation has fallen too far behind real time.
 
 			break
 		}
 	}
 
-	++frames
-	Draw(delta/timeStep)  ;* Pass the interpolation percentage.
-
 	;----------------  FPS  --------------------------------------------------------;
 
-	Static previousFpsUpdate := A_TickCount
-		, averageTicks := Setting("TargetFPS"), averageFrames := averageTicks/2
+	static previousFpsUpdate := A_TickCount
+
+	static averageTicks := Settings.TargetFPS
+		, averageFrames := averageTicks/2, alpha := Settings.FPSAlpha
 
 	if ((A_TickCount - previousFpsUpdate) >= 1000) {
 		previousFpsUpdate += 1000
 
-		averageTicks := averageTicks*0.75 + ticks*0.25, ticks := 0  ;* Exponential moving average.
-			, averageFrames := averageFrames*0.75 + frames*0.25, frames := 0
+		averageTicks := averageTicks*alpha + ticks*(1 - alpha), ticks := 0
+			, averageFrames := averageFrames*alpha + frames*(1 - alpha), frames := 0  ;* An exponential moving average of the frames per second.
 
-		if (Debug) {
-			ToolTip, % averageFrames ", " averageTicks, 50, 50, 20
+		if (A_Debug) {
+			ToolTip(averageTicks . ", " . averageFrames, 50, 50, 20)
 		}
 	}
 
+	ToolTip("RUNNING")
+
+	;--------------- Render -------------------------------------------------------;
+
+	static frames := 0
+
+	++frames, Draw(delta/timeStep)  ;* Render the screen. We do this regardless of whether `Update()` has run during this frame because it is possible to interpolate between updates to make the frame rate appear faster than updates are actually happening.
+
 	;----------------  End  --------------------------------------------------------;
 
-	End(averageFrames, averageTicks, panic)  ;* Run any updates that are not dependent on time in the simulation.
+	End(panic, averageTicks, averageFrames)  ;* Run any updates that are not dependent on time in the simulation.
 
-	SetTimer("Main", -1)
+	SetTimer(MainLoop, -1)
 }
 
-Begin() {  ;* The `Begin()` function is typically used to process input before the updates run. Processing input here (in chunks) can reduce the running time of event handlers, which is useful because long-running event handlers can sometimes delay frames.
+Begin() {  ;* Typically used to process input before the updates run. Processing input here (in chunks) can reduce the running time of event handlers, which is useful because long-running event handlers can sometimes delay frames.
 
 }
 
-Update(delta) {  ;* A function that runs updates (i.e. AI and physics).
-	mouse := new Vec2(MouseGet("Pos")).Subtract(Canvas)
+Update(delta) {  ;* Simulates everything that is affected by time. It can be called zero or more times per frame depending on the frame rate.
 
-	for i, particle in Particles {
-		particle.Update(mouse, delta)
-
-		particle.CheckEdges()
-	}
 }
 
-Draw(interp := 0) {  ;* A function that draws things on the screen.
+Draw(interpolation := 0) {  ;* A function that draws things on the screen.
 	Canvas.Clear()
 
 	Canvas.Graphics.DrawRectangle(Pen[0], ScriptObject.Border)
 
-	for i, particle in Particles {
-		particle.Draw(interp)
-	}
-
 	Canvas.Update()
 }
 
-End(averageFrames, averageTicks, panic) {
+End(panic, averageTicks, averageFrames) {  ;* Handles any updates that are not dependent on time in the simulation since it is always called exactly once at the end of every frame.
 	if (panic) {
 		Console.Clear()
-		Console.Write("Panick!")
+		Console.Log("Panic!")
 
 		Stop()
 	}
 
-	if (!Debug) {
+	if (!(A_Debug)) {
 		if (averageFrames < 25) {
-			ToolTip, % averageFrames ", " averageTicks, 50, 50, 20
+			ToolTip(averageTicks . ", " . averageFrames, 50, 50, 20)
 		}
 		else if (averageFrames > 30) {
-			ToolTip, , , , 20
+			ToolTip("", , , 20)
 		}
 	}
 }
@@ -337,22 +315,22 @@ End(averageFrames, averageTicks, panic) {
 ;===============  Class  =======================================================;
 
 Class Settings {
-	Debug[] {
-		Get {
-			IniRead, d, % A_WorkingDir . "\cfg\Settings.ini", Debug, Debug
 
-			return (d)
-		}
-	}
-	TargetFPS[] {  ;* An exponential moving average of the frames per second.
+	static TargetFPS {  ;* Generally, 60 is a good choice because most monitors run at 60 Hz.
 		Get {
 			return (60)
 		}
 	}
 
-	FPSAlpha[] {  ;* A factor that affects how heavily to weigh more recent seconds' performance when calculating the average frames per second. Valid values range from zero to one inclusive. Higher values result in weighting more recent seconds more heavily.
+	static MaxFPS {
 		Get {
-			return (0.9)
+			return (60)
+		}
+	}
+
+	static FPSAlpha {  ;* A factor that affects how heavily to weigh more recent seconds' performance when calculating the average frames per second in the range (0.0, 1.0). Higher values result in weighting more recent seconds more heavily.
+		Get {
+			return (0.85)
 		}
 	}
 }

@@ -4,17 +4,21 @@
 	1 = MatrixOrderAppend
 */
 
-;* GDIp.CreateMatrix()
+;* GDIp.CreateMatrix([m11, m12, m21, m22, dx, dy])
 ;* Return:
 	;* [Matrix]
-static CreateMatrix() {
-	if (status := DllCall("Gdiplus\GdipCreateMatrix", "Ptr*", &(pMatrix := 0), "Int")) {
+static CreateMatrix(m11 := 1, m12 := 0, m21 := 0, m22 := 1, dx := 0, dy := 0) {
+	if (status := DllCall("Gdiplus\GdipCreateMatrix2", "Float", m11, "Float", m12, "Float", m21, "Float", m22, "Float", dx, "Float", dy, "Ptr*", &(pMatrix := 0), "Int")) {
 		throw (ErrorFromStatus(status))
 	}
 
 	(instance := this.Matrix()).Ptr := pMatrix
 	return (instance)
 }
+
+/*
+** Matrix Class: https://docs.microsoft.com/en-us/dotnet/api/system.drawing.drawing2d.matrix?view=net-5.0. **
+*/
 
 class Matrix {
 	Class := "Matrix"
@@ -58,7 +62,7 @@ class Matrix {
 
 	IsInvertible {
 		Get {
-			return (this.IsInvertible())
+			return (this.IsInvertible())  ;* Determinant does not equal 0.
 		}
 	}
 
@@ -73,32 +77,25 @@ class Matrix {
 		return (bool)
 	}
 
-	;--------------- Method -------------------------------------------------------;  ;~ REAL is a typedef for a float.
+	;--------------- Method -------------------------------------------------------;
 
-	;* matrix.Invert() - If the matrix is invertible, this function replaces its elements  with the elements of its inverse.
-	Invert() {
-		if (status := DllCall("Gdiplus\GdipInvertMatrix", "Ptr", this.Ptr, "Int")) {
+	;* matrix.Set(m11, m12, m21, m22, m31, m32)
+	;* Parameter:
+		;* [Float] m11
+		;* [Float] m12
+		;* [Float] m21
+		;* [Float] m22
+		;* [Float] m31
+		;* [Float] m32
+	Set(m11, m12, m21, m22, m31, m32) {
+		if (status := DllCall("Gdiplus\GdipSetMatrixElements", "Ptr", this.Ptr, "Float", m11, "Float", m12, "Float", m21, "Float", m22, "Float", m31, "Float", m32, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* matrix.Translate(x, y[, matrixOrder]) - Updates this matrix with the product of itself and a scaling matrix.
-	;* Parameter:
-		;* [Float] x - Single precision value that specifies the horizontal component of the translation.
-		;* [Float] y - Single precision value that specifies the vertical component of the translation.
-		;* [Integer] matrixOrder - See MatrixOrder enumeration.
-	Translate(x, y, matrixOrder := 0) {
-		if (status := DllCall("Gdiplus\GdipTranslateMatrix", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
-			throw (ErrorFromStatus(status))
-		}
-	}
-
-	;* matrix.Rotate(angle[, matrixOrder]) - Updates this matrix with the product of itself and a rotation matrix.
-	;* Parameter:
-		;* [Float] angle - Simple precision value that specifies the angle of rotation in degrees. Positive values specify clockwise rotation.
-		;* [Integer] matrixOrder - See MatrixOrder enumeration.
-	Rotate(angle, matrixOrder := 0) {
-		if (status := DllCall("Gdiplus\GdipRotateMatrix", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
+	;* matrix.SetIdentity()
+	SetIdentity() {
+		if (status := DllCall("Gdiplus\GdipResetMatrix", "Ptr", this.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -109,6 +106,23 @@ class Matrix {
 		;* [Integer] matrixOrder - See MatrixOrder enumeration.
 	Multiply(matrix, matrixOrder := 0) {
 		if (status := DllCall("Gdiplus\GdipMultiplyMatrix", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+
+	;* matrix.Invert() - If the matrix is invertible, this function replaces its elements  with the elements of its inverse.
+	Invert() {
+		if (status := DllCall("Gdiplus\GdipInvertMatrix", "Ptr", this.Ptr, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+
+	;* matrix.Rotate(angle[, matrixOrder]) - Updates this matrix with the product of itself and a rotation matrix.
+	;* Parameter:
+		;* [Float] angle - Simple precision value that specifies the angle of rotation (in degrees). Positive values specify clockwise rotation.
+		;* [Integer] matrixOrder - See MatrixOrder enumeration.
+	Rotate(angle, matrixOrder := 0) {
+		if (status := DllCall("Gdiplus\GdipRotateMatrix", "Ptr", this.Ptr, "Float", angle, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -135,9 +149,13 @@ class Matrix {
 		}
 	}
 
-	;* matrix.Reset()
-	Reset() {
-		if (status := DllCall("gdiplus\GdipResetMatrix", "Ptr", this.Ptr, "Int")) {
+	;* matrix.Translate(x, y[, matrixOrder]) - Updates this matrix with the product of itself and a scaling matrix.
+	;* Parameter:
+		;* [Float] x - Single precision value that specifies the horizontal component of the translation.
+		;* [Float] y - Single precision value that specifies the vertical component of the translation.
+		;* [Integer] matrixOrder - See MatrixOrder enumeration.
+	Translate(x, y, matrixOrder := 0) {
+		if (status := DllCall("Gdiplus\GdipTranslateMatrix", "Ptr", this.Ptr, "Float", x, "Float", y, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
