@@ -29,7 +29,7 @@
 	;* Description:
 		;* See https://en.wikipedia.org/wiki/Determinant.
 	;* Note:
-		;* If the determinant is zero, the matrix is singular as its vector components have the same slope and they're either parallel or they're on the same line.
+		;* If the determinant is zero, the matrix is singular as its vector components have the same slope and they're either parallel or on the same line.
 	static Determinant(matrix) {
 		try {
 			return (matrix[0]*matrix[4] - matrix[3]*matrix[1])
@@ -322,5 +322,28 @@
 			this[6] += x*this[0] + y*this[3], this[7] += x*this[1] + y*this[4]
 			return (this)
 		}
+	}
+
+	Print() {  ;* This only works if you use a monospaced font, otherwise the elements will not be spaced correctly.
+		(lengths := this.Reduce((a, c, i, *) => (((l := StrLen(c)) > a[i := Mod(i, 3)]) ? (a[i] := l, a) : (a)), [0, 0, 0])).ForEach((v, i, *) => ([v//2, Ceil(v/2)]))
+
+		for index, element in (string := "[", this) {
+			if (index ~= "3|6") {
+				string .= A_Space
+			}
+
+			column := Mod(index, 3), length := StrLen(element)
+				, string .= SubStr(((offset := lengths[column][0]) && StrReplace(Format("{:0" . offset . "}", 0), "0", A_Space) || "") . element . StrReplace(Format("{:0" . lengths[column][1] . "}", 0), "0", A_Space), length//2 + 1, -Ceil(length/2))
+
+			if (index != 8) {
+				string .=  (index ~= "2|5") ? ("`n") : ("   ")
+			}
+		}
+
+		return (string . "]")
+	}
+
+	ToString() {
+		return (this.Print())
 	}
 }

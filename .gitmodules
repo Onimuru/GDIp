@@ -19,6 +19,3 @@
 [submodule "lib/String"]
 	path = lib/String
 	url = https://github.com/Onimuru/String
-[submodule "lib/Core/Structure"]
-	path = lib/Core/Structure
-	url = https://github.com/Onimuru/Structure
