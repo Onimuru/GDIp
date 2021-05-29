@@ -1,168 +1,168 @@
-﻿class Vec2 {
+﻿class Vec2 extends Array {
 
-	;* Vec2([x, y])
-	__New(param1 := 0, param2 := 0) {
-		this.x := param1, this.y := param2
+;	;* Vec2([x, y])
+	__New(x := 0, y := 0) {
+		this.Push(x, y)
 	}
 
 	Clone() {
-		return (Vec2(this.x, this.y))
+		return (Vec2(this*))
 	}
 
 	;* Vec2.Equals(vector1, vector2)
 	static Equals(vector1, vector2) {
-		return (vector1 is Vec2 && vector2 is Vec2 && vector1.x == vector2.x && vector1.y == vector2.y)
+		return (vector1 is Vec2 && vector2 is Vec2 && vector1.Every((element, index, *) => (element == vector2[index])))
 	}
 
 	;* Vec2.Divide(vector1, vector2)
 	static Divide(vector1, vector2) {
 		try {
-			return (this(vector1.x/vector2.x, vector1.y/vector2.y))
+			return (this(vector1[0]/vector2[0], vector1[1]/vector2[1]))
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 		;* Use the default ZeroDivisionError.
 	}
 
 	static DivideScalar(vector, scalar) {
 		try {
-			return (this(vector.x/scalar, vector.y/scalar))
+			return (this(vector[0]/scalar, vector[1]/scalar))
+		}
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 		catch TypeError {
 			throw (TypeError("``scalar`` is invalid.", -1, "This parameter must be a Number."))
-		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
 		}
 	}
 
 	;* Vec2.Multiply(vector1, vector2)
 	static Multiply(vector1, vector2) {
 		try {
-			return (this(vector1.x*vector2.x, vector1.y*vector2.y))
+			return (this(vector1[0]*vector2[0], vector1[1]*vector2[1]))
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	static MultiplyScalar(vector, scalar) {
 		try {
-			return (this(vector.x*scalar, vector.y*scalar))
+			return (this(vector[0]*scalar, vector[1]*scalar))
+		}
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 		catch TypeError {
 			throw (TypeError("``scalar`` is invalid.", -1, "This parameter must be a Number."))
-		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
 		}
 	}
 
 	;* Vec2.Add(vector1, vector2)
 	static Add(vector1, vector2) {
 		try {
-			return (this(vector1.x + vector2.x, vector1.y + vector2.y))
+			return (this(vector1[0] + vector2[0], vector1[1] + vector2[1]))
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	static AddScalar(vector, scalar) {
 		try {
-			return (this(vector.x + scalar, vector.y + scalar))
+			return (this(vector[0] + scalar, vector[1] + scalar))
+		}
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 		catch TypeError {
 			throw (TypeError("``scalar`` is invalid.", -1, "This parameter must be a Number."))
-		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
 		}
 	}
 
 	;* Vec2.Subtract(vector1, vector2)
 	static Subtract(vector1, vector2) {
 		try {
-			return (this(vector1.x - vector2.x, vector1.y - vector2.y))
+			return (this(vector1[0] - vector2[0], vector1[1] - vector2[1]))
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	static SubtractScalar(vector, scalar) {
 		try {
-			return (this(vector.x - scalar, vector.y - scalar))
+			return (this(vector[0] - scalar, vector[1] - scalar))
+		}
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 		catch TypeError {
 			throw (TypeError("``scalar`` is invalid.", -1, "This parameter must be a Number."))
-		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
 		}
 	}
 
 	;* Vec2.Distance(vector1, vector2)
 	static Distance(vector1, vector2) {
 		try {
-			return (Sqrt((vector1.x - vector2.x)**2 + (vector1.y - vector2.y)**2))
+			return (Sqrt((vector1[0] - vector2[0])**2 + (vector1[1] - vector2[1])**2))
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	;* Vec2.DistanceSquared(vector1, vector2)
 	static DistanceSquared(vector1, vector2) {
 		try {
-			return ((vector1.x - vector2.x)**2 + (vector1.y - vector2.y)**2)
+			return ((vector1[0] - vector2[0])**2 + (vector1[1] - vector2[1])**2)
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	;* Vec2.Dot(vector1, vector2)
 	static Dot(vector1, vector2) {
 		try {
-			return (vector1.x*vector2.x + vector1.y*vector2.y)
+			return (vector1[0]*vector2[0] + vector1[1]*vector2[1])
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	;* Vec2.Cross(vector1, vector2)
 	static Cross(vector1, vector2) {
 		try {
-			return (vector1.x*vector2.y - vector1.y*vector2.x)
+			return (vector1[0]*vector2[1] - vector1[1]*vector2[0])
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	;* Vec2.Transform(vector, matrix)
 	static Transform(vector, matrix) {
 		try {
-			x := vector.x, y := vector.y
+			x := vector[0], y := vector[1]
 
 			switch (Type(matrix)) {
 				case "TransformMatrix":
@@ -173,23 +173,22 @@
 
 			return (this(matrix[0]*x + matrix[3]*y + matrix[6], matrix[1]*x + matrix[4]*y + matrix[7]))
 		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-		}
 		catch IndexError {
-			throw (TypeError("``matrix`` is invalid.", -1, "This parameter must be an Array."))
+			throw ((vector is Array && vector.Magnitude == 2)
+				? (TypeError("``matrix`` is invalid.", -1, "This parameter must be an Array."))
+				: (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	;* Vec2.Lerp(vector1, vector2, alpha)
 	static Lerp(vector1, vector2, alpha) {
 		try {
-			return (this(vector1.x + (vector2.x - vector1.x)*alpha, vector1.y + (vector2.y - vector1.y)*alpha))
+			return (this(vector1[0] + (vector2[0] - vector1[0])*alpha, vector1[1] + (vector2[1] - vector1[1])*alpha))
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 		catch TypeError {
 			throw (TypeError("``alpha`` is invalid.", -1, "This parameter must be a Number."))
@@ -199,47 +198,59 @@
 	;* Vec2.Clamp(vector, lower, upper)
 	static Clamp(vector, lower, upper) {
 		try {
-			return (this(Max(lower.x, Min(upper.x, vector.x)), Max(lower.y, Min(upper.y, vector.y))))
+			return (this(Max(lower[0], Min(upper[0], vector[0])), Max(lower[1], Min(upper[1], vector[1]))))
 		}
-		catch PropertyError {
-			throw ((IsObject(vector) && vector.HasProp("x") && vector.HasProp("y"))
-				? ((IsObject(lower) && lower.HasProp("x") && lower.HasProp("y"))
-					? (TypeError("``upper`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-					: (TypeError("``lower`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
-				: (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector is Array && vector.Magnitude == 2)
+				? ((lower is Array && lower.Magnitude == 2)
+					? (TypeError("``upper`` is invalid.", -1, "This parameter must be an Array with two elements."))
+					: (TypeError("``lower`` is invalid.", -1, "This parameter must be an Array with two elements.")))
+				: (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	;* Vec2.Min(vector1, vector2)
 	static Min(vector1, vector2) {
 		try {
-			return (this(Min(vector1.x, vector2.x), Min(vector1.y, vector2.y)))
+			return (this(Min(vector1[0], vector2[0]), Min(vector1[1], vector2[1])))
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	;* Vec2.Max(vector1, vector2)
 	static Max(vector1, vector2) {
 		try {
-			return (this(Max(vector1.x, vector2.x), Max(vector1.y, vector2.y)))
+			return (this(Max(vector1[0], vector2[0]), Max(vector1[1], vector2[1])))
 		}
-		catch PropertyError {
-			throw ((IsObject(vector1) && vector1.HasProp("x") && vector1.HasProp("y"))
-				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((vector1 is Array && vector1.Magnitude == 2)
+				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
-	;* vector.Length[ := value]
+	x {
+		Get {
+			return (this[0])
+		}
+	}
+
+	y {
+		Get {
+			return (this[1])
+		}
+	}
+
+	;* vector.Magnitude[ := value]
 	;* Description:
 		;* Calculates the length (magnitude) of the vector.
-	Length {
+	Magnitude {
 		Get {
-			return (Sqrt(this.x**2 + this.y**2))
+			return (Sqrt(this[0]**2 + this[1]**2))
 		}
 
 		Set {
@@ -249,35 +260,35 @@
 		}
 	}
 
-	;* vector.LengthSquared
-	LengthSquared {
+	;* vector.MagnitudeSquared
+	MagnitudeSquared {
 		Get {
-			return (this.x**2 + this.y**2)
+			return (this[0]**2 + this[1]**2)
 		}
 	}
 
 	Copy(vector) {
 		try {
-			return (this.Set(vector.x, vector.y))
+			return (this.Set(vector[0], vector[1]))
 		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 	}
 
 	Set(x, y) {
-		this.x := x, this.y := y
+		this[0] := x, this[1] := y
 		return (this)
 	}
 
 	SetScalar(scalar) {
-		this.x := scalar, this.y := scalar
+		this[0] := scalar, this[1] := scalar
 		return (this)
 	}
 
 	;* vector.Negate()
 	Negate() {
-		this.x *= -1, this.y *= -1
+		this[0] *= -1, this[1] *= -1
 		return (this)
 	}
 
@@ -285,8 +296,8 @@
 	;* Description:
 		;* Normalize the vector to a unit length of 1.
 	Normalize() {
-		if (s := this.Length) {
-			this.x /= s, this.y /= s
+		if (s := this.Magnitude) {
+			this[0] /= s, this[1] /= s
 		}
 
 		return (this)
@@ -294,18 +305,18 @@
 
 	Divide(vector) {
 		try {
-			this.x /= vector.x, this.y /= vector.y
+			this[0] /= vector[0], this[1] /= vector[1]
 			return (this)
 		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 		;* Use the default ZeroDivisionError.
 	}
 
 	DivideScalar(scalar) {
 		try {
-			this.x /= scalar, this.y /= scalar
+			this[0] /= scalar, this[1] /= scalar
 			return (this)
 		}
 		catch TypeError {
@@ -316,17 +327,17 @@
 
 	Multiply(vector) {
 		try {
-			this.x *= vector.x, this.y *= vector.y
+			this[0] *= vector[0], this[1] *= vector[1]
 			return (this)
 		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 	}
 
 	MultiplyScalar(scalar) {
 		try {
-			this.x *= scalar, this.y *= scalar
+			this[0] *= scalar, this[1] *= scalar
 			return (this)
 		}
 		catch TypeError {
@@ -336,17 +347,17 @@
 
 	Add(vector) {
 		try {
-			this.x += vector.x, this.y += vector.y
+			this[0] += vector[0], this[1] += vector[1]
 			return (this)
 		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 	}
 
 	AddScalar(scalar) {
 		try {
-			this.x += scalar, this.y += scalar
+			this[0] += scalar, this[1] += scalar
 			return (this)
 		}
 		catch TypeError {
@@ -356,17 +367,17 @@
 
 	Subtract(vector) {
 		try {
-			this.x -= vector.x, this.y -= vector.y
+			this[0] -= vector[0], this[1] -= vector[1]
 			return (this)
 		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 	}
 
 	SubtractScalar(scalar) {
 		try {
-			this.x -= scalar, this.y -= scalar
+			this[0] -= scalar, this[1] -= scalar
 			return (this)
 		}
 		catch TypeError {
@@ -376,13 +387,17 @@
 
 	Transform(matrix) {
 		try {
-			x := this.x, y := this.y
+			x := this[0], y := this[1]
 
 			switch (Type(matrix)) {
 				case "TransformMatrix":
-					return (this.Set(matrix[0]*x + matrix[3]*y + matrix[6], matrix[1]*x + matrix[4]*y + matrix[7]))
+					;             [m11   m12   0]
+					; [x   y   1] [m21   m22   0] = [x*m11 + y*m21 + 1*m31   x*m12 + y*m22 + 1*m32]
+					;             [m31   m32   1]
+
+					return (this.Set(x*matrix[0] + y*matrix[3] + matrix[6], x*matrix[1] + y*matrix[4] + matrix[7]))
 				case "Matrix3", "RotationMatrix":
-					return (this.Set(matrix[0]*x + matrix[3]*y + matrix[2], matrix[1]*x + matrix[4]*y + matrix[5]))
+					return (this.Set(x*matrix[0] + y*matrix[3] + matrix[6], x*matrix[1] + y*matrix[4] + matrix[7]))
 			}
 		}
 		catch IndexError {
@@ -393,11 +408,11 @@
 	;* vector.Lerp()
 	Lerp(vector, alpha) {
 		try {
-			this.x += (vector.x - this.x)*alpha, this.y += (vector.y - this.y)*alpha
+			this[0] += (vector[0] - this[0])*alpha, this[1] += (vector[1] - this[1])*alpha
 			return (this)
 		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 		catch TypeError {
 			throw (TypeError("``alpha`` is invalid.", -1, "This parameter must be a Number."))
@@ -406,18 +421,18 @@
 
 	Clamp(lower, upper) {
 		try {
-			return (this.Set(Max(lower.x, Min(upper.x, this.x)), Max(lower.y, Min(upper.y, this.y))))
+			return (this.Set(Max(lower[0], Min(upper[0], this[0])), Max(lower[1], Min(upper[1], this[1]))))
 		}
-		catch PropertyError {
-			throw ((IsObject(lower) && lower.HasProp("x") && lower.HasProp("y"))
-				? (TypeError("``upper`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
-				: (TypeError("``lower`` is invalid.", -1, "This parameter must be an Object with x and y properties.")))
+		catch IndexError {
+			throw ((lower is Array && lower.Magnitude == 2)
+				? (TypeError("``upper`` is invalid.", -1, "This parameter must be an Array with two elements."))
+				: (TypeError("``lower`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
 	}
 
 	ClampScalar(lower, upper) {
 		try {
-			return (this.Set(Max(lower, Min(upper, this.x)), Max(lower, Min(upper, this.y))))
+			return (this.Set(Max(lower, Min(upper, this[0])), Max(lower, Min(upper, this[1]))))
 		}
 		catch TypeError {
 			throw ((lower is Number)
@@ -426,13 +441,13 @@
 		}
 	}
 
-	ClampLength(lower, upper) {
-		if (length := this.Length) {
-			this.DivideScalar(length)
+	ClampMagnitude(lower, upper) {
+		if (magnitude := this.Magnitude) {
+			this.DivideScalar(magnitude)
 		}
 
 		try {
-			return (this.MultiplyScalar(Max(lower, Min(upper, length))))
+			return (this.MultiplyScalar(Max(lower, Min(upper, magnitude))))
 		}
 		catch TypeError {
 			throw ((lower is Number)
@@ -446,10 +461,10 @@
 			if (decimalPlace) {
 				p := 10**decimalPlace
 
-				return (this.Set(Round(Ceil(this.x*p)/p, decimalPlace), Round(Ceil(this.y*p)/p, decimalPlace)))
+				return (this.Set(Round(Ceil(this[0]*p)/p, decimalPlace), Round(Ceil(this[1]*p)/p, decimalPlace)))
 			}
 
-			return (this.Set(Ceil(this.x), Ceil(this.y)))
+			return (this.Set(Ceil(this[0]), Ceil(this[1])))
 		}
 		catch TypeError {
 			throw (TypeError("``decimalPlace`` is invalid.", -1, "This parameter must be a Number."))
@@ -461,10 +476,10 @@
 			if (decimalPlace) {
 				p := 10**decimalPlace
 
-				return (this.Set(Round(Floor(this.x*p)/p, decimalPlace), Round(Floor(this.y*p)/p, decimalPlace)))
+				return (this.Set(Round(Floor(this[0]*p)/p, decimalPlace), Round(Floor(this[1]*p)/p, decimalPlace)))
 			}
 
-			return (this.Set(Floor(this.x), Floor(this.y)))
+			return (this.Set(Floor(this[0]), Floor(this[1])))
 		}
 		catch TypeError {
 			throw (TypeError("``decimalPlace`` is invalid.", -1, "This parameter must be a Number."))
@@ -473,7 +488,7 @@
 
 	Fix(decimalPlace := False) {
 		try {
-			x := this.x, y := this.y
+			x := this[0], y := this[1]
 
 			if (decimalPlace) {
 				p := 10**decimalPlace
@@ -491,8 +506,8 @@
 	Round(decimalPlace := False) {
 		try {
 			return ((decimalPlace)
-				? (this.Set(Round(this.x, decimalPlace), Round(this.y, decimalPlace)))
-				: (this.Set(Round(this.x), Round(this.y))))
+				? (this.Set(Round(this[0], decimalPlace), Round(this[1], decimalPlace)))
+				: (this.Set(Round(this[0]), Round(this[1]))))
 		}
 		catch TypeError {
 			throw (TypeError("``decimalPlace`` is invalid.", -1, "This parameter must be a Number."))
@@ -501,19 +516,19 @@
 
 	Min(vector) {
 		try {
-			return (this.Set(Min(this.x, vector.x), Min(this.y, vector.y)))
+			return (this.Set(Min(this[0], vector[0]), Min(this[1], vector[1])))
 		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 	}
 
 	Max(vector) {
 		try {
-			return (this.Set(Max(this.x, vector.x), Max(this.y, vector.y)))
+			return (this.Set(Max(this[0], vector[0]), Max(this[1], vector[1])))
 		}
-		catch PropertyError {
-			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Object with x and y properties."))
+		catch IndexError {
+			throw (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements."))
 		}
 	}
 }
