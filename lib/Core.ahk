@@ -10,7 +10,6 @@
 #Include %A_LineFile%\..\String\String.ahk
 
 #Include %A_LineFile%\..\Structure\Structure.ahk
-;#Include %A_LineFile%\..\Math\Math.ahk
 
 #Include %A_LineFile%\..\Core\GDI.ahk
 #Include %A_LineFile%\..\Core\GDIp.ahk

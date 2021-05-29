@@ -226,158 +226,173 @@ class Path {
 	;AddRectangle
 	;AddRoundedRectangle
 
-	;* path.AddArc(object, startAngle, sweepAngle)
+	;* path.AddArc(x, y, width, height, startAngle, sweepAngle)
 	;* Parameter:
-		;* [Object] object - An object with `x`, `y`, `Width` and `Height` properties.
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
 		;* [Float] startAngle
 		;* [Float] sweepAngle
-	AddArc(object, startAngle, sweepAngle) {
-		if (status := DllCall("Gdiplus\GdipAddPathArc", "Ptr", this.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width, "Float", object.Height, "Float", startAngle, "Float", sweepAngle, "Int")) {
+	AddArc(x, y, width, height, startAngle, sweepAngle) {
+		if (status := DllCall("Gdiplus\GdipAddPathArc", "Ptr", this.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddBezier(object1, object2, object3, object4)
+	;* path.AddBezier(point1, point2, point3, point4)
 	;* Parameter:
-		;* [Object] object1 - An object with `x` and `y` properties.
-		;* [Object] object2 - An object with `x` and `y` properties.
-		;* [Object] object3 - An object with `x` and `y` properties.
-		;* [Object] object4 - An object with `x` and `y` properties.
-	AddBezier(object1, object2, object3, object4) {
-		if (status := DllCall("Gdiplus\GdipAddPathBezier", "Ptr", this.Ptr, "Float", object1.x, "Float", object1.y, "Float", object2.x, "Float", object2.y, "Float", object3.x, "Float", object3.y, "Float", object4.x, "Float", object4.y, "Int")) {
+		;* [Array] point1
+		;* [Array] point2
+		;* [Array] point3
+		;* [Array] point4
+	AddBezier(point1, point2, point3, point4) {
+		if (status := DllCall("Gdiplus\GdipAddPathBezier", "Ptr", this.Ptr, "Float", point1[0], "Float", point1[1], "Float", point2[0], "Float", point2[1], "Float", point3[0], "Float", point3[1], "Float", point4[0], "Float", point4[1], "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddBeziers(objects*)
+	;* path.AddBeziers(points*)
 	;* Parameter:
-		;* [Object]* objects - Any number of objects with `x` and `y` properties.
+		;* [Array]* points - Any number of Arrays with values at index 0 and 1 to be used as x and y coordinates respectively.
 	;* Note:
 		;~ The first spline is constructed from the first point through the fourth point in the array and uses the second and third points as control points. Each subsequent spline in the sequence needs exactly three more points: the ending point of the previous spline is used as the starting point, the next two points in the sequence are control points, and the third point is the ending point.
-	AddBeziers(objects*) {
-		for index, object in (objects, points := Structure((length := objects.Length)*8)) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+	AddBeziers(points*) {
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipAddPathBeziers", "Ptr", this.Ptr, "Ptr", points.Ptr, "UInt", length, "Int")) {
+		if (status := DllCall("Gdiplus\GdipAddPathBeziers", "Ptr", this.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddClosedCurve(objects*[, tension])
+	;* path.AddClosedCurve(points*[, tension])
 	;* Parameter:
-		;* [Object]* objects - Any number of objects with `x` and `y` properties.
+		;* [Array]* points - Any number of Arrays with values at index 0 and 1 to be used as x and y coordinates respectively.
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
-	AddClosedCurve(objects*) {
-		if (IsNumber(objects[-1])) {
-			tension := objects.Pop()
+	AddClosedCurve(points*) {
+		if (IsNumber(points[-1])) {
+			tension := points.Pop()
 		}
 
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
 		if (status := (tension)
-			? (DllCall("Gdiplus\GdipAddPathClosedCurve2", "Ptr", this.Ptr, "Ptr", points.Ptr, "UInt", length, "Float", tension, "Int"))
-			: (DllCall("Gdiplus\GdipAddPathClosedCurve", "Ptr", this.Ptr, "Ptr", points.Ptr, "UInt", length, "Int"))) {
+			? (DllCall("Gdiplus\GdipAddPathClosedCurve2", "Ptr", this.Ptr, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "Int"))
+			: (DllCall("Gdiplus\GdipAddPathClosedCurve", "Ptr", this.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddCurve(objects*[, tension])
+	;* path.AddCurve(points*[, tension])
 	;* Parameter:
-		;* [Object]* objects - Any number of objects with `x` and `y` properties.
+		;* [Array]* points - Any number of Arrays with values at index 0 and 1 to be used as x and y coordinates respectively.
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
-	AddCurve(objects*) {
-		if (IsNumber(objects[-1])) {
-			tension := objects.Pop()
+	AddCurve(points*) {
+		if (IsNumber(points[-1])) {
+			tension := points.Pop()
 		}
 
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
 		if (status := (tension)
-			? (DllCall("Gdiplus\GdipAddPathCurve2", "Ptr", this.Ptr, "Ptr", points.Ptr, "UInt", length, "Float", tension, "Int"))
-			: (DllCall("Gdiplus\GdipAddPathCurve", "Ptr", this.Ptr, "Ptr", points.Ptr, "UInt", length, "Int"))) {
+			? (DllCall("Gdiplus\GdipAddPathCurve2", "Ptr", this.Ptr, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "Int"))
+			: (DllCall("Gdiplus\GdipAddPathCurve", "Ptr", this.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddEllipse(object)
+	;* path.AddEllipse(x, y, width, height)
 	;* Parameter:
-		;* [Object] object - An object with `x`, `y`, `Width` and `Height` properties.
-	AddEllipse(object) {
-		if (status := DllCall("Gdiplus\GdipAddPathEllipse", "Ptr", this.Ptr, "Float", object.x, "Float", object.y, "Float", object.width, "Float", object.height, "Int")) {
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	AddEllipse(x, y, width, height) {
+		if (status := DllCall("Gdiplus\GdipAddPathEllipse", "Ptr", this.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddLine(object1, object2)
+	;* path.AddLine(point1, point2)
 	;* Parameter:
-		;* [Object] object1 - An object with `x` and `y` properties.
-		;* [Object] object2 - An object with `x` and `y` properties.
-	AddLine(object1, object2) {
-		if (status := DllCall("Gdiplus\GdipAddPathLine", "Ptr", this.Ptr, "Float", object1.x, "Float", object1.y, "Float", object2.x, "Float", object2.y, "Int")) {
+		;* [Array] point1 - An Array with values at index 0 and 1 to be used as x and y coordinates respectively.
+		;* [Array] point2 - An Array with values at index 0 and 1 to be used as x and y coordinates respectively.
+	AddLine(point1, point2) {
+		if (status := DllCall("Gdiplus\GdipAddPathLine", "Ptr", this.Ptr, "Float", point1[0], "Float", point1[1], "Float", point2[0], "Float", point2[1], "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddLines(objects*)
+	;* path.AddLines(points*)
 	;* Parameter:
-		;* [Object]* objects - Any number of objects with `x` and `y` properties.
-	AddLines(objects*) {
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+		;* [Array]* points - Any number of Arrays with values at index 0 and 1 to be used as x and y coordinates respectively.
+	AddLines(points*) {
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipAddPathLine2", "Ptr", this.Ptr, "Ptr", points.Ptr, "UInt", length, "Int")) {
+		if (status := DllCall("Gdiplus\GdipAddPathLine2", "Ptr", this.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddPie(object, startAngle, sweepAngle)
+	;* path.AddPie(x, y, width, height, startAngle, sweepAngle)
 	;* Parameter:
-		;* [Object] object - An object with `x`, `y`, `Width` and `Height` properties.
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
 		;* [Float] startAngle
 		;* [Float] sweepAngle
-	AddPie(object, startAngle, sweepAngle) {
-		if (status := DllCall("Gdiplus\GdipAddPathPie", "Ptr", this.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width, "Float", object.Height, "Float", startAngle, "Float", sweepAngle, "Int")) {
+	AddPie(x, y, width, height, startAngle, sweepAngle) {
+		if (status := DllCall("Gdiplus\GdipAddPathPie", "Ptr", this.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddPolygon(objects*)
+	;* path.AddPolygon(points*)
 	;* Parameter:
-		;* [Object]* objects - Any number of objects with `x` and `y` properties.
+		;* [Array]* points - Any number of Arrays with values at index 0 and 1 to be used as x and y coordinates respectively.
 	;* Note:
 		;~ The `"Gdiplus\GdipAddPathPolygon"` function is similar to the `"Gdiplus\GdipAddPathLine2"` function. The difference is that a polygon is an intrinsically closed figure, but a sequence of lines is not a closed figure unless you call `"Gdiplus\GdipClosePathFigure"`. When Microsoft Windows GDI+ renders a path, each polygon in that path is closed; that is, the last vertex of the polygon is connected to the first vertex by a straight line.
-	AddPolygon(objects*) {
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+	AddPolygon(points*) {
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipAddPathPolygon", "Ptr", this.Ptr, "Ptr", points.Ptr, "Int", length, "Int")) {
+		if (status := DllCall("Gdiplus\GdipAddPathPolygon", "Ptr", this.Ptr, "Ptr", struct.Ptr, "Int", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddRectangle(object)
+	;* path.AddRectangle(x, y, width, height)
 	;* Parameter:
-		;* [Object] object - An object with `x`, `y`, `Width` and `Height` properties.
-	AddRectangle(object) {
-		if (status := DllCall("Gdiplus\GdipAddPathRectangle", "Ptr", this.Ptr, "Float", object.x, "Float", object.y, "Float", object.width, "Float", object.height, "Int")) {
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	AddRectangle(x, y, width, height) {
+		if (status := DllCall("Gdiplus\GdipAddPathRectangle", "Ptr", this.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* path.AddRoundedRectangle(object, radius)
+	;* path.AddRoundedRectangle(x, y, width, height, radius)
 	;* Parameter:
-		;* [Object] object - An object with `x`, `y`, `Width` and `Height` properties.
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
 		;* [Float] radius - Radius of the rounded corners.
-	AddRoundedRectangle(object, radius) {
+	AddRoundedRectangle(x, y, width, height, radius) {
 		diameter := radius*2
-			x := object.x, y := object.y, width := object.Width - diameter, height := object.Height - diameter
+			, width -= diameter, height -= diameter
 
 		pPath := this.Ptr
 

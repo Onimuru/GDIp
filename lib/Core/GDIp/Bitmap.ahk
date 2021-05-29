@@ -96,7 +96,7 @@ static CreateBitmapFromFile(file, useICM := False) {
 
 ;* GDIp.CreateBitmapFromGraphics(graphics, width, height)
 ;* Parameter:
-	;* [Graphics] graphics
+	;* [Graphics] graphics - Graphics object that contains information used to initialize certain properties (for example, dots per inch) of the new Bitmap object.
 	;* [Integer] width
 	;* [Integer] height
 ;* Return:
@@ -332,7 +332,7 @@ class Bitmap {
 
 			loop (height) {
 				loop (x := reset, width) {
-					Numput("UInt", color, scan0 + 4*x++ + y*stride) ;~ The Stride data member is negative if the pixel data is stored bottom-up.
+					Numput("UInt", color, scan0 + 4*x++ + y*stride)  ;~ The Stride data member is negative if the pixel data is stored bottom-up.
 				}
 
 				y++

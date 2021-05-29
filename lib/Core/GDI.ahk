@@ -167,7 +167,7 @@ Class GDI {
 		__Delete() {
 			this.Reset()
 
-			if (!(DllCall("Gdi32\DeleteDC", "Ptr", this.Handle))) {
+			if (!(DllCall("Gdi32\DeleteDC", "Ptr", this.Handle, "UInt"))) {
 				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 			}
 		}
@@ -309,7 +309,7 @@ Class GDI {
 		Class := "HBitmap"
 
 		__Delete() {
-			if (!(DllCall("Gdi32\DeleteObject", "Ptr", this.Handle))) {
+			if (!(DllCall("Gdi32\DeleteObject", "Ptr", this.Handle, "UInt"))) {
 				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 			}
 		}

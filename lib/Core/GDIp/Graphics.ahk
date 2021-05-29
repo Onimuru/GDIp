@@ -535,11 +535,11 @@ class Graphics {
 		;* [Object] sourceObject
 		;* [Integer] unit - See Unit enumeration.
 		;* [ImageAttributes] imageAttributes
-	DrawBitmap(bitmap, destinationObject := unset, sourceObject := unset, unit := 2, imageAttributes := 0) {
-		if (status := (IsSet(sourceObject))
-			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Float", sourceObject.x, "Float", sourceObject.y, "Float", sourceObject.Width, "Float", sourceObject.Height, "Int", unit, "Ptr", imageAttributes, "Ptr", 0, "Ptr", 0, "Int"))
-			: ((IsSet(destinationObject))
-				? (DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", destinationObject.x, "Float", destinationObject.y, "Float", destinationObject.Width, "Float", destinationObject.Height, "Int"))
+	DrawBitmap(bitmap, dx := unset, dy := unset, dWidth := unset, dHeight := unset, sx := unset, sy := unset, sWidth := unset, sHeight := unset, unit := 2, imageAttributes := 0) {
+		if (status := (IsSet(sx) && IsSet(sy) && IsSet(sWidth) && IsSet(sHeight))
+			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", dx, "Float", dy, "Float", dWidth, "Float", dHeight, "Float", sx, "Float", sy, "Float", sWidth, "Float", sHeight, "Int", unit, "Ptr", imageAttributes, "Ptr", 0, "Ptr", 0, "Int"))
+			: ((IsSet(dx) && IsSet(dy) && IsSet(dWidth) && IsSet(dHeight))
+				? (DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", dx, "Float", dy, "Float", dWidth, "Float", dHeight, "Int"))
 				: (DllCall("Gdiplus\GdipDrawImage", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", 0, "Float", 0, "Int")))) {
 			throw (ErrorFromStatus(status))
 		}
@@ -549,9 +549,9 @@ class Graphics {
 	;* Parameter:
 		;* [CachedBitmap] bitmap
 		;* [Object] object
-	DrawCachedBitmap(bitmap, object := unset) {
-		if (status := (IsSet(object))
-			? (DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", object.x, "Int", object.y, "Int"))
+	DrawCachedBitmap(bitmap, x := unset, y := unset) {
+		if (status := (IsSet(x) && IsSet(y))
+			? (DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", x, "Int", y, "Int"))
 			: (DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", 0, "Int", 0, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
@@ -568,34 +568,37 @@ class Graphics {
 	;FillRoundedRectangle
 	;FillRegion
 
-	;* graphics.FillClosedCurve(brush, objects*[, tension, fillMode])
+	;* graphics.FillClosedCurve(brush, points*[, tension, fillMode])
 	;* Parameter:
 		;* [Brush] brush
-		;* [Object]* objects
+		;* [Array]* points
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
 		;* [Integer] fillMode - See FillMode enumeration.
-	FillClosedCurve(brush, objects*) {
-		if (IsNumber(objects[-1])) {
-			fillMode := (IsNumber(objects[-2])) ? (objects.Pop()) : (0), tension := objects.Pop()
+	FillClosedCurve(brush, points*) {
+		if (IsNumber(points[-1])) {
+			fillMode := (IsNumber(points[-2])) ? (points.Pop()) : (0), tension := points.Pop()
 		}
 
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
 		if (status := (tension)
-			? (DllCall("Gdiplus\GdipFillClosedCurve2", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", points.Ptr, "UInt", length, "Float", tension, "UInt", fillMode, "Int"))
-			: (DllCall("Gdiplus\GdipFillClosedCurve", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", points.Ptr, "UInt", length, "Int"))) {
+			? (DllCall("Gdiplus\GdipFillClosedCurve2", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "UInt", fillMode, "Int"))
+			: (DllCall("Gdiplus\GdipFillClosedCurve", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.FillEllipse(brush, object)
+	;* graphics.FillEllipse(brush, x, y, width, height)
 	;* Parameter:
 		;* [Brush] brush
-		;* [Object] object
-	FillEllipse(brush, object) {
-		if (status := DllCall("Gdiplus\GdipFillEllipse", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width, "Float", object.Height, "Int")) {
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	FillEllipse(brush, x, y, width, height) {
+		if (status := DllCall("Gdiplus\GdipFillEllipse", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -610,57 +613,66 @@ class Graphics {
 		}
 	}
 
-	;* graphics.FillPie(brush, object, startAngle, sweepAngle)
+	;* graphics.FillPie(brush, x, y, width, height, startAngle, sweepAngle)
 	;* Parameter:
 		;* [Brush] brush
-		;* [Object] object
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
 		;* [Float] startAngle
 		;* [Float] sweepAngle
-	FillPie(brush, object, startAngle, sweepAngle) {
-		if (status := DllCall("Gdiplus\GdipFillPie", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width, "Float", object.Height, "Float", startAngle, "Float", sweepAngle, "Int")) {
+	FillPie(brush, x, y, width, height, startAngle, sweepAngle) {
+		if (status := DllCall("Gdiplus\GdipFillPie", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.FillPolygon(brush, objects*[, fillMode])
+	;* graphics.FillPolygon(brush, points*[, fillMode])
 	;* Parameter:
 		;* [Brush] brush
-		;* [Object]* objects
+		;* [Array]* points
 		;* [Integer] fillMode - See FillMode enumeration.
-	FillPolygon(brush, objects*) {
-		fillMode := (IsNumber(objects[-1])) ? (objects.Pop()) : (0)
+	FillPolygon(brush, points*) {
+		fillMode := (IsNumber(points[-1])) ? (points.Pop()) : (0)
 
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipFillPolygon", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", points.Ptr, "Int", length, "UInt", fillMode, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFillPolygon", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", struct.Ptr, "Int", length, "UInt", fillMode, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.FillRectangle(brush, object)
+	;* graphics.FillRectangle(brush, x, y, width, height)
 	;* Parameter:
 		;* [Brush] brush
-		;* [Object] object
-	FillRectangle(brush, object) {
-		if (status := DllCall("Gdiplus\GdipFillRectangle", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width, "Float", object.Height, "Int")) {
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	FillRectangle(brush, x, y, width, height) {
+		if (status := DllCall("Gdiplus\GdipFillRectangle", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.FillRoundedRectangle(brush, object, radius)
+	;* graphics.FillRoundedRectangle(brush, x, y, width, height, radius)
 	;* Parameter:
 		;* [Brush] brush
-		;* [Object] object - Object with `x`, `y`, `Width` and `Height` properties that defines the rectangle to be rounded.
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
 		;* [Float] radius - Radius of the rounded corners.
-	FillRoundedRectangle(brush, object, radius) {
+	FillRoundedRectangle(brush, x, y, width, height, radius) {
 		state := this.Save()
 			, pGraphics := this.Ptr
 
 		DllCall("Gdiplus\GdipSetPixelOffsetMode", "Ptr", pGraphics, "Int", 2)
 
-		(path := GDIp.CreatePath()).AddRoundedRectangle(object, radius)
+		(path := GDIp.CreatePath()).AddRoundedRectangle(x, y, width, height, radius)
 
 		if (status := DllCall("Gdiplus\GdipFillPath", "Ptr", pGraphics, "Ptr", brush.Ptr, "Ptr", path.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
@@ -695,120 +707,126 @@ class Graphics {
 	;DrawRectangle
 	;DrawRoundedRectangle
 
-	;* graphics.DrawArc(pen, object, startAngle, sweepAngle)
+	;* graphics.DrawArc(pen, x, y, width, height, startAngle, sweepAngle)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object] object
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
 		;* [Float] startAngle
 		;* [Float] sweepAngle
-	DrawArc(pen, object, startAngle, sweepAngle) {
-		if (status := DllCall("Gdiplus\GdipDrawArc", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width - (offset := pen.Width), "Float", object.Height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
+	DrawArc(pen, x, y, width, height, startAngle, sweepAngle) {
+		if (status := DllCall("Gdiplus\GdipDrawArc", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", x, "Float", y, "Float", width - (offset := pen.Width), "Float", height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawBezier(pen, object1, object2, object3, object4)
+	;* graphics.DrawBezier(pen, point1, point2, point3, point4)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object] object1
-		;* [Object] object2
-		;* [Object] object3
-		;* [Object] object4
-	DrawBezier(pen, object1, object2, object3, object4) {
-		if (status := DllCall("Gdiplus\GdipDrawBezier", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object1.x, "Float", object1.y, "Float", object2.x, "Float", object2.y, "Float", object3.x, "Float", object3.y, "Float", object4.x, "Float", object4.y, "Int")) {
+		;* [Array] point1
+		;* [Array] point2
+		;* [Array] point3
+		;* [Array] point4
+	DrawBezier(pen, point1, point2, point3, point4) {
+		if (status := DllCall("Gdiplus\GdipDrawBezier", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", point1[0], "Float", point1[1], "Float", point2[0], "Float", point2[1], "Float", point3[0], "Float", point3[1], "Float", point4[0], "Float", point4[1], "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawBeziers(pen, objects*)
+	;* graphics.DrawBeziers(pen, points*)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object]* objects
+		;* [Array]* points
 	;* Note:
 		;~ The first spline is constructed from the first point through the fourth point in the array and uses the second and third points as control points. Each subsequent spline in the sequence needs exactly three more points: the ending point of the previous spline is used as the starting point, the next two points in the sequence are control points, and the third point is the ending point.
-	DrawBeziers(pen, objects*) {
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+	DrawBeziers(pen, points*) {
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipDrawBeziers", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawBeziers", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawClosedCurve(pen, objects*[, tension])
+	;* graphics.DrawClosedCurve(pen, points*[, tension])
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object]* objects
+		;* [Array]* points
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
-	DrawClosedCurve(pen, objects*) {
-		if (IsNumber(objects[-1])) {
-			tension := objects.Pop()
+	DrawClosedCurve(pen, points*) {
+		if (IsNumber(points[-1])) {
+			tension := points.Pop()
 		}
 
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
 		if (status := (tension)
-			? (DllCall("Gdiplus\GdipDrawClosedCurve2", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Float", tension, "Int"))
-			: (DllCall("Gdiplus\GdipDrawClosedCurve", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int"))) {
+			? (DllCall("Gdiplus\GdipDrawClosedCurve2", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "Int"))
+			: (DllCall("Gdiplus\GdipDrawClosedCurve", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawCurve(pen, objects*[, tension])
+	;* graphics.DrawCurve(pen, points*[, tension])
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object]* objects
+		;* [Array]* points
 		;* [Float] tension - Non-negative real number that specifies how tightly the spline bends as it passes through the points.
-	DrawCurve(pen, objects*) {
-		if (IsNumber(objects[-1])) {
-			tension := objects.Pop()
+	DrawCurve(pen, points*) {
+		if (IsNumber(points[-1])) {
+			tension := points.Pop()
 		}
 
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
 		if (status := (tension)
-			? (DllCall("Gdiplus\GdipDrawCurve2", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Float", tension, "Int"))
-			: (DllCall("Gdiplus\GdipDrawCurve", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int"))) {
+			? (DllCall("Gdiplus\GdipDrawCurve2", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "Int"))
+			: (DllCall("Gdiplus\GdipDrawCurve", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawEllipse(pen, object)
+	;* graphics.DrawEllipse(pen, x, y, width, height)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object] object
-	DrawEllipse(pen, object) {
-		if (status := DllCall("Gdiplus\GdipDrawEllipse", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width - (offset := pen.Width), "Float", object.Height - offset, "Int")) {
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	DrawEllipse(pen, x, y, width, height) {
+		if (status := DllCall("Gdiplus\GdipDrawEllipse", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", x, "Float", y, "Float", width - (offset := pen.Width), "Float", height - offset, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawLine(pen, object1, object2)
+	;* graphics.DrawLine(pen, point1, point2)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object] object1
-		;* [Object] object2
-	DrawLine(pen, object1, object2) {
-		if (status := DllCall("Gdiplus\GdipDrawLine", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object1.x, "Float", object1.y, "Float", object2.x, "Float", object2.y, "Int")) {
+		;* [Array] point1
+		;* [Array] point2
+	DrawLine(pen, point1, point2) {
+		if (status := DllCall("Gdiplus\GdipDrawLine", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", point1[0], "Float", point1[1], "Float", point2[0], "Float", point2[1], "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawLines(pen, objects*)
+	;* graphics.DrawLines(pen, points*)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object]* objects
-	DrawLines(pen, objects*) {
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+		;* [Array]* points
+	DrawLines(pen, points*) {
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipDrawLines", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawLines", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -823,50 +841,59 @@ class Graphics {
 		}
 	}
 
-	;* graphics.DrawPie(pen, object, startAngle, sweepAngle)
+	;* graphics.DrawPie(pen, x, y, width, height, startAngle, startAngle, sweepAngle)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object] object
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
 		;* [Float] startAngle
 		;* [Float] sweepAngle
-	DrawPie(pen, object, startAngle, sweepAngle) {
-		if (status := DllCall("Gdiplus\GdipDrawPie", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width - (offset := pen.Width), "Float", object.Height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
+	DrawPie(pen, x, y, width, height, startAngle, sweepAngle) {
+		if (status := DllCall("Gdiplus\GdipDrawPie", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", x, "Float", y, "Float", width - (offset := pen.Width), "Float", height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawPolygon(pen, objects*)
+	;* graphics.DrawPolygon(pen, points*)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object]* objects
-	DrawPolygon(pen, objects*) {
-		for index, object in (points := Structure((length := objects.Length)*8), objects) {
-			points.NumPut(index*8, "Float", object.x, "Float", object.y)
+		;* [Array]* points
+	DrawPolygon(pen, points*) {
+		for index, point in (struct := Structure((length := points.Length)*8), points) {
+			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipDrawPolygon", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", points.Ptr, "UInt", length, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawPolygon", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawRectangle(pen, object)
+	;* graphics.DrawRectangle(pen, x, y, width, height)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object] object
-	DrawRectangle(pen, object) {
-		if (status := DllCall("Gdiplus\GdipDrawRectangle", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", object.x, "Float", object.y, "Float", object.Width - (offset := pen.Width), "Float", object.Height - offset, "Int")) {
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	DrawRectangle(pen, x, y, width, height) {
+		if (status := DllCall("Gdiplus\GdipDrawRectangle", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", x, "Float", y, "Float", width - (offset := pen.Width), "Float", height - offset, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* graphics.DrawRoundedRectangle(pen, object, radius)
+	;* graphics.DrawRoundedRectangle(pen, x, y, width, height, radius)
 	;* Parameter:
 		;* [Pen] pen
-		;* [Object] object - Object with `x`, `y`, `Width` and `Height` properties that defines the rectangle to be rounded.
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
 		;* [Float] radius - Radius of the rounded corners.
-	DrawRoundedRectangle(pen, object, radius) {
+	DrawRoundedRectangle(pen, x, y, width, height, radius) {
 		diameter := radius*2
-			, width := object.Width - diameter - (offset := pen.Width), height := object.Height - diameter - offset, x := object.x, y := object.y
+			, width -= diameter + (offset := pen.Width), height -= diameter + offset
 
 		DllCall("Gdiplus\GdipCreatePath", "UInt", 0, "Ptr*", &(pPath := 0))
 
