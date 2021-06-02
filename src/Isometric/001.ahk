@@ -45,7 +45,7 @@ for i, v in [
 		"GDIp.ahk",
 			"Canvas.ahk", "Bitmap.ahk", "Graphics.ahk", "Brush.ahk", "Pen.ahk", "Path.ahk", "Matrix.ahk",
 
-	"Assert.ahk", "Console.ahk"
+	"Assert.ahk", "Console.ahk",
 
 	"Color.ahk", "Geometry.ahk",
 		"Vec2.ahk", "Vec3.ahk", "TransformMatrix.ahk", "RotationMatrix.ahk", "Matrix3.ahk", "Ellipse.ahk", "Rect.ahk"

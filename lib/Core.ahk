@@ -20,7 +20,7 @@
 LoadLibrary(libraryName) {
 	static loaded := FreeLibrary("__SuperSecretString")
 
-	if (!(loaded.HasProp(libraryName))) {
+	if (!loaded.HasProp(libraryName)) {
 		if (!(ptr := DllCall("Kernel32\LoadLibrary", "Str", libraryName, "Ptr"))) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
@@ -52,7 +52,7 @@ FreeLibrary(libraryName) {
 		}
 
 		if (handle := DllCall("Kernel32\GetModuleHandle", "Str", libraryName, "Ptr")) {  ;* If the library module is already in the address space of the script's process.
-			if (!(DllCall("Kernel32\FreeLibrary", "Ptr", handle, "UInt"))) {
+			if (!DllCall("Kernel32\FreeLibrary", "Ptr", handle, "UInt")) {
 				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 			}
 
@@ -71,7 +71,9 @@ GetProcAddress(libraryName, functionName) {
 		(o := library.Call()).Name := libraryName
 			, p := (ptr := LoadLibrary(libraryName)) + NumGet(ptr + 0x3C, "Int") + 24
 
-		if (NumGet(p + ((A_PtrSize == 4) ? (92) : (108)), "UInt") < 1 || (ts := NumGet(p + ((A_PtrSize == 4) ? (96) : (112)), "UInt") + ptr) == ptr || (te := NumGet(p + ((A_PtrSize == 4) ? (100) : (116)), "UInt") + ts) == ts) {
+		static offset := (A_PtrSize == 4) ? (92) : (108)
+
+		if (NumGet(p + offset, "UInt") < 1 || (ts := NumGet(p + offset + 4, "UInt") + ptr) == ptr || (te := NumGet(p + offset + 8, "UInt") + ts) == ts) {
 			return (o)
 		}
 
@@ -186,11 +188,9 @@ GetDCEx(hWnd := 0, flags := 0, region := 0) {
 ;* Note:
 	;~ This function should not be called manually. DC objects will call this automatically when they are deleted.
 ReleaseDC(DC) {
-	if (!(DllCall("User32\ReleaseDC", "Ptr", DC.Window, "Ptr", DC.Handle, "Int"))) {
+	if (!DllCall("User32\ReleaseDC", "Ptr", DC.Window, "Ptr", DC.Handle, "Int")) {
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
-
-	return (True)
 }
 
 GetDesktopWindow() {
@@ -203,11 +203,9 @@ GetDesktopWindow() {
 	;* [DC] DC - A DC object to copy the window into.
 	;* [Integer] flags - The drawing options.
 PrintWindow(hWnd, DC, flags := 2) {
-	if (!(DllCall("User32\PrintWindow", "Ptr", hWnd, "Ptr", DC.Handle, "UInt", flags, "Int"))) {
+	if (!DllCall("User32\PrintWindow", "Ptr", hWnd, "Ptr", DC.Handle, "UInt", flags, "Int")) {
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
-
-	return (True)
 }
 
 ;/*
@@ -240,30 +238,30 @@ UpdateLayeredWindow(hWnd, DC, x := unset, y := unset, width := unset, height := 
 		static rect := Structure.CreateRect(0, 0, 0, 0, "UInt")
 
 		if (DllCall("Dwmapi\DwmGetWindowAttribute", "Ptr", hWnd, "UInt", 9, "Ptr", rect.Ptr, "UInt", 16, "UInt")) {
-			if (!(DllCall("User32\GetWindowRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt"))) {
+			if (!DllCall("User32\GetWindowRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt")) {
 				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 			}
 		}
 
-		if (!(IsSet(x))) {
+		if (!IsSet(x)) {
 			x := rect.NumGet(0, "Int")
 
-			if (!(IsSet(width))) {
+			if (!IsSet(width)) {
 				width := Abs(rect.NumGet(8, "Int") - x)
 			}
 		}
-		else if (!(IsSet(width))) {
+		else if (!IsSet(width)) {
 			width := Abs(rect.NumGet(8, "Int") - rect.NumGet(0, "Int"))
 		}
 
-		if (!(IsSet(y))) {
+		if (!IsSet(y)) {
 			y := rect.NumGet(4, "Int")
 
-			if (!(IsSet(height))) {
+			if (!IsSet(height)) {
 				height := Abs(rect.NumGet(12, "Int") - y)
 			}
 		}
-		else if (!(IsSet(height))) {
+		else if (!IsSet(height)) {
 			height := Abs(rect.NumGet(12, "Int") - rect.NumGet(4, "Int"))
 		}
 	}
@@ -271,6 +269,4 @@ UpdateLayeredWindow(hWnd, DC, x := unset, y := unset, width := unset, height := 
 	if (!DllCall("User32\UpdateLayeredWindow", "Ptr", hWnd, "Ptr", 0, "Int64*", x | y << 32, "Int64*", width | height << 32, "Ptr", DC.Handle, "Int64*", 0, "UInt", 0, "UInt*", alpha << 16 | 1 << 24, "UInt", 0x00000002, "UInt")) {
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
-
-	return (True)
 }
