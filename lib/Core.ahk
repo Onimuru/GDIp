@@ -270,3 +270,257 @@ UpdateLayeredWindow(hWnd, DC, x := unset, y := unset, width := unset, height := 
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
 }
+
+;===============  Class  =======================================================;
+
+/*
+** About Windows: https://docs.microsoft.com/en-us/windows/win32/winmsg/about-windows. **
+*/
+
+class LayeredWindow {
+
+	__New(x, y, width, height, className := "LayeredWindow", classStyle := 0x00000000, windowProc := False, hCursor := 32512  ;? 32512 = OCR_NORMAL
+		, title := "No-Face", exStyle := 0x00000000, style := 0x00000000, parent := 0, show := "SW_SHOWNOACTIVATE", alpha := 0xFF, pixelFormat := 0x000E200B, interpolation := 7, smoothing := 4) {
+		this.Class := className
+
+		if (!DllCall("User32\GetClassInfoEx", "Ptr", hInstance := DllCall("Kernel32\GetModuleHandle", "Ptr", 0, "Ptr"), "Ptr", classNamePtr := StrPtr(className), "Ptr", sWndClassEx := Structure(cbSize := (A_PtrSize == 8) ? (80) : (48)), "UInt")) {  ;: https://docs.microsoft.com/en-gb/windows/win32/api/winuser/nf-winuser-getclassinfoexa?redirectedfrom=MSDN
+			static CS_BYTEALIGNCLIENT := 0x00001000, CS_BYTEALIGNWINDOW := 0x00002000, CS_CLASSDC := 0x00000040, CS_DBLCLKS := 0x00000008, CS_DROPSHADOW := 0x00020000, CS_GLOBALCLASS := 0x00004000, CS_HREDRAW := 0x00000002, CS_NOCLOSE := 0x00000200, CS_OWNDC := 0x00000020, CS_PARENTDC := 0x00000080, CS_SAVEBITS := 0x00000800, CS_VREDRAW := 0x00000001  ;: https://docs.microsoft.com/en-us/windows/win32/winmsg/window-class-styles
+
+			if (!classStyle) {
+				classStyle := CS_HREDRAW | CS_VREDRAW  ;~ `WS_EX_LAYERED` cannot be used if the window has a class style of either `CS_OWNDC` or `CS_CLASSDC`.
+			}
+			else if (classStyle is Array) {
+				classStyle := classStyle.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0x00000000)
+			}
+
+			if (windowProc) {
+				if (!(windowProc is Func || windowProc is Closure)) {
+					throw (TypeError(Format("{} is not a valid callback function.", Type(windowProc)), -1))
+				}
+			}
+			else {
+				windowProc := (hWnd, uMsg, wParam, lParam) => (DllCall("User32\DefWindowProc", "Ptr", hWnd, "UInt", uMsg, "Ptr", wParam, "Ptr", lParam, "Ptr"))
+			}
+
+			sWndClassEx.NumPut(0, "UInt", cbSize
+				, "UInt", classStyle  ;* style
+				, "Ptr", CallbackCreate(windowProc, "F")  ;* lpfnWndProc
+				, "Int", 0  ;* cbClsExtra
+				, "Int", 0  ;* cbWndExtra
+				, "Ptr", hInstance  ;* hInstance
+				, "Ptr", 0  ;* hIcon
+				, "Ptr", (hCursor) ? (DllCall("LoadCursor", "Ptr", 0, "Ptr", hCursor, "Ptr")) : (0)  ;* hCursor
+				, "Ptr", 0  ;* hbrBackground
+				, "Ptr", 0  ;* lpszMenuName
+				, "Ptr", classNamePtr  ;* lpszClassName
+				, "Ptr", 0)  ;* hIconSm
+
+			if (!DllCall("User32\RegisterClassEx", "Ptr", sWndClassEx.Ptr, "UShort")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerclassexa
+				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+			}
+		}
+
+		static WS_EX_ACCEPTFILES := 0x00000010, WS_EX_APPWINDOW := 0x00040000, WS_EX_CLIENTEDGE := 0x00000200, WS_EX_COMPOSITED := 0x02000000, WS_EX_CONTEXTHELP := 0x00000400, WS_EX_CONTROLPARENT := 0x00010000, WS_EX_DLGMODALFRAME := 0x00000001, WS_EX_LAYERED := 0x00080000, WS_EX_LAYOUTRTL := 0x00400000, WS_EX_LEFT := 0x00000000, WS_EX_LEFTSCROLLBAR := 0x00004000, WS_EX_LTRREADING := 0x00000000, WS_EX_MDICHILD := 0x00000040, WS_EX_NOACTIVATE := 0x08000000, WS_EX_NOINHERITLAYOUT := 0x00100000, WS_EX_NOPARENTNOTIFY := 0x00000004, WS_EX_NOREDIRECTIONBITMAP := 0x00200000, WS_EX_OVERLAPPEDWINDOW := 0x00000300, WS_EX_PALETTEWINDOW := 0x00000188, WS_EX_RIGHT := 0x00001000, WS_EX_RIGHTSCROLLBAR := 0x00000000, WS_EX_RTLREADING := 0x00002000, WS_EX_STATICEDGE := 0x00020000, WS_EX_TOOLWINDOW := 0x00000080, WS_EX_TOPMOST := 0x00000008, WS_EX_TRANSPARENT := 0x00000020, WS_EX_WINDOWEDGE := 0x00000100  ;: https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles
+
+		if (!exStyle) {
+			exStyle := (WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_TRANSPARENT) & ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE)
+		}
+		else if (exStyle is Array) {
+			exStyle := (exStyle.Length == 2 && (add := exStyle[0]) is Array && (remove := exStyle[1]) is Array)
+				? (add.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0x00000000) & ~remove.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0x00000000))
+				: (exStyle.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0x00000000))
+		}
+
+		static WS_BORDER := 0x00800000, WS_CAPTION := 0x00C00000, WS_CHILD := 0x40000000, WS_CHILDWINDOW := 0x40000000, WS_CLIPCHILDREN := 0x02000000, WS_CLIPSIBLINGS := 0x04000000, WS_DISABLED := 0x08000000, WS_DLGFRAME := 0x00400000, WS_GROUP := 0x00020000, WS_HSCROLL := 0x00100000, WS_ICONIC := 0x20000000, WS_MAXIMIZE := 0x01000000, WS_MAXIMIZEBOX := 0x00010000, WS_MINIMIZE := 0x20000000, WS_MINIMIZEBOX := 0x00020000, WS_OVERLAPPED := 0x00000000, WS_OVERLAPPEDWINDOW := 0x00CF0000, WS_POPUP := 0x80000000, WS_POPUPWINDOW := 0x80880000, WS_SIZEBOX := 0x00040000, WS_SYSMENU := 0x00080000, WS_TABSTOP := 0x00010000, WS_THICKFRAME := 0x00040000, WS_TILED := 0x00000000, WS_TILEDWINDOW := 0xCF0000, WS_VISIBLE := 0x10000000, WS_VSCROLL := 0x00200000  ;: https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
+
+		if (!style) {
+			style := WS_POPUPWINDOW & ~(WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX)
+		}
+		else if (style is Array) {
+			style := (style.Length == 2 && (add := style[0]) is Array && (remove := style[1]) is Array)
+				? (add.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0x00000000) & ~remove.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0x00000000))
+				: (style.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0x00000000))
+		}
+
+		if (!(this.Handle := DllCall("User32\CreateWindowEx"  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
+			, "UInt", exStyle  ;* dwExStyle
+			, "Ptr", classNamePtr  ;* lpClassName
+			, "Str", title  ;* lpWindowName
+			, "UInt", style  ;* dwStyle
+			, "Int", x
+			, "Int", y
+			, "Int", width
+			, "Int", height
+			, "Ptr", parent  ;* hWndParent
+			, "Ptr", 0  ;* hMenu
+			, "Ptr", hInstance  ;* hInstance
+			, "Ptr", 0  ;* lpParam
+			, "Ptr"))) {
+			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+		}
+
+		if (show) {
+			static SW_NORMAL := 1, SW_SHOWNORMAL := 1, SW_SHOWMINIMIZED := 2, SW_MAXIMIZE := 3, SW_SHOWMAXIMIZED := 3, SW_SHOWNOACTIVATE := 4, SW_SHOW := 5, SW_MINIMIZE := 6, SW_SHOWMINNOACTIVE := 7, SW_SHOWNA := 8, SW_RESTORE := 9, SW_SHOWDEFAULT := 10, SW_FORCEMINIMIZE := 11
+
+			try {
+				show := %show%
+			}
+
+			DllCall("User32\ShowWindow", "Ptr", this.Handle, "Int", show)  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showwindow
+		}
+
+		this.Point := Structure.CreatePoint(x, y, "UInt"), this.Size := Structure.CreateSize(width, height), this.Blend := Structure.CreateBlendFunction(alpha)
+
+		this.DC := GDI.CreateCompatibleDC()
+			, this.DC.SelectObject(GDI.CreateDIBSection(Structure.CreateBitmapInfoHeader(width, -height, bitCount := 32), this.DC, 0, &(pBits := 0)))
+
+		this.Bitmap := GDIp.CreateBitmap(width, height, pixelFormat, width*(bitCount >> 3), pBits)
+		this.Graphics := GDIp.CreateGraphicsFromBitmap(this.Bitmap)
+			, this.Graphics.SetInterpolationMode(interpolation), this.Graphics.SetSmoothingMode(smoothing)
+	}
+
+	__Delete() {
+		try {
+			DllCall("User32\DestroyWindow", "Ptr", this.Handle)  ;~ If the specified window is a parent or owner window, DestroyWindow automatically destroys the associated child or owned windows when it destroys the parent or owner window. The function first destroys child or owned windows, and then it destroys the parent or owner window.
+		}
+
+		;~ If the window being destroyed is a child window that does not have the WS_EX_NOPARENTNOTIFY style, a WM_PARENTNOTIFY message is sent to the parent.
+
+		try {
+			DllCall("User32\UnregisterClass", "Ptr", StrPtr(this.Class), "Ptr", 0)
+		}
+	}
+
+	IsVisible {
+		Get {
+			return (DllCall("IsWindowVisible", "Ptr", this.Handle, "UInt"))  ;~ If the specified window, its parent window, its parent's parent window, and so forth, have the WS_VISIBLE style, the return value is nonzero. Otherwise, the return value is zero.
+
+			;~ If you need to check the `WS_VISIBLE` flag for a specific window you can do `GetWindowLong(hWnd, GWL_STYLE)` and test for `WS_VISIBLE`.
+		}
+	}
+
+	x {
+		Get {
+			return (this.Point.NumGet(0, "UInt"))
+		}
+	}
+
+	y {
+		Get {
+			return (this.Point.NumGet(4, "UInt"))
+		}
+	}
+
+	Width {
+		Get {
+			return (this.Size.NumGet(0, "UInt"))
+		}
+	}
+
+	Height {
+		Get {
+			return (this.Size.NumGet(4, "UInt"))
+		}
+	}
+
+	Rect[client := True] {
+		Get {
+			static rect := Structure.CreateRect(0, 0, 0, 0, "Int")
+
+			if (client) {
+				if (!DllCall("User32\GetClientRect", "Ptr", this.Handle, "Ptr", pointer := rect.Ptr, "UInt")) {
+					throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+				}
+			}
+			else if (DllCall("Dwmapi\DwmGetWindowAttribute", "Ptr", this.Handle, "UInt", 9, "UPtr", pointer := rect.Ptr, "UInt", 16, "UInt")) {
+				if (!DllCall("User32\GetWindowRect", "Ptr", this.Handle, "Ptr", pointer, "UInt")) {
+					throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+				}
+			}
+
+			return ({x: x := NumGet(pointer, "Int"), y: y := NumGet(pointer + 4, "Int"), Width: NumGet(pointer + 8, "Int") - x, Height: NumGet(pointer + 12, "Int") - y})  ;~ The coordinates are relative to the upper left corner of the screen, even for a child window.
+		}
+	}
+
+	AddExStyle(exStyle) {
+		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") | exStyle)  ;? -20 = GWL_EXSTYLE
+
+		if (!DllCall("User32\SetWindowPos", "Ptr", overlay.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {  ;? 0x0027 = SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos
+			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+		}
+	}
+
+	RemoveExStyle(exStyle) {
+		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") & ~(exStyle))
+
+		if (!DllCall("User32\SetWindowPos", "Ptr", overlay.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {
+			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+		}
+	}
+
+	;* window.Show([flag])
+	Show(flag := "SW_SHOWNOACTIVATE") {
+		static SW_NORMAL := 1, SW_SHOWNORMAL := 1, SW_SHOWMINIMIZED := 2, SW_MAXIMIZE := 3, SW_SHOWMAXIMIZED := 3, SW_SHOWNOACTIVATE := 4, SW_SHOW := 5, SW_MINIMIZE := 6, SW_SHOWMINNOACTIVE := 7, SW_SHOWNA := 8, SW_RESTORE := 9, SW_SHOWDEFAULT := 10, SW_FORCEMINIMIZE := 11
+
+		try {
+			flag := %flag%
+		}
+
+		DllCall("User32\ShowWindow", "Ptr", this.Handle, "Int", flag)  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showwindow
+	}
+
+	Hide() {
+		DllCall("User32\ShowWindow", "Ptr", this.Handle, "Int", 0)
+	}
+
+	;* window.Clear()
+	Clear() {
+		return (this.Graphics.Clear())
+	}
+
+	;* window.Reset()
+	Reset() {
+		return (this.Graphics.Reset())
+	}
+
+	;* window.Update([x, y, width, height, alpha])
+	;* Parameter:
+		;* [Integer] x
+		;* [Integer] y
+		;* [Integer] width
+		;* [Integer] height
+		;* [Integer] alpha
+	Update(x := unset, y := unset, width := unset, height := unset, alpha := unset) {
+		if (IsSet(x)) {
+			if (IsSet(y)) {
+				this.Point.NumPut(0, "UInt", x, "UInt", y)
+			}
+			else {
+				this.Point.NumPut(0, "UInt", x)
+			}
+		}
+		else if (IsSet(y)) {
+			this.Point.NumPut(4, "UInt", y)
+		}
+
+		if (IsSet(width)) {
+			if (IsSet(height)) {
+				this.Size.NumPut(0, "UInt", width, "UInt", height)
+			}
+			else {
+				this.Size.NumPut(0, "UInt", width)
+			}
+		}
+		else if (IsSet(height)) {
+			this.Size.NumPut(4, "UInt", height)
+		}
+
+		if (IsSet(alpha)) {
+			this.Blend.NumPut(2, "UChar", alpha)
+		}
+
+		if (!DllCall("User32\UpdateLayeredWindow", "Ptr", this.Handle, "Ptr", 0, "Ptr", this.Point.Ptr, "Ptr", this.Size.Ptr, "Ptr", this.DC.Handle, "Int64*", 0, "UInt", 0, "Ptr", this.Blend.Ptr, "UInt", 0x00000002, "UInt")) {
+			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+		}
+	}
+}
