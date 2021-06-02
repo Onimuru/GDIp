@@ -130,9 +130,7 @@ __GridProc(hWnd, uMsg, wParam, lParam) {
 
 	switch (uMsg) {
 		case 0x0200:  ;? 0x0200 = WM_MOUSEMOVE
-			static tracking := False, tttt := 1
-
-;			Console.Log((tttt := !tttt) ? (1) : (0))
+			static tracking := False
 
 			if (!tracking) {
 				tracking := TrackMouseEvent(hWnd, 0x00000003)  ;? 0x00000003 = TME_LEAVE + TME_HOVER
