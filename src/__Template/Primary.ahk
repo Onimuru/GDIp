@@ -28,7 +28,7 @@ SetWorkingDir(A_ScriptDir . "\..\..")
 
 #Include %A_ScriptDir%\..\..\lib\Color\Color.ahk
 #Include %A_ScriptDir%\..\..\lib\Math\Math.ahk
-;#Include %A_ScriptDir%\..\..\lib\Geometry.ahk
+#Include %A_ScriptDir%\..\..\lib\Geometry.ahk
 
 ;======================================================== Menu ================;
 
@@ -36,9 +36,21 @@ TraySetIcon(A_WorkingDir . "\res\Image\Icon\1.ico")
 
 ;=======================================================  Group  ===============;
 
-for i, v in ["Core.ahk", "GDI.ahk", "GDIp.ahk", "Canvas.ahk", "Bitmap.ahk", "Graphics.ahk", "Brush.ahk", "Pen.ahk", "Path.ahk", "Matrix.ahk",
-		"Assert.ahk", "Console.ahk", "General.ahk",
-		"Color.ahk", "Math.ahk", "Geometry.ahk"] {
+for i, v in [
+	"Core.ahk",
+		"Array.ahk", "Object.ahk", "String.ahk",
+
+		"Structure.ahk",
+
+		"GDI.ahk",
+		"GDIp.ahk",
+			"Canvas.ahk", "Bitmap.ahk", "Graphics.ahk", "Brush.ahk", "Pen.ahk", "Path.ahk", "Matrix.ahk",
+
+	"Assert.ahk", "Console.ahk", "General.ahk",
+
+	"Color.ahk", "Geometry.ahk",
+		"Vec2.ahk", "Vec3.ahk", "TransformMatrix.ahk", "RotationMatrix.ahk", "Matrix3.ahk", "Ellipse.ahk", "Rect.ahk"
+	"Math.ahk"] {
 	GroupAdd("Library", v)
 }
 
@@ -179,19 +191,20 @@ GetTime() {
 
 Start() {
 	global Started
+
 	if (!(Started)) {
 		Started := True
 
 		Draw()
 
-		Running := True
+		global Running := True
 
 		SetTimer(MainLoop.Bind(True), -1)
 	}
 }
 
 Stop() {
-	Running := False, Started := False
+	global Running := False, Started := False
 
 	SetTimer(MainLoop, 0)
 }
@@ -302,7 +315,7 @@ End(panic, averageTicks, averageFrames) {  ;* Handles any updates that are not d
 		Stop()
 	}
 
-	if (!(A_Debug)) {
+	if (!A_Debug) {
 		if (averageFrames < 25) {
 			ToolTip(averageTicks . ", " . averageFrames, 50, 50, 20)
 		}
