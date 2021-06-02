@@ -262,9 +262,16 @@ CreateGrid(x, y, width) {
 								if (block := blocks[index := xIndex + yComponent]) {
 									DrawBlock(layer, Nodes[index], A_WorkingDir . "\res\Image\Isometric\Cubes\" . SubStr("00" . block, -2) . "_64x64.png")
 
-									next := True, lastActual := index
+									next := True
+
+									if (xIndex + 1 = tiles) {
+										last := index
+									}
+									else {
+										lastActual := index
+									}
 								}
-								else if (!IsSet(last) || index - last > tiles) {
+								else if (xIndex + 1 = tiles || !IsSet(last) || index - last > tiles) {
 									if (next) {
 										last := (!IsSet(last) || index - last - 1 != tiles) ? (index - 1) : (lastActual)
 									}
@@ -316,23 +323,30 @@ CreateGrid(x, y, width) {
 								if (block := blocks[index := xIndex + yComponent]) {
 									DrawBlock(layer, Nodes[index], A_WorkingDir . "\res\Image\Isometric\Cubes\" . SubStr("00" . block, -2) . "_64x64.png")
 
-									if (A_Debug) {
-										layer.Update()
+;									if (A_Debug) {
+;										layer.Update()
+;
+;										MsgBox("REPAIR (" xIndex ", " yIndex ")")
+;									}
 
-										MsgBox("REPAIR (" xIndex ", " yIndex ")")
+									next := True
+
+									if (xIndex + 1 = tiles) {
+										last := index
 									}
-
-									next := True, lastActual := index
+									else {
+										lastActual := index
+									}
 								}
-								else if ((IsSet(clear) || (yIndex < yIndex2 && xIndex >= xIndex2) || (xIndex > xIndex2)) && (!IsSet(last) || index - last > tiles)) {  ;* Here I'm forcing the loop to continue if 1] `yIndex` is less than the y-index of the block that was removed (i.e. on the row above) and `xIndex` is less than the x-index of the block that was removed because the 0 alpha block that removes the block that was there in drawn straight up in screen coordinates so the block "above" the block that was removed is not affected and 2] if `yIndex` is not less than `yIndex2` (same row or greater than the row of the the block that was removed) and `xIndex` is greater than `xIndex2` because the blocks (if any) to the right and below the removed block will have been clipped.
-									if (A_Debug) {
-										DrawBlock(layer, Nodes[index], A_WorkingDir . "\res\Image\Isometric\Cubes\09_64x64.png")
-										layer.Update()
-
-										if (next) {
-											MsgBox("BREAK (" xIndex ", " yIndex ")")
-										}
-									}
+								else if (xIndex + 1 = tiles || ((IsSet(clear) || (yIndex < yIndex2 && xIndex >= xIndex2) || (xIndex > xIndex2 + 1)) && (!IsSet(last) || index - last > tiles))) {  ;* Here I'm forcing the loop to continue if 1] `yIndex` is less than the y-index of the block that was removed (i.e. on the row above) and `xIndex` is less than the x-index of the block that was removed because the 0 alpha block that removes the block that was there in drawn straight up in screen coordinates so the block "above" the block that was removed is not affected and 2] if `yIndex` is not less than `yIndex2` (same row or greater than the row of the the block that was removed) and `xIndex` is greater than `xIndex2 + 1` because the blocks (if any) to the right, far right and below the removed block will have been clipped.
+;									if (A_Debug) {
+;										DrawBlock(layer, Nodes[index], A_WorkingDir . "\res\Image\Isometric\Cubes\09_64x64.png")
+;										layer.Update()
+;
+;										if (next) {
+;											MsgBox("BREAK (" xIndex ", " yIndex ")")
+;										}
+;									}
 
 									if (next) {
 										last := (!IsSet(last) || index - last - 1 != tiles) ? (index - 1) : (lastActual)  ;* Implement a rudementary "fade" to avoid unnecessary checks.
@@ -340,20 +354,20 @@ CreateGrid(x, y, width) {
 
 									break
 								}
-								else if (A_Debug) {
-									DrawBlock(layer, Nodes[index], A_WorkingDir . "\res\Image\Isometric\Cubes\06_64x64.png")
-									layer.Update()`
-
-									if (IsSet(last)) {
-										MsgBox("CONTINUE (" xIndex ", " yIndex ")")
-									}
-								}
+;								else if (A_Debug) {
+;									DrawBlock(layer, Nodes[index], A_WorkingDir . "\res\Image\Isometric\Cubes\06_64x64.png")
+;									layer.Update()`
+;
+;									if (IsSet(last)) {
+;										MsgBox("CONTINUE (" xIndex ", " yIndex ")")
+;									}
+;								}
 							}
 
 							if (!next) {
-								if (A_Debug) {
-									MsgBox("SUPER BREAK (" xIndex ", " yIndex ")")
-								}
+;								if (A_Debug) {
+;									MsgBox("SUPER BREAK (" xIndex ", " yIndex ")")
+;								}
 
 								break
 							}
@@ -449,7 +463,7 @@ CreateGrid(x, y, width) {
 
 	if (!(hWnd := DllCall("User32\CreateWindowEx", "UInt", WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST  ;* dwExStyle
 		, "Ptr", lpszClassName  ;* lpClassName
-		, "Str", "TEMP"  ;* lpWindowName
+		, "Str", "NoFace"  ;* lpWindowName
 		, "UInt", (WS_CLIPCHILDREN | WS_POPUPWINDOW) & ~(WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX)  ;* dwStyle
 		, "Int", x
 		, "Int", y
@@ -549,7 +563,7 @@ CreateOverlay(x, y, width, height, hParent, show) {
 	return (instance)
 }
 
-DrawTile(window, node, file) {
+DrawTile(window, node, file, alpha := unset) {
 	static tiles := Map()
 
 	if (!tiles.Has(file)) {
@@ -571,8 +585,25 @@ DrawTile(window, node, file) {
 		}
 	}
 
-	tile := tiles[file], width := tile.Width
-		, window.Graphics.DrawBitmap(tile, node[0] - 16, node[1] - 7 - 16, 32, 32, 0, 0, width, width)
+	if (IsSet(alpha)) {
+		DllCall("Gdiplus\GdipCreateImageAttributes", "Ptr*", &(pImageAttributes := 0))
+
+		static colorMatrix := Structure.CreateColorMatrix()
+
+		colorMatrix.NumPut(72, "Float", alpha)
+
+		if (status := DllCall("Gdiplus\GdipSetImageAttributesColorMatrix", "Ptr", pImageAttributes, "Int", 0, "Int", 1, "Ptr", colorMatrix.Ptr, "Ptr", 0, "Int", 0, "UInt")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		tile := tiles[file], width := tile.Width
+			, window.Graphics.DrawBitmap(tile, node[0] - 16, node[1] - 7 - 32, 32, 32, 0, 0, width, width, 2, pImageAttributes)
+
+		DllCall("Gdiplus\GdipDisposeImageAttributes", "Ptr", pImageAttributes)
+	}
+	else {
+		window.Graphics.DrawBitmap(tiles[file], node[0] - 16, node[1] - 7 - 32, 32, 32)
+	}
 
 ;	resized := GDIp.CreateBitmap(32, 16, 0x000E200B)
 ;	graphics := GDIp.CreateGraphicsFromBitmap(resized), graphics.SetInterpolationMode(7), graphics.SetSmoothingMode(4)
