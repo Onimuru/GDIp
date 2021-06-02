@@ -398,8 +398,13 @@ class Bitmap {
 
 	;--------------- Method -------------------------------------------------------;
 
+	ConvertFormat(pixelFormat, dithertype, palettetype, colorPalette, alphaThresholdPercent) {
+		if (status := DllCall("Gdiplus\GdipBitmapConvertFormat", "Ptr", this.Ptr, "UInt", pixelFormat, "UInt", dithertype, "UInt", palettetype, "Ptr", colorPalette.Ptr, "UInt", alphaThresholdPercent, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+			throw (ErrorFromStatus(status))
+		}
+	}
+
 	;~ ApplyEffect
-	;~ ConvertFormat
 	;~ CreateApplyEffect
 	;~ GetHistogram
 	;~ GetHistogramSize
@@ -429,7 +434,7 @@ class Bitmap {
 				DllCall("Gdiplus\GdipGetImageHeight", "Ptr", this.Ptr, "UInt*", &(height := 0))
 			}
 
-			static bitmapData := Structure.CreateBitmapData()
+			bitmapData := Structure.CreateBitmapData()
 
 			if (status := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", Structure.CreateRect(x, y, width, height, "UInt").Ptr, "UInt", lockMode, "UInt", (IsSet(pixelFormat)) ? (pixelFormat) : (this.GetPixelFormat()), "Ptr", bitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
 				throw (ErrorFromStatus(status))

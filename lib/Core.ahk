@@ -113,6 +113,16 @@ ErrorFromStatus(status) {
 	return (Error(status, -2, statusLookup[status]))
 }
 
+;======================================================= MSVCRT ===============;
+
+MemCopy(dest, src, bytes) {
+	return (DllCall("msvcrt\memcpy", "Ptr", dest, "Ptr", src, "UInt", bytes))
+}
+
+MemMove(dest, src, bytes) {
+	return (DllCall("msvcrt\memmove", "Ptr", dest, "Ptr", src, "UInt", bytes))
+}
+
 ;======================================================= User32 ===============;
 
 /*
@@ -200,6 +210,22 @@ PrintWindow(hWnd, DC, flags := 2) {
 	return (True)
 }
 
+;/*
+;** A Guide to WIN32 Clipping Regions: https://www.codeproject.com/articles/2095/a-guide-to-win32-clipping-regions. **
+;*/
+
+SetWindowRgn(hWnd, x, y, width, height) {
+	if (!(hRgn := DllCall("Gdi32\CreateEllipticRgn", "Int", x, "Int", y, "Int", width + 1, "Int", height + 1))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createellipticrgn
+		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+	}
+
+	if (!DllCall("User32\SetWindowRgn", "Ptr", hWnd, "Ptr", hRgn, "UInt", 0, "UInt")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowrgn
+		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+	}
+
+	DllCall("Gdi32\DeleteObject", "Ptr", hRgn, "UInt")
+}
+
 ;* UpdateLayeredWindow(hWnd, DC[, x, y, width, height, alpha])
 ;* Parameter:
 	;* [Integer] hWnd - A handle to a layered window.
@@ -242,7 +268,7 @@ UpdateLayeredWindow(hWnd, DC, x := unset, y := unset, width := unset, height := 
 		}
 	}
 
-	if (!(DllCall("User32\UpdateLayeredWindow", "Ptr", hWnd, "Ptr", 0, "Int64*", x | y << 32, "Int64*", width | height << 32, "Ptr", DC.Handle, "Int64*", 0, "UInt", 0, "UInt*", alpha << 16 | 1 << 24, "UInt", 0x00000002, "UInt"))) {
+	if (!DllCall("User32\UpdateLayeredWindow", "Ptr", hWnd, "Ptr", 0, "Int64*", x | y << 32, "Int64*", width | height << 32, "Ptr", DC.Handle, "Int64*", 0, "UInt", 0, "UInt*", alpha << 16 | 1 << 24, "UInt", 0x00000002, "UInt")) {
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
 

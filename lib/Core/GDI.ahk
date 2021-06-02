@@ -248,6 +248,17 @@ Class GDI {
 
 			return (False)
 		}
+
+;		// Take a snap-shot of the current state of the DC
+;		SaveDC(
+;			__in HDC hdc,           // Handle to the DC
+;		);
+;
+;		// Restore the DC to a previously saved state
+;		RestoreDC (
+;			__in HDC hdc,           // Handle to the DC
+;			__in int nSavedDC       // Saved state claim ticket
+;		);
 	}
 
 	;------------------------------------------------------  HBitmap  --------------;
@@ -297,7 +308,7 @@ Class GDI {
 	;* Return:
 		;* [HBitmap]
 	static CreateDIBSection(bitmapInfo, DC := unset, usage := 0, &pBits := 0, hSection := 0, offset := 0) {
-		if (!(hBitmap := DllCall("Gdi32\CreateDIBSection", "Ptr", ((IsSet(DC)) ? (DC) : (GetDC())).Handle, "Ptr", bitmapInfo.Ptr, "UInt", usage, "Ptr*", pBits, "Ptr", hSection, "UInt", offset, "Ptr"))) {  ;~ DIB
+		if (!(hBitmap := DllCall("Gdi32\CreateDIBSection", "Ptr", ((IsSet(DC)) ? (DC) : (GetDC())).Handle, "Ptr", bitmapInfo.Ptr, "UInt", usage, "Ptr*", &pBits, "Ptr", hSection, "UInt", offset, "Ptr"))) {  ;~ DIB
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 

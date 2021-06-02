@@ -16,7 +16,7 @@
 	;* [Integer] windowStyles
 	;* [Integer] smoothing
 	;* [Integer] interpolation
-static CreateCanvas(x, y, width, height, windowProc := False, windowClassName := "Canvas", windowClassStyles := 0x00000000, title := "Title", extendedWindowStyles := 0x00000000, windowStyles := 0x00000000, smoothing := 4, interpolation := 7) {
+static CreateCanvas(x, y, width, height, windowProc := False, windowClassName := "Canvas", windowClassStyles := 0x00000000, title := "Title", extendedWindowStyles := 0x00000000, windowStyles := 0x00000000, parent := 0, smoothing := 4, interpolation := 7) {
 	if (windowProc) {
 		if (!(windowProc is Func || windowProc is Closure)) {
 			throw (TypeError(Format("{} is not a valid callback function.", Type(windowProc)), -1))
@@ -59,7 +59,7 @@ static CreateCanvas(x, y, width, height, windowProc := False, windowClassName :=
 		windowStyles := windowStyles.Reduce((accumulator, currentValue, *) => (accumulator |= %currentValue%), 0x00000000)
 	}
 
-	if (!(hWnd := DllCall("User32\CreateWindowEx", "UInt", extendedWindowStyles, "Str", windowClassName, "Str", title, "UInt", windowStyles, "Int", x, "Int", y, "Int", width, "Int", height, "Ptr", A_ScriptHwnd, "Ptr", 0, "Ptr", DllCall("GetModuleHandle", "Ptr", 0, "Ptr"), "Ptr", 0, "Ptr"))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
+	if (!(hWnd := DllCall("User32\CreateWindowEx", "UInt", extendedWindowStyles, "Str", windowClassName, "Str", title, "UInt", windowStyles, "Int", x, "Int", y, "Int", width, "Int", height, "Ptr", parent || A_ScriptHwnd, "Ptr", 0, "Ptr", DllCall("GetModuleHandle", "Ptr", 0, "Ptr"), "Ptr", 0, "Ptr"))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
 
@@ -67,8 +67,7 @@ static CreateCanvas(x, y, width, height, windowProc := False, windowClassName :=
 	instance.Class := windowClassName
 
 	instance.DC := GDI.CreateCompatibleDC()  ;* Get a memory DC compatible with the screen.
-	instance.Bitmap := GDI.CreateDIBSection(Structure.CreateBitmapInfoHeader(width, -height), instance.DC)  ;* Create a GDI bitmap.
-		, instance.DC.SelectObject(instance.Bitmap)  ;* Select the DIB into the memory DC.
+		, instance.DC.SelectObject(GDI.CreateDIBSection(Structure.CreateBitmapInfoHeader(width, -height, 32)))  ;* Select a GDI DIB bitmap into the memory DC.
 
 	(instance.Graphics := this.CreateGraphicsFromDC(instance.DC)).SetSmoothingMode(smoothing)
 		, instance.Graphics.SetInterpolationMode(interpolation)
@@ -76,7 +75,6 @@ static CreateCanvas(x, y, width, height, windowProc := False, windowClassName :=
 	instance.Point := Structure.CreatePoint(x, y, "UInt"), instance.Size := Structure.CreateSize(width, height), instance.Blend := Structure.CreateBlendFunction(0xFF)
 
 	instance.Show()
-
 	return (instance)
 }
 
@@ -87,14 +85,16 @@ class Canvas {
 	}
 
 	__Delete() {
-		if (!(DllCall("User32\DestroyWindow", "Ptr", this.Handle, "UInt"))) {  ;~ If the specified window is a parent or owner window, DestroyWindow automatically destroys the associated child or owned windows when it destroys the parent or owner window. The function first destroys child or owned windows, and then it destroys the parent or owner window.
-			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+		try {  ;* Lazy way to account for child windows getting deleted when their parent does.
+			if (!(DllCall("User32\DestroyWindow", "Ptr", this.Handle, "UInt"))) {  ;~ If the specified window is a parent or owner window, DestroyWindow automatically destroys the associated child or owned windows when it destroys the parent or owner window. The function first destroys child or owned windows, and then it destroys the parent or owner window.
+;				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+			}
 		}
 
 		;~ If the window being destroyed is a child window that does not have the WS_EX_NOPARENTNOTIFY style, a WM_PARENTNOTIFY message is sent to the parent.
 
 		if (!(DllCall("User32\UnregisterClass", "Ptr", StrPtr(this.Class), "Ptr", 0, "UInt"))) {
-			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+;			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}
 

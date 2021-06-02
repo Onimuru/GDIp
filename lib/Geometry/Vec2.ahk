@@ -20,7 +20,7 @@
 			return (this(vector1[0]/vector2[0], vector1[1]/vector2[1]))
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -45,7 +45,7 @@
 			return (this(vector1[0]*vector2[0], vector1[1]*vector2[1]))
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -69,7 +69,7 @@
 			return (this(vector1[0] + vector2[0], vector1[1] + vector2[1]))
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -93,7 +93,7 @@
 			return (this(vector1[0] - vector2[0], vector1[1] - vector2[1]))
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -117,7 +117,7 @@
 			return (Sqrt((vector1[0] - vector2[0])**2 + (vector1[1] - vector2[1])**2))
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -129,7 +129,7 @@
 			return ((vector1[0] - vector2[0])**2 + (vector1[1] - vector2[1])**2)
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -141,7 +141,7 @@
 			return (vector1[0]*vector2[0] + vector1[1]*vector2[1])
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -153,7 +153,7 @@
 			return (vector1[0]*vector2[1] - vector1[1]*vector2[0])
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -174,7 +174,7 @@
 			return (this(matrix[0]*x + matrix[3]*y + matrix[6], matrix[1]*x + matrix[4]*y + matrix[7]))
 		}
 		catch IndexError {
-			throw ((vector is Array && vector.Magnitude == 2)
+			throw ((vector is Array && vector.Length == 2)
 				? (TypeError("``matrix`` is invalid.", -1, "This parameter must be an Array."))
 				: (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -186,7 +186,7 @@
 			return (this(vector1[0] + (vector2[0] - vector1[0])*alpha, vector1[1] + (vector2[1] - vector1[1])*alpha))
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -201,8 +201,8 @@
 			return (this(Max(lower[0], Min(upper[0], vector[0])), Max(lower[1], Min(upper[1], vector[1]))))
 		}
 		catch IndexError {
-			throw ((vector is Array && vector.Magnitude == 2)
-				? ((lower is Array && lower.Magnitude == 2)
+			throw ((vector is Array && vector.Length == 2)
+				? ((lower is Array && lower.Length == 2)
 					? (TypeError("``upper`` is invalid.", -1, "This parameter must be an Array with two elements."))
 					: (TypeError("``lower`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 				: (TypeError("``vector`` is invalid.", -1, "This parameter must be an Array with two elements.")))
@@ -215,7 +215,7 @@
 			return (this(Min(vector1[0], vector2[0]), Min(vector1[1], vector2[1])))
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -227,7 +227,7 @@
 			return (this(Max(vector1[0], vector2[0]), Max(vector1[1], vector2[1])))
 		}
 		catch IndexError {
-			throw ((vector1 is Array && vector1.Magnitude == 2)
+			throw ((vector1 is Array && vector1.Length == 2)
 				? (TypeError("``vector2`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``vector1`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
@@ -424,7 +424,7 @@
 			return (this.Set(Max(lower[0], Min(upper[0], this[0])), Max(lower[1], Min(upper[1], this[1]))))
 		}
 		catch IndexError {
-			throw ((lower is Array && lower.Magnitude == 2)
+			throw ((lower is Array && lower.Length == 2)
 				? (TypeError("``upper`` is invalid.", -1, "This parameter must be an Array with two elements."))
 				: (TypeError("``lower`` is invalid.", -1, "This parameter must be an Array with two elements.")))
 		}
