@@ -11,7 +11,7 @@
 
 #Include %A_LineFile%\..\Structure\Structure.ahk
 
-#Include %A_LineFile%\..\Core\Direct2D.ahk
+#Include *i%A_LineFile%\..\Core\Direct2D.ahk
 #Include %A_LineFile%\..\Core\GDI.ahk
 #Include %A_LineFile%\..\Core\GDIp.ahk
 
