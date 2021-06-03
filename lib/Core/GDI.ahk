@@ -297,8 +297,7 @@ Class GDI {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 
-		(instance := this.HBitmap()).Handle := hBitmap
-		return (instance)
+		return (this.HBitmap(hBitmap))
 	}
 
 	;* GDI.CreateCompatibleBitmap(width, height[, DC])
@@ -313,8 +312,7 @@ Class GDI {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 
-		(instance := this.HBitmap()).Handle := hBitmap
-		return (instance)
+		return (this.HBitmap(hBitmap))
 	}
 
 	;* GDI.CreateDIBSection(bitmapInfo[, DC, usage, &pBits, hSection, offset])
@@ -332,12 +330,15 @@ Class GDI {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 
-		(instance := this.HBitmap()).Handle := hBitmap
-		return (instance)
+		return (this.HBitmap(hBitmap))
 	}
 
 	class HBitmap {  ;~ hBitmaps are word aligned, so a 24 bpp image will use 32 bits of space.
 		Class := "HBitmap"
+
+		__New(hBitmap) {
+			this.Handle := hBitmap
+		}
 
 		__Delete() {
 			if (!DllCall("Gdi32\DeleteObject", "Ptr", this.Handle, "UInt")) {
