@@ -42,6 +42,27 @@
 /*
 ** GDIp_Enums: https://github.com/mono/libgdiplus/blob/main/src/gdipenums.h **
 
+;* enum ColorAdjustType  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluscolormatrix/ne-gdipluscolormatrix-coloradjusttype
+	0 = ColorAdjustTypeDefault
+	1 = ColorAdjustTypeBitmap
+	2 = ColorAdjustTypeBrush
+	3 = ColorAdjustTypePen
+	4 = ColorAdjustTypeText
+	5 = ColorAdjustTypeCount
+	6 = ColorAdjustTypeAny
+
+;* enum ColorChannelFlags  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluscolor/ne-gdipluscolor-colorchannelflags
+	0 = ColorChannelFlagsC
+	1 = ColorChannelFlagsM
+	2 = ColorChannelFlagsY
+	3 = ColorChannelFlagsK
+	4 = ColorChannelFlagsLast
+
+;* enum ColorMatrixFlags  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluscolormatrix/ne-gdipluscolormatrix-colormatrixflags
+	0 = ColorMatrixFlagsDefault
+	1 = ColorMatrixFlagsSkipGrays
+	2 = ColorMatrixFlagsAltGray
+
 ;* enum FontStyle  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fontstyle
 	0 = FontStyleRegular
 	1 = FontStyleBold
@@ -87,6 +108,13 @@
 	3 = UnitPoint - Each unit is a printer's point, or 1/72 inch.
 	4 = UnitInch
 	5 = UnitDocument - Each unit is 1/300 inch.
+
+;* enum WrapMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-wrapmode
+	0 = WrapModeTile - Tiling without flipping.
+	1 = WrapModeTileFlipX - Tiles are flipped horizontally as you move from one tile to the next in a row.
+	2 = WrapModeTileFlipY - Tiles are flipped vertically as you move from one tile to the next in a column.
+	3 = WrapModeTileFlipXY - Tiles are flipped horizontally as you move along a row and flipped vertically as you move along a column.
+	4 = WrapModeClamp - No tiling takes place.
 */
 
 class GDIp {
@@ -159,6 +187,131 @@ class GDIp {
 
 		__Delete() {
 			if (status := DllCall("Gdiplus\GdipDisposeImageAttributes", "Ptr", this.Ptr, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;-------------- Property ------------------------------------------------------;
+
+		;--------------- Method -------------------------------------------------------;
+
+		;* imageAttributes.SetAdjustType(adjustType, enableFlag)
+		;* Description:
+			;* Enables or disables color adjustment for a specified category.
+		;* Parameter:
+			;* [Integer] adjustType - See ColorAdjustType enumeration.
+			;* [Integer] enableFlag - Boolean value that specifies whether a color adjustment is enabled for the category specified by `adjustType`.
+		SetAdjustType(adjustType, enableFlag) {
+			if (status := DllCall("Gdiplus\GdipSetImageAttributesNoOp", "Ptr", this.Ptr, "Int", adjustType, "UInt", enableFlag, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* imageAttributes.SetColorKeys(colorLow, colorHigh[, adjustType, enableFlag])
+		;* Description:
+			;* Sets the color key (transparency range) for a specified category.
+		;* Parameter:
+			;* [Integer] colorLow - Color that specifies the low color-key value.
+			;* [Integer] colorHigh - Color that specifies the high color-key value.
+			;* [Integer] adjustType - See ColorAdjustType enumeration.
+			;* [Integer] enableFlag - Boolean value that specifies whether a separate transparency range is enabled for the category specified by `adjustType`.
+		SetColorKeys(colorLow, colorHigh, adjustType := 0, enableFlag := True) {
+			if (status := DllCall("Gdiplus\GdipSetImageAttributesColorKeys", "Ptr", this.Ptr, "Int", adjustType, "UInt", enableFlag, "UInt", colorLow, "UInt", colorHigh, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* imageAttributes.SetColorMatrix(colorMatrix[, adjustType, enableFlag, flags, grayMatrix])
+		;* Description:
+			;* Sets the color-adjustment matrix for a specified category.
+		;* Parameter:
+			;* [Structure] colorMatrix - A 5x5 color-adjustment matrix structure.
+			;* [Integer] adjustType - See ColorAdjustType enumeration.
+			;* [Integer] enableFlag - Boolean value that specifies whether a separate color adjustment is enabled for the category specified by `adjustType`.
+			;* [Integer] flags - See ColorMatrixFlags enumeration.
+			;* [Structure] grayMatrix - A 5x5 color-adjustment matrix structure used for adjusting gray shades when the value of `flags` is `ColorMatrixFlagsAltGray`.
+		SetColorMatrix(colorMatrix, adjustType := 0, enableFlag := True, flags := 0, grayMatrix := 0) {
+			if (status := DllCall("Gdiplus\GdipSetImageAttributesColorMatrix", "Ptr", this.Ptr, "Int", adjustType, "UInt", enableFlag, "Ptr", colorMatrix.Ptr, "Ptr", grayMatrix, "Int", flags, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* imageAttributes.SetGamma(gamma[, adjustType, enableFlag])
+		;* Description:
+			;* Sets the gamma value for a specified category.
+		;* Parameter:
+			;* [Float] gamma
+			;* [Integer] adjustType - See ColorAdjustType enumeration.
+			;* [Integer] enableFlag - Boolean value that specifies whether a separate gamma is enabled for the category specified by `adjustType`.
+		SetGamma(gamma, adjustType := 0, enableFlag := True) {
+			if (status := DllCall("Gdiplus\GdipSetImageAttributesGamma", "Ptr", this.Ptr, "Int", adjustType, "UInt", enableFlag, "Float", gamma, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* imageAttributes.SetICMMode(bool)
+		;* Parameter:
+			;* [Integer] bool
+		SetICMMode(bool) {
+			if (status := DllCall("Gdiplus\GdipSetImageAttributesICMMode", "Ptr", this.Ptr, "UInt", bool, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* imageAttributes.SetOutputChannel(channelFlags[, adjustType, enableFlag])
+		;* Description:
+			;* Sets the CMYK output channel for a specified category.
+		;* Parameter:
+			;* [Integer] channelFlags - See ColorChannelFlags enumeration.
+			;* [Integer] adjustType - See ColorAdjustType enumeration.
+			;* [Integer] enableFlag - Boolean value that specifies whether a separate output channel is enabled for the category specified by `adjustType`.
+		SetOutputChannel(channelFlags, adjustType := 0, enableFlag := True) {
+			if (status := DllCall("Gdiplus\GdipSetImageAttributesOutputChannel", "Ptr", this.Ptr, "Int", adjustType, "UInt", enableFlag, "Int", channelFlags, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* imageAttributes.SetThreshold(threshold[, adjustType, enableFlag])
+		;* Description:
+			;* Sets the threshold (transparency range) for a specified category.
+		;* Parameter:
+			;* [Float] threshold
+			;* [Integer] adjustType - See ColorAdjustType enumeration.
+			;* [Integer] enableFlag - Boolean value that specifies whether a separate threshold is enabled for the category specified by `adjustType`.
+		SetThreshold(threshold, adjustType := 0, enableFlag := True) {
+			if (status := DllCall("Gdiplus\GdipSetImageAttributesThreshold", "Ptr", this.Ptr, "Int", adjustType, "UInt", enableFlag, "Float", threshold, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* imageAttributes.SetWrapMode(wrapMode, color)
+		;* Description:
+			;* Sets the wrap mode of this ImageAttributes object.
+		;* Parameter:
+			;* [Integer] wrapMode - See WrapMode enumeration.
+			;* [Integer] color
+		SetWrapMode(wrapMode, color) {
+			if (status := DllCall("Gdiplus\GdipSetImageAttributesWrapMode", "Ptr", this.Ptr, "Int", wrapMode, "UInt", color, "UInt", 0, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* imageAttributes.Reset(adjustType)
+		;* Parameter:
+			;* [Integer] adjustType - See ColorAdjustType enumeration.
+		Reset(adjustType) {
+			if (status := DllCall("Gdiplus\GdipResetImageAttributes", "Ptr", this.Ptr, "Int", adjustType, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* imageAttributes.ResetColorMatrix(adjustType)
+		;* Description:
+			;* Sets the color-adjustment matrix of a specified category to identity matrix.
+		;* Parameter:
+			;* [Integer] adjustType - See ColorAdjustType enumeration.
+		ResetColorMatrix(adjustType) {
+			if (status := DllCall("Gdiplus\GdipSetImageAttributesToIdentity", "Ptr", this.Ptr, "Int", adjustType, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
 		}
