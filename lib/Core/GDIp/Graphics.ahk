@@ -528,11 +528,17 @@ class Graphics {
 
 	;------------------------------------------------------- Bitmap ---------------;
 
-	;* graphics.DrawBitmap(bitmap[, destinationObject, sourceObject, unit, imageAttributes])
+	;* graphics.DrawBitmap(bitmap[, dx, dy, dWidth, dHeight, sx, sy, sWidth, sHeight, unit, imageAttributes])
 	;* Parameter:
 		;* [Bitmap] bitmap
-		;* [Object] destinationObject
-		;* [Object] sourceObject
+		;* [Float] dx
+		;* [Float] dy
+		;* [Float] dWidth
+		;* [Float] dHeight
+		;* [Float] sx
+		;* [Float] sy
+		;* [Float] sWidth
+		;* [Float] sHeight
 		;* [Integer] unit - See Unit enumeration.
 		;* [ImageAttributes] imageAttributes
 	DrawBitmap(bitmap, dx := unset, dy := unset, dWidth := unset, dHeight := unset, sx := unset, sy := unset, sWidth := unset, sHeight := unset, unit := 2, imageAttributes := 0) {
@@ -545,10 +551,11 @@ class Graphics {
 		}
 	}
 
-	;* graphics.DrawCachedBitmap(bitmap[, object])
+	;* graphics.DrawCachedBitmap(bitmap[, x, y])
 	;* Parameter:
 		;* [CachedBitmap] bitmap
-		;* [Object] object
+		;* [Integer] x
+		;* [Integer] y
 	DrawCachedBitmap(bitmap, x := unset, y := unset) {
 		if (status := (IsSet(x) && IsSet(y))
 			? (DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", x, "Int", y, "Int"))
