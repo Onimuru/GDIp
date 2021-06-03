@@ -11,6 +11,7 @@
 
 #Include %A_LineFile%\..\Structure\Structure.ahk
 
+#Include %A_LineFile%\..\Core\Direct2D.ahk
 #Include %A_LineFile%\..\Core\GDI.ahk
 #Include %A_LineFile%\..\Core\GDIp.ahk
 
@@ -125,6 +126,10 @@ MemMove(dest, src, bytes) {
 	return (DllCall("msvcrt\memmove", "Ptr", dest, "Ptr", src, "UInt", bytes))
 }
 
+MemoryDifference(ptr1, ptr2, num) {
+   return DllCall("msvcrt\memcmp", "ptr", ptr1, "ptr", ptr2, "int", num)
+}
+
 ;======================================================= User32 ===============;
 
 /*
@@ -163,13 +168,13 @@ GetDC(hWnd := 0) {
 	return (DC)
 }
 
-;* GetDCEx([hWnd, flags, region])
+;* GetDCEx([hWnd, flags, hRegion])
 ;* Parameter:
 	;* [Integer] hWnd - A handle to the window whose DC is to be retrieved. If this value is NULL, this function retrieves the DC for the entire screen.
 	;* [Integer] flags - See DCX enumeration.
-	;* [Integer] region - A clipping region that may be combined with the visible region of the DC.
-GetDCEx(hWnd := 0, flags := 0, region := 0) {
-	if (!(hDC := DllCall("User32\GetDCEx", "Ptr", hWnd, "Ptr", region, "UInt", flags, "Ptr"))) {
+	;* [Integer] hRegion - A handle to a clipping region that may be combined with the visible region of the DC.
+GetDCEx(hWnd := 0, flags := 0, hRegion := 0) {
+	if (!(hDC := DllCall("User32\GetDCEx", "Ptr", hWnd, "Ptr", hRegion, "UInt", flags, "Ptr"))) {
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
 
@@ -323,7 +328,7 @@ class LayeredWindow {
 		static WS_EX_ACCEPTFILES := 0x00000010, WS_EX_APPWINDOW := 0x00040000, WS_EX_CLIENTEDGE := 0x00000200, WS_EX_COMPOSITED := 0x02000000, WS_EX_CONTEXTHELP := 0x00000400, WS_EX_CONTROLPARENT := 0x00010000, WS_EX_DLGMODALFRAME := 0x00000001, WS_EX_LAYERED := 0x00080000, WS_EX_LAYOUTRTL := 0x00400000, WS_EX_LEFT := 0x00000000, WS_EX_LEFTSCROLLBAR := 0x00004000, WS_EX_LTRREADING := 0x00000000, WS_EX_MDICHILD := 0x00000040, WS_EX_NOACTIVATE := 0x08000000, WS_EX_NOINHERITLAYOUT := 0x00100000, WS_EX_NOPARENTNOTIFY := 0x00000004, WS_EX_NOREDIRECTIONBITMAP := 0x00200000, WS_EX_OVERLAPPEDWINDOW := 0x00000300, WS_EX_PALETTEWINDOW := 0x00000188, WS_EX_RIGHT := 0x00001000, WS_EX_RIGHTSCROLLBAR := 0x00000000, WS_EX_RTLREADING := 0x00002000, WS_EX_STATICEDGE := 0x00020000, WS_EX_TOOLWINDOW := 0x00000080, WS_EX_TOPMOST := 0x00000008, WS_EX_TRANSPARENT := 0x00000020, WS_EX_WINDOWEDGE := 0x00000100  ;: https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles
 
 		if (!exStyle) {
-			exStyle := (WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_TRANSPARENT) & ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE)
+			exStyle := WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_TRANSPARENT
 		}
 		else if (exStyle is Array) {
 			exStyle := (exStyle.Length == 2 && (add := exStyle[0]) is Array && (remove := exStyle[1]) is Array)
@@ -334,7 +339,7 @@ class LayeredWindow {
 		static WS_BORDER := 0x00800000, WS_CAPTION := 0x00C00000, WS_CHILD := 0x40000000, WS_CHILDWINDOW := 0x40000000, WS_CLIPCHILDREN := 0x02000000, WS_CLIPSIBLINGS := 0x04000000, WS_DISABLED := 0x08000000, WS_DLGFRAME := 0x00400000, WS_GROUP := 0x00020000, WS_HSCROLL := 0x00100000, WS_ICONIC := 0x20000000, WS_MAXIMIZE := 0x01000000, WS_MAXIMIZEBOX := 0x00010000, WS_MINIMIZE := 0x20000000, WS_MINIMIZEBOX := 0x00020000, WS_OVERLAPPED := 0x00000000, WS_OVERLAPPEDWINDOW := 0x00CF0000, WS_POPUP := 0x80000000, WS_POPUPWINDOW := 0x80880000, WS_SIZEBOX := 0x00040000, WS_SYSMENU := 0x00080000, WS_TABSTOP := 0x00010000, WS_THICKFRAME := 0x00040000, WS_TILED := 0x00000000, WS_TILEDWINDOW := 0xCF0000, WS_VISIBLE := 0x10000000, WS_VSCROLL := 0x00200000  ;: https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
 
 		if (!style) {
-			style := WS_POPUPWINDOW & ~(WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX)
+			style := WS_POPUPWINDOW & ~WS_CAPTION  ;~ The WS_CAPTION style must be combined with the WS_POPUPWINDOW style to make the window menu visible.
 		}
 		else if (style is Array) {
 			style := (style.Length == 2 && (add := style[0]) is Array && (remove := style[1]) is Array)
@@ -377,6 +382,10 @@ class LayeredWindow {
 		this.Bitmap := GDIp.CreateBitmap(width, height, pixelFormat, width*(bitCount >> 3), pBits)
 		this.Graphics := GDIp.CreateGraphicsFromBitmap(this.Bitmap)
 			, this.Graphics.SetInterpolationMode(interpolation), this.Graphics.SetSmoothingMode(smoothing)
+	}
+
+	static RegisterClass(className := "LayeredWindow", classStyle := 0x00000000, windowProc := False, hCursor := 32512) {  ;? 32512 = OCR_NORMAL
+
 	}
 
 	__Delete() {
@@ -445,7 +454,7 @@ class LayeredWindow {
 	AddExStyle(exStyle) {
 		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") | exStyle)  ;? -20 = GWL_EXSTYLE
 
-		if (!DllCall("User32\SetWindowPos", "Ptr", overlay.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {  ;? 0x0027 = SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos
+		if (!DllCall("User32\SetWindowPos", "Ptr", this.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {  ;? 0x0027 = SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}
@@ -453,7 +462,15 @@ class LayeredWindow {
 	RemoveExStyle(exStyle) {
 		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") & ~(exStyle))
 
-		if (!DllCall("User32\SetWindowPos", "Ptr", overlay.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {
+		if (!DllCall("User32\SetWindowPos", "Ptr", this.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {
+			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+		}
+	}
+
+	ToggleExStyle(exStyle) {
+		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") ^ exStyle)
+
+		if (!DllCall("User32\SetWindowPos", "Ptr", this.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}

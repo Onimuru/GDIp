@@ -67,8 +67,7 @@ static CreateGraphicsFromDC(DC) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Graphics()).Ptr := pGraphics
-	return (instance)
+	return (this.Graphics(pGraphics))
 }
 
 ;* GDIp.CreateGraphicsFromBitmap(bitmap)
@@ -81,8 +80,7 @@ static CreateGraphicsFromBitmap(bitmap) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Graphics()).Ptr := pGraphics
-	return (instance)
+	return (this.Graphics(pGraphics))
 }
 
 ;* GDIp.CreateGraphicsFromWindow(hWnd[, useICM])
@@ -98,12 +96,15 @@ static CreateGraphicsFromWindow(hWnd, useICM := False) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Graphics()).Ptr := pGraphics
-	return (instance)
+	return (this.Graphics(pGraphics))
 }
 
 class Graphics {
 	Class := "Graphics"
+
+	__New(pGraphics) {
+		this.Ptr := pGraphics
+	}
 
 	__Delete() {
 		if (status := DllCall("Gdiplus\GdipDeleteGraphics", "Ptr", this.Ptr, "Int")) {
@@ -395,8 +396,7 @@ class Graphics {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := GDIp.Matrix()).Ptr := pMatrix
-		return (instance)
+		return (GDIp.Matrix(pMatrix))
 	}
 
 	;* graphics.SetTransform(matrix)

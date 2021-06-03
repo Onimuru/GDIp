@@ -92,7 +92,7 @@ Class GDI {
 		;* [Integer] sy
 		;* [Integer] operation - See TernaryRasterOperations enumeration.
 	static BitBlt(dDC, dx, dy, width, height, sDC, sx, sy, operation := 0x00CC0020) {  ;? 0x00CC0020 = SRCCOPY
-		if (!(DllCall("Gdi32\BitBlt", "Ptr", dDC.Handle, "Int", dx, "Int", dy, "Int", width, "Int", height, "Ptr", sDC.Handle, "Int", sx, "Int", sy, "UInt", operation, "UInt"))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt
+		if (!DllCall("Gdi32\BitBlt", "Ptr", dDC.Handle, "Int", dx, "Int", dy, "Int", width, "Int", height, "Ptr", sDC.Handle, "Int", sx, "Int", sy, "UInt", operation, "UInt")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}
@@ -117,33 +117,9 @@ Class GDI {
 		;* [Integer] sHeight
 		;* [Integer] operation - See TernaryRasterOperations enumeration.
 	static StretchBlt(dDC, dx, dy, dWidth, dHeight, sDC, sx, sy, sWidth, sHeight, operation := 0x00CC0020) {  ;? 0x00CC0020 = SRCCOPY
-		if (!(DllCall("Gdi32\StretchBlt", "Ptr", dDC.Handle, "Int", dx, "Int", dy, "Int", dWidth, "Int", dHeight, "Ptr", sDC.Handle, "Int", sx, "Int", sy, "Int", sWidth, "Int", sHeight, "UInt", operation, "UInt"))) {
+		if (!DllCall("Gdi32\StretchBlt", "Ptr", dDC.Handle, "Int", dx, "Int", dy, "Int", dWidth, "Int", dHeight, "Ptr", sDC.Handle, "Int", sx, "Int", sy, "Int", sWidth, "Int", sHeight, "UInt", operation, "UInt")) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
-	}
-
-	;* GDI.GetDeviceCaps(DC, index)
-	;* Parameter:
-		;* [DC] DC
-		;* [Integer] index - See DeviceCaps enumeration.
-	static GetDeviceCaps(DC, index) {
-		if (!(information := DllCall("Gdi32\GetDeviceCaps", "Ptr", DC.Handle, "Int", index, "Int"))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getdevicecaps
-			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
-		}
-
-		switch (index) {
-			case 0x26:  ;? 0x26 = RASTERCAPS
-				static rasterCaps := Map(0x0000, "RC_NONE", 0x0001, "RC_BITBLT", 0x0002, "RC_BANDING", 0x0004, "RC_SCALING", 0x0008, "RC_BITMAP64", 0x0010, "RC_GDI20_OUTPUT", 0x0020, "RC_GDI20_STATE", 0x0040, "RC_SAVEBITMAP", 0x0080, "RC_DI_BITMAP", 0x0100, "RC_PALETTE", 0x0200, "RC_DIBTODEV", 0x0400, "RC_BIGFONT", 0x0800, "RC_STRETCHBLT", 0x1000, "RC_FLOODFILL", 0x2000, "RC_STRETCHDIB", 0x4000, "RC_OP_DX_OUTPUT", 0x8000, "RC_DEVBITS")
-				information := shadeBlendCaps[information]
-			case 0x78:  ;? 0x78 = SHADEBLENDCAPS
-				static shadeBlendCaps := Map(0x00000000, "SB_NONE", 0x00000001, "SB_CONST_ALPHA", 0x00000002, "SB_PIXEL_ALPHA", 0x00000004, "SB_PREMULT_ALPHA", 0x00000010, "SB_GRAD_RECT", 0x00000020, "SB_GRAD_TRI")
-				information := shadeBlendCaps[information]
-			case 0x02:  ;? 0x02 = TECHNOLOGY
-				static technology := ["DT_PLOTTER", "DT_RASDISPLAY", "DT_RASPRINTER", "DT_RASCAMERA", "DT_CHARSTREAM", "DT_METAFILE", "DT_DISPFILE"]
-				information := technology[information]
-		}
-
-		return (information)
 	}
 
 	;---------------  Class  -------------------------------------------------------;
@@ -167,7 +143,7 @@ Class GDI {
 		__Delete() {
 			this.Reset()
 
-			if (!(DllCall("Gdi32\DeleteDC", "Ptr", this.Handle, "UInt"))) {
+			if (!DllCall("Gdi32\DeleteDC", "Ptr", this.Handle, "UInt")) {
 				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 			}
 		}
@@ -179,6 +155,50 @@ Class GDI {
 				this.DefineProp("OriginalObjects", {Value: object := {}})  ;* Only initialize this object as needed.
 
 				return (object)
+			}
+		}
+
+		;* DC.GetDeviceCaps(DC, index)
+		;* Parameter:
+			;* [DC] DC
+			;* [Integer] index - See DeviceCaps enumeration.
+		static GetDeviceCaps(index) {
+			if (!(information := DllCall("Gdi32\GetDeviceCaps", "Ptr", this.Handle, "Int", index, "Int"))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getdevicecaps
+				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+			}
+
+			switch (index) {
+				case 0x26:  ;? 0x26 = RASTERCAPS
+					static rasterCaps := Map(0x0000, "RC_NONE", 0x0001, "RC_BITBLT", 0x0002, "RC_BANDING", 0x0004, "RC_SCALING", 0x0008, "RC_BITMAP64", 0x0010, "RC_GDI20_OUTPUT", 0x0020, "RC_GDI20_STATE", 0x0040, "RC_SAVEBITMAP", 0x0080, "RC_DI_BITMAP", 0x0100, "RC_PALETTE", 0x0200, "RC_DIBTODEV", 0x0400, "RC_BIGFONT", 0x0800, "RC_STRETCHBLT", 0x1000, "RC_FLOODFILL", 0x2000, "RC_STRETCHDIB", 0x4000, "RC_OP_DX_OUTPUT", 0x8000, "RC_DEVBITS")
+					information := shadeBlendCaps[information]
+				case 0x78:  ;? 0x78 = SHADEBLENDCAPS
+					static shadeBlendCaps := Map(0x00000000, "SB_NONE", 0x00000001, "SB_CONST_ALPHA", 0x00000002, "SB_PIXEL_ALPHA", 0x00000004, "SB_PREMULT_ALPHA", 0x00000010, "SB_GRAD_RECT", 0x00000020, "SB_GRAD_TRI")
+					information := shadeBlendCaps[information]
+				case 0x02:  ;? 0x02 = TECHNOLOGY
+					static technology := ["DT_PLOTTER", "DT_RASDISPLAY", "DT_RASPRINTER", "DT_RASCAMERA", "DT_CHARSTREAM", "DT_METAFILE", "DT_DISPFILE"]
+					information := technology[information]
+			}
+
+			return (information)
+		}
+
+		;* DC.GetLayout()
+		;* Return:
+			;* [Integer] layout
+		GetLayout() {
+			if ((layout := DllCall("Gdi32\SetLayout", this.Handle, "UInt")) == -1) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getlayout
+				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+			}
+		}
+
+		;* DC.SetLayout(layout)
+		;* Parameter:
+			;* [Integer] layout
+		;* Note
+			;~ The values returned by GetWindowOrgEx, GetWindowExtEx, GetViewportOrgEx and GetViewportExtEx are not affected by calling SetLayout.
+		SetLayout(layout) {
+			if (DllCall("Gdi32\SetLayout", this.Handle, "UInt", layout, "UInt") == -1) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-setlayout
+				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 			}
 		}
 
@@ -194,7 +214,7 @@ Class GDI {
 		;* Parameter:
 			;* [Integer] stretchMode - See StretchMode enumeration.
 		SetStretchBltMode(stretchMode) {
-			if (!(DllCall("Gdi32\SetStretchBltMode", "Ptr", this.Handle, "Int", stretchMode, "UInt"))) {
+			if (!DllCall("Gdi32\SetStretchBltMode", "Ptr", this.Handle, "Int", stretchMode, "UInt")) {
 				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 			}
 		}
@@ -213,7 +233,7 @@ Class GDI {
 						throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 					}
 
-					if (!(this.OriginalObjects.HasProp(class))) {  ;* Save the handle to any original, default objects that are replaced.
+					if (!this.OriginalObjects.HasProp(class)) {  ;* Save the handle to any original, default objects that are replaced.
 						this.OriginalObjects.%class% := hObject
 					}
 
@@ -236,9 +256,9 @@ Class GDI {
 
 				return (hObject)
 			}
-			else if (!(class)) {
+			else if (!class) {
 				for class in this.OriginalObjects.Clone().OwnProps() {
-					if (!(DllCall("Gdi32\SelectObject", "Ptr", this.Handle, "Ptr", this.OriginalObjects.DeleteProp(class), "Ptr"))) {
+					if (!DllCall("Gdi32\SelectObject", "Ptr", this.Handle, "Ptr", this.OriginalObjects.DeleteProp(class), "Ptr")) {
 						throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 					}
 				}
@@ -320,7 +340,7 @@ Class GDI {
 		Class := "HBitmap"
 
 		__Delete() {
-			if (!(DllCall("Gdi32\DeleteObject", "Ptr", this.Handle, "UInt"))) {
+			if (!DllCall("Gdi32\DeleteObject", "Ptr", this.Handle, "UInt")) {
 				throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 			}
 		}

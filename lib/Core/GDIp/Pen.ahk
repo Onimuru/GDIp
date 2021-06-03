@@ -58,8 +58,7 @@ static CreatePen(color, width := 1, unit := 2) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Pen()).Ptr := pPen
-	return (instance)
+	return (this.Pen(pPen))
 }
 
 ;* GDIp.CreatePenFromBrush(brush[, width, unit])
@@ -74,12 +73,15 @@ static CreatePenFromBrush(brush, width := 1, unit := 2) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Pen()).Ptr := pPen
-	return (instance)
+	return (this.Pen(pPen))
 }
 
 class Pen {
 	Class := "Pen"
+
+	__New(pPen) {
+		this.Ptr := pPen
+	}
 
 	;* pen.Clone()
 	;* Return:
@@ -89,8 +91,7 @@ class Pen {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := GDIp.Pen()).Ptr := pPen
-		return (instance)
+		return (GDIp.Pen(pPen))
 	}
 
 	__Delete() {
@@ -224,11 +225,11 @@ class Pen {
 		}
 
 		switch (type) {
-			case 0: (instance := GDIp.SolidBrush()).Ptr := pBrush
-			case 1: (instance := GDIp.HatchBrush()).Ptr := pBrush
-			case 2: (instance := GDIp.TextureBrush()).Ptr := pBrush
-			case 3: (instance := GDIp.PathBrush()).Ptr := pBrush
-			case 4: (instance := GDIp.LinearBrush()).Ptr := pBrush
+			case 0: instance := GDIp.SolidBrush(pBrush)
+			case 1: instance := GDIp.HatchBrush(pBrush)
+			case 2: instance := GDIp.TextureBrush(pBrush)
+			case 3: instance := GDIp.PathBrush(pBrush)
+			case 4: instance := GDIp.LinearBrush(pBrush)
 		}
 
 		return (instance)
@@ -513,8 +514,7 @@ class Pen {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := GDIp.Matrix()).Ptr := pMatrix
-		return (instance)
+		return (GDIp.Matrix(pMatrix))
 	}
 
 	;* pen.SetTransform(matrix)

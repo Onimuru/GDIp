@@ -14,12 +14,15 @@ static CreatePath(fillMode := 0) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := GDIp.Path()).Ptr := pPath
-	return (instance)
+	return (this.Path(pPath))
 }
 
 class Path {
 	Class := "Path"
+
+	__New(pPath) {
+		this.Ptr := pPath
+	}
 
 	;* path.Clone()
 	;* Return:
@@ -29,8 +32,7 @@ class Path {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := GDIp.Path()).Ptr := pPath
-		return (instance)
+		return (GDIp.Path(pPath))
 	}
 
 	__Delete() {

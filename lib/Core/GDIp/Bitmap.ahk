@@ -69,8 +69,7 @@ static CreateBitmap(width, height, pixelFormat := 0x26200A, stride := 0, scan0 :
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Bitmap()).Ptr := pBitmap
-	return (instance)
+	return (this.Bitmap(pBitmap))
 }
 
 ;~ CreateBitmapFromDirectDrawSurface()
@@ -88,8 +87,7 @@ static CreateBitmapFromFile(file, useICM := False) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Bitmap()).Ptr := pBitmap
-	return (instance)
+	return (this.Bitmap(pBitmap))
 }
 
 ;~ CreateBitmapFromGdiDIB
@@ -106,8 +104,7 @@ static CreateBitmapFromGraphics(graphics, width, height) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Bitmap()).Ptr := pBitmap
-	return (instance)
+	return (this.Bitmap(pBitmap))
 }
 
 ;~ CreateBitmapFromHBITMAP
@@ -144,8 +141,7 @@ static CreateBitmapFromScreen(params*) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Bitmap()).Ptr := pBitmap
-	return (instance)
+	return (this.Bitmap(pBitmap))
 }
 
 ;~ CreateBitmapFromStream, CreateBitmapFromStreamICM
@@ -164,21 +160,21 @@ static CreateBitmapFromWindow(hWnd, client := True) {
 	static rect := Structure.CreateRect(0, 0, 0, 0, "Int")
 
 	if (client) {
-		if (!(DllCall("User32\GetClientRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt"))) {
+		if (!DllCall("User32\GetClientRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt")) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}
 	else if (DllCall("Dwmapi\DwmGetWindowAttribute", "Ptr", hWnd, "UInt", 9, "UPtr", rect.Ptr, "UInt", 16, "UInt")) {
-		if (!(DllCall("User32\GetWindowRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt"))) {
+		if (!DllCall("User32\GetWindowRect", "Ptr", hWnd, "Ptr", rect.Ptr, "UInt")) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}
 
 	DC := GDI.CreateCompatibleDC()
-	bitmap := GDI.CreateDIBSection(Structure.CreateBitmapInfoHeader(rect.NumGet(8, "Int"), -rect.NumGet(12, "Int")), DC)
+	bitmap := GDI.CreateDIBSection(Structure.CreateBitmapInfoHeader(rect.NumGet(8, "Int"), -rect.NumGet(12, "Int"), 32, 0x0000), DC)
 		, DC.SelectObject(bitmap)
 
-	if (!(DllCall("User32\PrintWindow", "Ptr", hWnd, "Ptr", DC.Handle, "UInt", 2 + client, "UInt"))) {
+	if (!DllCall("User32\PrintWindow", "Ptr", hWnd, "Ptr", DC.Handle, "UInt", 2 + client, "UInt")) {  ;? 2 = PW_RENDERFULLCONTENT, 1 = PW_CLIENTONLY
 		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 	}
 
@@ -186,8 +182,7 @@ static CreateBitmapFromWindow(hWnd, client := True) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Bitmap()).Ptr := pBitmap
-	return (instance)
+	return (this.Bitmap(pBitmap))
 }
 
 ;~ CreateHBITMAPFromBitmap
@@ -199,6 +194,10 @@ static CreateBitmapFromWindow(hWnd, client := True) {
 
 class Bitmap {
 	Class := "Bitmap"
+
+	__New(pBitmap) {
+		this.Ptr := pBitmap
+	}
 
 	;* bitmap.Clone([x, y, width, height, pixelFormat])
 	;* Parameter:
@@ -218,8 +217,7 @@ class Bitmap {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := GDIp.Bitmap()).Ptr := pBitmap
-		return (instance)
+		return (GDIp.Bitmap(pBitmap))
 	}
 
 	__Delete() {
@@ -392,8 +390,7 @@ class Bitmap {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := GDIp.Bitmap()).Ptr := pBitmap
-		return (instance)
+		return (GDIp.Bitmap(pBitmap))
 	}
 
 	;--------------- Method -------------------------------------------------------;
@@ -421,16 +418,16 @@ class Bitmap {
 	;* Return:
 		;* [Integer] - Boolean value that indicates if the bitmap was locked.
 	LockBits(x := 0, y := 0, width := unset, height := unset, lockMode := 0x0003, pixelFormat := unset) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
-		if (!(this.HasProp("BitmapData"))) {
-			if (!(IsSet(width))) {
-				if (!(IsSet(height))) {
+		if (!this.HasProp("BitmapData")) {
+			if (!IsSet(width)) {
+				if (!IsSet(height)) {
 					DllCall("Gdiplus\GdipGetImageDimension", "Ptr", this.Ptr, "Float*", &(width := 0), "Float*", &(height := 0))
 				}
 				else {
 					DllCall("Gdiplus\GdipGetImageWidth", "Ptr", this.Ptr, "UInt*", &(width := 0))
 				}
 			}
-			else if (!(IsSet(height))) {
+			else if (!IsSet(height)) {
 				DllCall("Gdiplus\GdipGetImageHeight", "Ptr", this.Ptr, "UInt*", &(height := 0))
 			}
 
@@ -490,7 +487,7 @@ class Bitmap {
 			}
 		}
 
-		if (!(pCodec)) {
+		if (!pCodec) {
 			throw (Error("Could not find a matching encoder for the specified file format."))
 		}
 
@@ -511,12 +508,15 @@ static CreateCachedBitmap(bitmap, graphics) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.CachedBitmap()).Ptr := pCachedBitmap
-	return (instance)
+	return (this.CachedBitmap(pCachedBitmap))
 }
 
 class CachedBitmap {
 	Class := "CachedBitmap"
+
+	__New(pCachedBitmap) {
+		this.Ptr := pCachedBitmap
+	}
 
 	__Delete() {
 		if (status := DllCall("Gdiplus\GdipDeleteCachedBitmap", "Ptr", this.Ptr, "Int")) {

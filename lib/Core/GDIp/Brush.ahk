@@ -92,12 +92,15 @@ static CreateSolidBrush(color)  {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.SolidBrush()).Ptr := pBrush
-	return (instance)
+	return (this.SolidBrush(pBrush))
 }
 
 class SolidBrush {
 	Class := "Brush"
+
+	__New(pBrush) {
+		this.Ptr := pBrush
+	}
 
 	;* brush.Clone()
 	;* Return:
@@ -107,8 +110,7 @@ class SolidBrush {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := GDIp.SolidBrush()).Ptr := pBrush
-		return (instance)
+		return (GDIp.SolidBrush(pBrush))
 	}
 
 	__Delete() {
@@ -183,8 +185,7 @@ static CreateHatchBrush(foregroundColor, backgroundColor, style := 0) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.HatchBrush()).Ptr := pBrush
-	return (instance)
+	return (this.HatchBrush(pBrush))
 }
 
 class HatchBrush extends GDIp.SolidBrush {
@@ -262,8 +263,7 @@ static CreateTextureBrush(bitmap, wrapMode := 0, x := unset, y := unset, width :
 		}
 	}
 
-	(instance := this.TextureBrush()).Ptr := pBrush
-	return (instance)
+	return (this.TextureBrush(pBrush))
 }
 
 class TextureBrush extends GDIp.SolidBrush {
@@ -284,8 +284,7 @@ class TextureBrush extends GDIp.SolidBrush {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.Bitmap()).Ptr := pBitmap
-		return (instance)
+		return (this.Bitmap(pBitmap))
 	}
 
 	WrapMode {
@@ -340,8 +339,7 @@ class TextureBrush extends GDIp.SolidBrush {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.Matrix()).Ptr := pMatrix
-		return (instance)
+		return (GDIp.Matrix(pMatrix))
 	}
 
 	;* textureBrush.SetTransform(matrix)
@@ -425,8 +423,7 @@ static CreatePathBrush(objects*)  {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.PathBrush()).Ptr := pBrush
-	return (instance)
+	return (this.PathBrush(pBrush))
 }
 
 ;* GDIp.CreatePathBrushFromPath(path)
@@ -439,8 +436,7 @@ static CreatePathBrushFromPath(path) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.PathBrush()).Ptr := pBrush
-	return (instance)
+	return (this.PathBrush(pBrush))
 }
 
 class PathBrush extends GDIp.SolidBrush {
@@ -731,8 +727,7 @@ class PathBrush extends GDIp.SolidBrush {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.Matrix()).Ptr := pMatrix
-		return (instance)
+		return (GDIp.Matrix(pMatrix))
 	}
 
 	;* pathBrush.SetTransform(matrix)
@@ -818,8 +813,7 @@ static CreateLinearBrush(x1, y1, x2, y2, color1, color2, wrapMode := 0) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.LinearBrush()).Ptr := pBrush
-	return (instance)
+	return (this.LinearBrush(pBrush))
 }
 
 ;* GDIp.CreateLinearBrushFromRect(x, y, width, height, color1, color2[, gradientMode, wrapMode])
@@ -842,8 +836,7 @@ static CreateLinearBrushFromRect(x, y, width, height, color1, color2, gradientMo
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.LinearBrush()).Ptr := pBrush
-	return (instance)
+	return (this.LinearBrush(pBrush))
 }
 
 ;* GDIp.CreateLinearBrushFromRectWithAngle(x, y, width, height, color1, color2, angle[, wrapMode])
@@ -866,8 +859,7 @@ static CreateLinearBrushFromRectWithAngle(x, y, width, height, color1, color2, a
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.LinearBrush()).Ptr := pBrush
-	return (instance)
+	return (this.LinearBrush(pBrush))
 }
 
 class LinearBrush extends GDIp.SolidBrush {
@@ -1012,8 +1004,7 @@ class LinearBrush extends GDIp.SolidBrush {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.Matrix()).Ptr := pMatrix
-		return (instance)
+		return (GDIp.Matrix(pMatrix))
 	}
 
 	;* linearBrush.SetTransform(matrix)

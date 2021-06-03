@@ -136,12 +136,15 @@ class GDIp {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.ImageAttributes()).Ptr := pImageAttributes
-		return (instance)
+		return (this.ImageAttributes(pImageAttributes))
 	}
 
 	class ImageAttributes {
 		Class := "ImageAttributes"
+
+		__New(pImageAttributes) {
+			this.Ptr := pImageAttributes
+		}
 
 		;* imageAttributes.Clone()
 		;* Return:
@@ -151,8 +154,7 @@ class GDIp {
 				throw (ErrorFromStatus(status))
 			}
 
-			(instance := GDIp.ImageAttributes()).Ptr := pImageAttributes
-			return (instance)
+			return (GDIp.ImageAttributes(pImageAttributes))
 		}
 
 		__Delete() {
@@ -204,12 +206,15 @@ class GDIp {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.Region()).Ptr := pRegion
-		return (instance)
+		return (this.Region(pRegion))
 	}
 
 	class Region {
 		Class := "Region"
+
+		__New(pRegion) {
+			this.Ptr := pRegion
+		}
 
 		;* region.Clone()
 		;* Return:
@@ -219,8 +224,7 @@ class GDIp {
 				throw (ErrorFromStatus(status))
 			}
 
-			(instance := GDIp.Region()).Ptr := pRegion
-			return (instance)
+			return (GDIp.Region(pRegion))
 		}
 
 		__Delete() {
@@ -279,12 +283,15 @@ class GDIp {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.FontFamily()).Ptr := pFontFamily
-		return (instance)
+		return (this.FontFamily(pFontFamily))
 	}
 
 	class FontFamily {
 		Class := "FontFamily"
+
+		__New(pFontFamily) {
+			this.Ptr := pFontFamily
+		}
 
 		;* fontFamily.Clone()
 		;* Return:
@@ -294,8 +301,7 @@ class GDIp {
 				throw (ErrorFromStatus(status))
 			}
 
-			(instance := GDIp.FontFamily()).Ptr := pFontFamily
-			return (instance)
+			return (GDIp.FontFamily(pFontFamily))
 		}
 
 		__Delete() {
@@ -341,8 +347,7 @@ class GDIp {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.Font()).Ptr := pFont
-		return (instance)
+		return (this.Font(pFont))
 	}
 
 	;* GDIp.CreateFontFromDC(DC)
@@ -355,12 +360,15 @@ class GDIp {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.Font()).Ptr := pFont
-		return (instance)
+		return (this.Font(pFont))
 	}
 
 	class Font {
 		Class := "Font"
+
+		__New(pFont) {
+			this.Ptr := pFont
+		}
 
 		;* font.Clone()
 		;* Return:
@@ -370,8 +378,7 @@ class GDIp {
 				throw (ErrorFromStatus(status))
 			}
 
-			(instance := GDIp.Font()).Ptr := pFont
-			return (instance)
+			return (GDIp.Font(pFont))
 		}
 
 		__Delete() {
@@ -396,8 +403,7 @@ class GDIp {
 				throw (ErrorFromStatus(status))
 			}
 
-			(instance := GDIp.FontFamily()).Ptr := pFontFamily
-			return (instance)
+			return (GDIp.FontFamily(pFontFamily))
 		}
 
 		Size {
@@ -484,12 +490,15 @@ class GDIp {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := this.StringFormat()).Ptr := pStringFormat
-		return (instance)
+		return (this.StringFormat(pStringFormat))
 	}
 
 	class StringFormat {
 		Class := "StringFormat"
+
+		__New(pStringFormat) {
+			this.Ptr := pStringFormat
+		}
 
 		;* stringFormat.Clone()
 		;* Return:
@@ -499,8 +508,7 @@ class GDIp {
 				throw (ErrorFromStatus(status))
 			}
 
-			(instance := GDIp.StringFormat()).Ptr := pStringFormat
-			return (instance)
+			return (GDIp.StringFormat(pStringFormat))
 		}
 
 		__Delete() {

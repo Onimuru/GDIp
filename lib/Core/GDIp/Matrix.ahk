@@ -4,16 +4,15 @@
 	1 = MatrixOrderAppend
 */
 
-;* GDIp.CreateMatrix([m11, m12, m21, m22, dx, dy])
+;* GDIp.CreateMatrix([m11, m12, m21, m22, m31, m32])
 ;* Return:
 	;* [Matrix]
-static CreateMatrix(m11 := 1, m12 := 0, m21 := 0, m22 := 1, dx := 0, dy := 0) {
-	if (status := DllCall("Gdiplus\GdipCreateMatrix2", "Float", m11, "Float", m12, "Float", m21, "Float", m22, "Float", dx, "Float", dy, "Ptr*", &(pMatrix := 0), "Int")) {
+static CreateMatrix(m11 := 1, m12 := 0, m21 := 0, m22 := 1, m31 := 0, m32 := 0) {
+	if (status := DllCall("Gdiplus\GdipCreateMatrix2", "Float", m11, "Float", m12, "Float", m21, "Float", m22, "Float", m31, "Float", m32, "Ptr*", &(pMatrix := 0), "Int")) {
 		throw (ErrorFromStatus(status))
 	}
 
-	(instance := this.Matrix()).Ptr := pMatrix
-	return (instance)
+	return (this.Matrix(pMatrix))
 }
 
 /*
@@ -23,6 +22,10 @@ static CreateMatrix(m11 := 1, m12 := 0, m21 := 0, m22 := 1, dx := 0, dy := 0) {
 class Matrix {
 	Class := "Matrix"
 
+	__New(pMatrix) {
+		this.Ptr := pMatrix
+	}
+
 	;* matrix.Clone()
 	;* Return:
 		;* [Matrix]
@@ -31,8 +34,7 @@ class Matrix {
 			throw (ErrorFromStatus(status))
 		}
 
-		(instance := GDIp.Matrix()).Ptr := pMatrix
-		return (instance)
+		return (GDIp.Matrix(pMatrix))
 	}
 
 	__Delete() {
