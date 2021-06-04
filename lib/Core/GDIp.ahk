@@ -1,4 +1,28 @@
-﻿;============ Auto-execute ====================================================;
+﻿/*
+* MIT License
+*
+* Copyright (c) 2021 Onimuru
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+;============ Auto-execute ====================================================;
 ;======================================================  Setting  ==============;
 
 #Requires AutoHotkey v2.0-a134-d3d43350
@@ -7,35 +31,6 @@
 ;======================================================  Include  ==============;
 
 #Include %A_LineFile%\..\..\Math\Math.ahk
-
-;============== Function ======================================================;
-
-;GetRotatedTranslation(width, height, angle, ByRef xTranslation, ByRef yTranslation) {
-;	angle := (angle >= 0) ? (Mod(angle, 360)) : (360 - Mod(-angle, -360))
-;
-;	if ((angle >= 0) && (angle <= 90)) {
-;		xTranslation := height*Sin(Math.ToRadians(angle)), yTranslation := 0
-;	}
-;	else if ((angle > 90) && (angle <= 180)) {
-;		radians := Math.ToRadians(angle), cos := Cos(radians)
-;			, xTranslation := (height*Sin(radians)) - (width*cos), yTranslation := -height*cos
-;	}
-;	else if ((angle > 180) && (angle <= 270)) {
-;		radians := Math.ToRadians(angle), cos := Cos(radians)
-;			, xTranslation := -(width*cos), yTranslation := -(height*cos) - (width*Sin(radians))
-;	}
-;	else if ((angle > 270) && (angle <= 360)) {
-;		xTranslation := 0, yTranslation := -width*Sin(Math.ToRadians(angle))
-;	}
-;}
-;
-;GetRotatedDimensions(width, height, angle, ByRef rotatedWidth, ByRef rotatedHeight) {
-;	angle := (angle >= 0) ? (Mod(angle, 360)) : (360 - Mod(-angle, -360))
-;		, radians := Math.ToRadians(angle)
-;
-;	sin := Sin(radians), cos := Cos(radians)
-;		, rotatedWidth := Abs(width*cos) + Abs(height*sin), rotatedHeight := Abs(width*sin) + Abs(height*cos)
-;}
 
 ;===============  Class  =======================================================;
 
@@ -190,8 +185,6 @@ class GDIp {
 				throw (ErrorFromStatus(status))
 			}
 		}
-
-		;-------------- Property ------------------------------------------------------;
 
 		;--------------- Method -------------------------------------------------------;
 
@@ -394,7 +387,7 @@ class GDIp {
 		;* Return:
 			;* [Integer]
 		IsEmpty(graphics) {
-			if (status := DllCall("Gdiplus\GdipIsEmptyRegion", "Ptr", this.Ptr, "Ptr", graphics.Ptr, "UInt*", &(bool := False), "Int")) {
+			if (status := DllCall("Gdiplus\GdipIsEmptyRegion", "Ptr", this.Ptr, "Ptr", graphics, "UInt*", &(bool := False), "Int")) {
 				throw (ErrorFromStatus(status))
 			}
 
@@ -417,7 +410,7 @@ class GDIp {
 		;* Parameter:
 			;* [Matrix] matrix
 		Transform(matrix) {
-			if (status := DllCall("Gdiplus\GdipTransformRegion", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
+			if (status := DllCall("Gdiplus\GdipTransformRegion", "Ptr", this.Ptr, "Ptr", matrix, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
 		}
@@ -736,38 +729,6 @@ class GDIp {
 			}
 		}
 
-		LineAlignment {
-			Get {
-				return (this.GetLineAlignment())
-			}
-
-			Set {
-				this.SetLineAlignment(value)
-
-				return (value)
-			}
-		}
-
-		;* stringFormat.GetLineAlignment()
-		;* Return:
-			;* [Integer] - See StringAlignment enumeration.
-		GetLineAlignment() {
-			if (status := DllCall("Gdiplus\GdipGetStringFormatLineAlign", "Ptr", this.Ptr, "Int*", &(alignment := 0), "Int")) {
-				throw (ErrorFromStatus(status))
-			}
-
-			return (alignment)
-		}
-
-		;* stringFormat.SetLineAlignment(alignment)
-		;* Parameter:
-			;* [Integer] alignment - See StringAlignment enumeration.
-		SetLineAlignment(alignment) {
-			if (status := DllCall("Gdiplus\GdipSetStringFormatLineAlign", "Ptr", this.Ptr, "Int", alignment, "Int")) {
-				throw (ErrorFromStatus(status))
-			}
-		}
-
 		DigitSubstitution {
 			Get {
 				return (this.GetDigitSubstitution())
@@ -801,6 +762,38 @@ class GDIp {
 			}
 		}
 
+		LineAlignment {
+			Get {
+				return (this.GetLineAlignment())
+			}
+
+			Set {
+				this.SetLineAlignment(value)
+
+				return (value)
+			}
+		}
+
+		;* stringFormat.GetLineAlignment()
+		;* Return:
+			;* [Integer] - See StringAlignment enumeration.
+		GetLineAlignment() {
+			if (status := DllCall("Gdiplus\GdipGetStringFormatLineAlign", "Ptr", this.Ptr, "Int*", &(alignment := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return (alignment)
+		}
+
+		;* stringFormat.SetLineAlignment(alignment)
+		;* Parameter:
+			;* [Integer] alignment - See StringAlignment enumeration.
+		SetLineAlignment(alignment) {
+			if (status := DllCall("Gdiplus\GdipSetStringFormatLineAlign", "Ptr", this.Ptr, "Int", alignment, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
 		Trimming {
 			Get {
 				return (this.GetTrimming())
@@ -817,18 +810,18 @@ class GDIp {
 		;* Return:
 			;* [Integer] - See StringTrimming enumeration.
 		GetTrimming() {
-			if (status := DllCall("Gdiplus\GdipGetStringFormatTrimming", "Ptr", this.Ptr, "Int*", &(trimMode := 0), "Int")) {
+			if (status := DllCall("Gdiplus\GdipGetStringFormatTrimming", "Ptr", this.Ptr, "Int*", &(trimming := 0), "Int")) {
 				throw (ErrorFromStatus(status))
 			}
 
-			return (trimMode)
+			return (trimming)
 		}
 
-		;* stringFormat.SetTrimming(trimMode)
+		;* stringFormat.SetTrimming(trimming)
 		;* Parameter:
-			;* [Integer] trimMode - See StringTrimming enumeration.
-		SetTrimming(trimMode) {
-			if (status := DllCall("Gdiplus\GdipSetStringFormatTrimming", "Ptr", this.Ptr, "Int", trimMode, "Int")) {
+			;* [Integer] trimming - See StringTrimming enumeration.
+		SetTrimming(trimming) {
+			if (status := DllCall("Gdiplus\GdipSetStringFormatTrimming", "Ptr", this.Ptr, "Int", trimming, "Int")) {
 				throw (ErrorFromStatus(status))
 			}
 		}

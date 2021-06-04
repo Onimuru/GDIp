@@ -1,4 +1,28 @@
 ﻿/*
+* MIT License
+*
+* Copyright (c) 2021 Onimuru
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/*
 ;* enum FillMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fillmode
 	0 = FillModeAlternate
 	1 = FillModeWinding
@@ -47,7 +71,7 @@ class Path {
 		Get {
 			return (this.GetFillMode())
 		}
-
+		
 		Set {
 			this.SetFillMode(value)
 
@@ -83,7 +107,7 @@ class Path {
 
 	;* path.GetLastPoint()
 	;* Return:
-		;* [Object]
+		;* [Array]
 	GetLastPoint() {
 		static point := Structure.CreatePoint(0, 0, "Float")
 
@@ -91,20 +115,7 @@ class Path {
 			throw (ErrorFromStatus(status))
 		}
 
-		return ({x: point.NumGet(0, "Float"), y: point.NumGet(4, "Float")})
-	}
-
-	;* path.GetWorldBounds()
-	;* Return:
-		;* [Object]
-	GetWorldBounds() {
-		static rect := Structure.CreateRect(0, 0, "Float")
-
-		if (status := DllCall("gdiplus\GdipGetPathWorldBounds", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int")) {
-			throw (ErrorFromStatus(status))
-		}
-
-		return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
+		return (Vec2(point.NumGet(0, "Float"), point.NumGet(4, "Float")))
 	}
 
 	PointCount {
@@ -140,10 +151,23 @@ class Path {
 
 		loop (array := [], count) {
 			offset := (A_Index - 1)*8
-				, array.Push({x: struct.NumGet(offset, "Float"), y: struct.NumGet(offset + 4, "Float")})
+				, array.Push(Vec2(struct.NumGet(offset, "Float"), struct.NumGet(offset + 4, "Float")))
 		}
 
 		return (array)
+	}
+
+	;* path.GetWorldBounds()
+	;* Return:
+		;* [Object]
+	GetWorldBounds() {
+		static rect := Structure.CreateRect(0, 0, "Float")
+
+		if (status := DllCall("gdiplus\GdipGetPathWorldBounds", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
 	}
 
 	;--------------- Method -------------------------------------------------------;
@@ -154,7 +178,7 @@ class Path {
 		;* [Float] flatness
 		;* [Matrix] matrix
 	Flatten(flatness, matrix := 0) {
-		if (status := DllCall("Gdiplus\GdipFlattenPath", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Float", flatness, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFlattenPath", "Ptr", this.Ptr, "Ptr", matrix, "Float", flatness, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -172,7 +196,7 @@ class Path {
 		;* [Float] flatness
 		;* [Matrix] matrix
 	Widen(pen, flatness := 1.0, matrix := 0) {
-		if (status := DllCall("Gdiplus\GdipWidenPath", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", matrix.Ptr, "Float", flatness, "Int")) {
+		if (status := DllCall("Gdiplus\GdipWidenPath", "Ptr", this.Ptr, "Ptr", pen, "Ptr", matrix, "Float", flatness, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -181,7 +205,7 @@ class Path {
 	;* Parameter:
 		;* [Matrix] matrix
 	Transform(matrix) {
-		if (status := DllCall("gdiplus\GdipTransformPath", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
+		if (status := DllCall("gdiplus\GdipTransformPath", "Ptr", this.Ptr, "Ptr", matrix, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}

@@ -1,4 +1,28 @@
-﻿;============ Auto-Execute ====================================================;
+﻿/*
+* MIT License
+*
+* Copyright (c) 2021 Onimuru
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+;============ Auto-Execute ====================================================;
 ;======================================================  Setting  ==============;
 
 #Requires AutoHotkey v2.0-a134-d3d43350
@@ -12,8 +36,10 @@
 #Include %A_LineFile%\..\Structure\Structure.ahk
 
 #Include *i%A_LineFile%\..\Core\Direct2D.ahk
+#Include *i%A_LineFile%\..\Core\DirectWrite.ahk
 #Include %A_LineFile%\..\Core\GDI.ahk
 #Include %A_LineFile%\..\Core\GDIp.ahk
+#Include *i%A_LineFile%\..\Core\WIC.ahk
 
 ;============== Function ======================================================;
 ;======================================================  Library  ==============;
@@ -202,6 +228,12 @@ GetDesktopWindow() {
 	return (DllCall("User32\GetDesktopWindow", "Ptr"))
 }
 
+PaintDesktop(DC) {
+	if (!DllCall("User32\PaintDesktop", "Ptr", DC.Handle, "UInt")) {
+		throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+	}
+}
+
 ;* PrintWindow(hWnd, DC[, flags])
 ;* Parameter:
 	;* [Integer] hWnd - A handle to the window that will be copied.
@@ -213,9 +245,9 @@ PrintWindow(hWnd, DC, flags := 2) {
 	}
 }
 
-;/*
-;** A Guide to WIN32 Clipping Regions: https://www.codeproject.com/articles/2095/a-guide-to-win32-clipping-regions. **
-;*/
+/*
+** A Guide to WIN32 Clipping Regions: https://www.codeproject.com/articles/2095/a-guide-to-win32-clipping-regions. **
+*/
 
 SetWindowRgn(hWnd, x, y, width, height) {
 	if (!(hRgn := DllCall("Gdi32\CreateEllipticRgn", "Int", x, "Int", y, "Int", width + 1, "Int", height + 1))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createellipticrgn
@@ -280,6 +312,22 @@ UpdateLayeredWindow(hWnd, DC, x := unset, y := unset, width := unset, height := 
 
 /*
 ** About Windows: https://docs.microsoft.com/en-us/windows/win32/winmsg/about-windows. **
+
+;* enum Cursors
+	32512 = IDC_ARROW
+	32513 = IDC_IBEAM
+	32514 = IDC_WAIT
+	32515 = IDC_CROSS
+	32516 = IDC_UPARROW
+	32642 = IDC_SIZENWSE
+	32643 = IDC_SIZENESW
+	32644 = IDC_SIZEWE
+	32645 = IDC_SIZENS
+	32646 = IDC_SIZEALL
+	32648 = IDC_NO  ;* Not in Win3.1
+	32649 = IDC_HAND
+	32650 = IDC_APPSTARTING  ;* Not in Win3.1
+	32651 = IDC_HELP
 */
 
 class LayeredWindow {
@@ -400,11 +448,32 @@ class LayeredWindow {
 		}
 	}
 
+	;-------------- Property ------------------------------------------------------;
+
 	IsVisible {
 		Get {
 			return (DllCall("IsWindowVisible", "Ptr", this.Handle, "UInt"))  ;~ If the specified window, its parent window, its parent's parent window, and so forth, have the WS_VISIBLE style, the return value is nonzero. Otherwise, the return value is zero.
 
 			;~ If you need to check the `WS_VISIBLE` flag for a specific window you can do `GetWindowLong(hWnd, GWL_STYLE)` and test for `WS_VISIBLE`.
+		}
+	}
+
+	Rect[client := True] {
+		Get {
+			static rect := Structure.CreateRect(0, 0, 0, 0, "Int")
+
+			if (client) {
+				if (!DllCall("User32\GetClientRect", "Ptr", this.Handle, "Ptr", pointer := rect.Ptr, "UInt")) {
+					throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+				}
+			}
+			else if (DllCall("Dwmapi\DwmGetWindowAttribute", "Ptr", this.Handle, "UInt", 9, "UPtr", pointer := rect.Ptr, "UInt", 16, "UInt")) {
+				if (!DllCall("User32\GetWindowRect", "Ptr", this.Handle, "Ptr", pointer, "UInt")) {
+					throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+				}
+			}
+
+			return ({x: x := NumGet(pointer, "Int"), y: y := NumGet(pointer + 4, "Int"), Width: NumGet(pointer + 8, "Int") - x, Height: NumGet(pointer + 12, "Int") - y})  ;~ The coordinates are relative to the upper left corner of the screen, even for a child window.
 		}
 	}
 
@@ -432,24 +501,7 @@ class LayeredWindow {
 		}
 	}
 
-	Rect[client := True] {
-		Get {
-			static rect := Structure.CreateRect(0, 0, 0, 0, "Int")
-
-			if (client) {
-				if (!DllCall("User32\GetClientRect", "Ptr", this.Handle, "Ptr", pointer := rect.Ptr, "UInt")) {
-					throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
-				}
-			}
-			else if (DllCall("Dwmapi\DwmGetWindowAttribute", "Ptr", this.Handle, "UInt", 9, "UPtr", pointer := rect.Ptr, "UInt", 16, "UInt")) {
-				if (!DllCall("User32\GetWindowRect", "Ptr", this.Handle, "Ptr", pointer, "UInt")) {
-					throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
-				}
-			}
-
-			return ({x: x := NumGet(pointer, "Int"), y: y := NumGet(pointer + 4, "Int"), Width: NumGet(pointer + 8, "Int") - x, Height: NumGet(pointer + 12, "Int") - y})  ;~ The coordinates are relative to the upper left corner of the screen, even for a child window.
-		}
-	}
+	;--------------- Method -------------------------------------------------------;
 
 	AddExStyle(exStyle) {
 		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") | exStyle)  ;? -20 = GWL_EXSTYLE

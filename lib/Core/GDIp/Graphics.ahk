@@ -1,4 +1,28 @@
 ﻿/*
+* MIT License
+*
+* Copyright (c) 2021 Onimuru
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/*
 ;* enum CompositingMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-compositingmode
 	0 = CompositingModeSourceOver - Specifies that when a color is rendered, it overwrites the background color.
 	1 = CompositingModeSourceCopy - Specifies that when a color is rendered, it is blended with the background color. The blend is determined by the alpha component of the color being rendered.
@@ -31,6 +55,14 @@
 ;* enum MatrixOrder  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-matrixorder
 	0 = MatrixOrderPrepend
 	1 = MatrixOrderAppend
+
+;* enum PixelOffsetMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-pixeloffsetmode
+	-1 = PixelOffsetModeInvalid
+	0 = PixelOffsetModeDefault - Equivalent to `PixelOffsetModeNone`.
+	1 = PixelOffsetModeHighSpeed - Equivalent to `PixelOffsetModeNone`.
+	2 = PixelOffsetModeHighQuality - Equivalent to `PixelOffsetModeHalf`.
+	3 = PixelOffsetModeNone - Indicates that pixel centers have integer coordinates.
+	4 = PixelOffsetModeHalf - Indicates that pixel centers have coordinates that are half way between integer values.
 
 ;* enum SmoothingMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-smoothingmode
 	0 = SmoothingModeDefault
@@ -76,7 +108,7 @@ static CreateGraphicsFromDC(DC) {
 ;* Return:
 	;* [Graphics]
 static CreateGraphicsFromBitmap(bitmap) {
-	if (status := DllCall("Gdiplus\GdipGetImageGraphicsContext", "Ptr", bitmap.Ptr, "Ptr*", &(pGraphics := 0), "Int")) {
+	if (status := DllCall("Gdiplus\GdipGetImageGraphicsContext", "Ptr", bitmap, "Ptr*", &(pGraphics := 0), "Int")) {
 		throw (ErrorFromStatus(status))
 	}
 
@@ -100,7 +132,7 @@ static CreateGraphicsFromWindow(hWnd, useICM := False) {
 }
 
 class Graphics {
-	Class := "Graphics"
+	Class := "Graphics", States := []
 
 	__New(pGraphics) {
 		this.Ptr := pGraphics
@@ -114,10 +146,62 @@ class Graphics {
 
 	;-------------- Property ------------------------------------------------------;
 
-	States {
+	;* graphics.IsVisiblePoint[x, y]
+	;* Parameter:
+		;* [Float] x
+		;* [Float] y
+	;* Return:
+		;* [Integer]
+	IsVisiblePoint[x, y] {
 		Get {
-			this.DefineProp("States", {Value: object := []})  ;* Only initialize this object as needed.
-			return (object)
+			if (status := DllCall("Gdiplus\GdipIsVisiblePoint", "Ptr", this.Ptr, "Float", x, "Float", y, "Int*", &(bool := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return (bool)
+		}
+	}
+
+	;* graphics.IsVisibleRect[x, y, width, height]
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	;* Return:
+		;* [Integer]
+	IsVisibleRect[x, y, width, height] {
+		Get {
+			if (status := DllCall("Gdiplus\GdipIsVisibleRect", "Ptr", this.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "UInt*", &(bool := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return (bool)
+		}
+	}
+
+	;* graphics.IsClipEmpty
+	;* Return:
+		;* [Integer]
+	IsClipEmpty {
+		Get {
+			if (status := DllCall("Gdiplus\GdipIsClipEmpty", "Ptr", this.Ptr, "UInt*", &(bool := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return (bool)
+		}
+	}
+
+	;* graphics.IsVisibleClipEmpty
+	;* Return:
+		;* [Integer]
+	IsVisibleClipEmpty {
+		Get {
+			if (status := DllCall("Gdiplus\GdipIsVisibleClipEmpty", "Ptr", this.Ptr, "UInt*", &(bool := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return (bool)
 		}
 	}
 
@@ -128,6 +212,7 @@ class Graphics {
 
 		Set {
 			this.SetCompositingMode(value)
+
 			return (value)
 		}
 	}
@@ -280,6 +365,71 @@ class Graphics {
 		}
 	}
 
+	PixelOffsetMode {
+		Get {
+			return (this.GetPixelOffsetMode())
+		}
+
+		Set {
+			this.SetPixelOffsetMode(value)
+
+			return (value)
+		}
+	}
+
+	;* graphics.GetPixelOffsetMode()
+	;* Return:
+		;* [Integer] - See PixelOffsetMode enumeration.
+	GetPixelOffsetMode() {
+		if (status := DllCall("Gdiplus\GdipGetPixelOffsetMode", "Ptr", this.Ptr, "Int*", &(pixelOffsetMode := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (pixelOffsetMode)
+	}
+
+	;* graphics.SetPixelOffsetMode(unit)
+	;* Parameter:
+		;* [Integer] pixelOffsetMode - See PixelOffsetMode enumeration.
+	SetPixelOffsetMode(unit) {
+		if (status := DllCall("Gdiplus\GdipSetPixelOffsetMode", "Ptr", this.Ptr, "Int", unit, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+
+	RenderingOrigin {
+		Get {
+			return (this.GetRenderingOrigin())
+		}
+
+		Set {
+			this.SetRenderingOrigin(value*)
+
+			return (value)
+		}
+	}
+
+	;* graphics.GetRenderingOrigin()
+	;* Return:
+		;* [Array]
+	GetRenderingOrigin() {
+		if (status := DllCall("Gdiplus\GdipGetRenderingOrigin", "Ptr", this.Ptr, "Int*", &(x := 0), "Int*", &(y := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (Vec2(x, y))
+	}
+
+	;* graphics.SetRenderingOrigin(x, y)
+	;* Parameter:
+		;* [Integer] x
+		;* [Integer] y
+	SetRenderingOrigin(x, y) {
+		if (status := DllCall("Gdiplus\GdipSetRenderingOrigin", "Ptr", this.Ptr, "Int", x, "Int", y, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+
 	SmoothingMode {
 		Get {
 			return (this.GetSmoothingMode())
@@ -376,17 +526,8 @@ class Graphics {
 		}
 	}
 
-	Transform {
-		Get {
-			return (this.GetTransform())
-		}
-
-		Set {
-			this.SetTransform(value)
-
-			return (value)
-		}
-	}
+	;--------------- Method -------------------------------------------------------;
+	;-----------------------------------------------------  Transform  -------------;
 
 	;* graphics.GetTransform()
 	;* Return:
@@ -403,13 +544,10 @@ class Graphics {
 	;* Parameter:
 		;* [Matrix] matrix
 	SetTransform(matrix) {
-		if (status := DllCall("Gdiplus\GdipSetWorldTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetWorldTransform", "Ptr", this.Ptr, "Ptr", matrix, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
-
-	;--------------- Method -------------------------------------------------------;
-	;-----------------------------------------------------  Transform  -------------;
 
 	;* graphics.TranslateTransform(x, y[, matrixOrder])
 	;* Parameter:
@@ -437,7 +575,7 @@ class Graphics {
 		;* [Matrix] matrix
 		;* [Integer] matrixOrder - See MatrixOrder enumeration.
 	MultiplyTransform(matrix, matrixOrder := 0) {
-		if (status := DllCall("Gdiplus\GdipMultiplyWorldTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
+		if (status := DllCall("Gdiplus\GdipMultiplyWorldTransform", "Ptr", this.Ptr, "Ptr", matrix, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -456,6 +594,13 @@ class Graphics {
 	;* graphics.ResetTransform()
 	ResetTransform() {
 		if (status := DllCall("Gdiplus\GdipResetWorldTransform", "Ptr", this.Ptr, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+
+	;* graphics.ResetPageTransform()
+	ResetPageTransform() {
+		if (status := DllCall("Gdiplus\GdipResetPageTransform", "Ptr", this.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -543,10 +688,10 @@ class Graphics {
 		;* [ImageAttributes] imageAttributes
 	DrawBitmap(bitmap, dx := unset, dy := unset, dWidth := unset, dHeight := unset, sx := unset, sy := unset, sWidth := unset, sHeight := unset, unit := 2, imageAttributes := 0) {
 		if (status := (IsSet(sx) && IsSet(sy) && IsSet(sWidth) && IsSet(sHeight))
-			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", dx, "Float", dy, "Float", dWidth, "Float", dHeight, "Float", sx, "Float", sy, "Float", sWidth, "Float", sHeight, "Int", unit, "Ptr", imageAttributes, "Ptr", 0, "Ptr", 0, "Int"))
+			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap, "Float", dx, "Float", dy, "Float", dWidth, "Float", dHeight, "Float", sx, "Float", sy, "Float", sWidth, "Float", sHeight, "Int", unit, "Ptr", imageAttributes, "Ptr", 0, "Ptr", 0, "Int"))
 			: ((IsSet(dx) && IsSet(dy) && IsSet(dWidth) && IsSet(dHeight))
-				? (DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", dx, "Float", dy, "Float", dWidth, "Float", dHeight, "Int"))
-				: (DllCall("Gdiplus\GdipDrawImage", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Float", 0, "Float", 0, "Int")))) {
+				? (DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap, "Float", dx, "Float", dy, "Float", dWidth, "Float", dHeight, "Int"))
+				: (DllCall("Gdiplus\GdipDrawImage", "Ptr", this.Ptr, "Ptr", bitmap, "Float", 0, "Float", 0, "Int")))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -556,10 +701,8 @@ class Graphics {
 		;* [CachedBitmap] bitmap
 		;* [Integer] x
 		;* [Integer] y
-	DrawCachedBitmap(bitmap, x := unset, y := unset) {
-		if (status := (IsSet(x) && IsSet(y))
-			? (DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", x, "Int", y, "Int"))
-			: (DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap.Ptr, "Int", 0, "Int", 0, "Int"))) {
+	DrawCachedBitmap(bitmap, x := 0, y := 0) {
+		if (status := DllCall("Gdiplus\GdipDrawCachedBitmap", "Ptr", this.Ptr, "Ptr", bitmap, "Int", x, "Int", y, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -591,8 +734,8 @@ class Graphics {
 		}
 
 		if (status := (tension)
-			? (DllCall("Gdiplus\GdipFillClosedCurve2", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "UInt", fillMode, "Int"))
-			: (DllCall("Gdiplus\GdipFillClosedCurve", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
+			? (DllCall("Gdiplus\GdipFillClosedCurve2", "Ptr", this.Ptr, "Ptr", brush, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "UInt", fillMode, "Int"))
+			: (DllCall("Gdiplus\GdipFillClosedCurve", "Ptr", this.Ptr, "Ptr", brush, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -605,7 +748,7 @@ class Graphics {
 		;* [Float] width
 		;* [Float] height
 	FillEllipse(brush, x, y, width, height) {
-		if (status := DllCall("Gdiplus\GdipFillEllipse", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFillEllipse", "Ptr", this.Ptr, "Ptr", brush, "Float", x, "Float", y, "Float", width, "Float", height, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -615,7 +758,7 @@ class Graphics {
 		;* [Brush] brush
 		;* [Path] path
 	FillPath(brush, path) {
-		if (status := DllCall("Gdiplus\GdipFillPath", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", path.Ptr, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFillPath", "Ptr", this.Ptr, "Ptr", brush, "Ptr", path, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -630,7 +773,7 @@ class Graphics {
 		;* [Float] startAngle
 		;* [Float] sweepAngle
 	FillPie(brush, x, y, width, height, startAngle, sweepAngle) {
-		if (status := DllCall("Gdiplus\GdipFillPie", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Float", startAngle, "Float", sweepAngle, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFillPie", "Ptr", this.Ptr, "Ptr", brush, "Float", x, "Float", y, "Float", width, "Float", height, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -647,7 +790,7 @@ class Graphics {
 			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipFillPolygon", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", struct.Ptr, "Int", length, "UInt", fillMode, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFillPolygon", "Ptr", this.Ptr, "Ptr", brush, "Ptr", struct.Ptr, "Int", length, "UInt", fillMode, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -660,7 +803,7 @@ class Graphics {
 		;* [Float] width
 		;* [Float] height
 	FillRectangle(brush, x, y, width, height) {
-		if (status := DllCall("Gdiplus\GdipFillRectangle", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFillRectangle", "Ptr", this.Ptr, "Ptr", brush, "Float", x, "Float", y, "Float", width, "Float", height, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -681,7 +824,7 @@ class Graphics {
 
 		(path := GDIp.CreatePath()).AddRoundedRectangle(x, y, width, height, radius)
 
-		if (status := DllCall("Gdiplus\GdipFillPath", "Ptr", pGraphics, "Ptr", brush.Ptr, "Ptr", path.Ptr, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFillPath", "Ptr", pGraphics, "Ptr", brush, "Ptr", path.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
@@ -693,7 +836,7 @@ class Graphics {
 		;* [Brush] brush
 		;* [Region] region
 	FillRegion(brush, region) {
-		if (status := DllCall("Gdiplus\GdipFillRegion", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Ptr", region.Ptr, "Int")) {
+		if (status := DllCall("Gdiplus\GdipFillRegion", "Ptr", this.Ptr, "Ptr", brush, "Ptr", region, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -724,7 +867,16 @@ class Graphics {
 		;* [Float] startAngle
 		;* [Float] sweepAngle
 	DrawArc(pen, x, y, width, height, startAngle, sweepAngle) {
-		if (status := DllCall("Gdiplus\GdipDrawArc", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", x, "Float", y, "Float", width - (offset := pen.Width), "Float", height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
+		try {
+			offset := pen.Width
+		}
+		catch {
+			if (status := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", pen, "Float*", &(offset := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		if (status := DllCall("Gdiplus\GdipDrawArc", "Ptr", this.Ptr, "Ptr", pen, "Float", x, "Float", y, "Float", width - offset, "Float", height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -737,7 +889,7 @@ class Graphics {
 		;* [Array] point3
 		;* [Array] point4
 	DrawBezier(pen, point1, point2, point3, point4) {
-		if (status := DllCall("Gdiplus\GdipDrawBezier", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", point1[0], "Float", point1[1], "Float", point2[0], "Float", point2[1], "Float", point3[0], "Float", point3[1], "Float", point4[0], "Float", point4[1], "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawBezier", "Ptr", this.Ptr, "Ptr", pen, "Float", point1[0], "Float", point1[1], "Float", point2[0], "Float", point2[1], "Float", point3[0], "Float", point3[1], "Float", point4[0], "Float", point4[1], "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -753,7 +905,7 @@ class Graphics {
 			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipDrawBeziers", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawBeziers", "Ptr", this.Ptr, "Ptr", pen, "Ptr", struct.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -773,8 +925,8 @@ class Graphics {
 		}
 
 		if (status := (tension)
-			? (DllCall("Gdiplus\GdipDrawClosedCurve2", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "Int"))
-			: (DllCall("Gdiplus\GdipDrawClosedCurve", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
+			? (DllCall("Gdiplus\GdipDrawClosedCurve2", "Ptr", this.Ptr, "Ptr", pen, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "Int"))
+			: (DllCall("Gdiplus\GdipDrawClosedCurve", "Ptr", this.Ptr, "Ptr", pen, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -794,8 +946,8 @@ class Graphics {
 		}
 
 		if (status := (tension)
-			? (DllCall("Gdiplus\GdipDrawCurve2", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "Int"))
-			: (DllCall("Gdiplus\GdipDrawCurve", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
+			? (DllCall("Gdiplus\GdipDrawCurve2", "Ptr", this.Ptr, "Ptr", pen, "Ptr", struct.Ptr, "UInt", length, "Float", tension, "Int"))
+			: (DllCall("Gdiplus\GdipDrawCurve", "Ptr", this.Ptr, "Ptr", pen, "Ptr", struct.Ptr, "UInt", length, "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -808,7 +960,16 @@ class Graphics {
 		;* [Float] width
 		;* [Float] height
 	DrawEllipse(pen, x, y, width, height) {
-		if (status := DllCall("Gdiplus\GdipDrawEllipse", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", x, "Float", y, "Float", width - (offset := pen.Width), "Float", height - offset, "Int")) {
+		try {
+			offset := pen.Width
+		}
+		catch {
+			if (status := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", pen, "Float*", &(offset := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		if (status := DllCall("Gdiplus\GdipDrawEllipse", "Ptr", this.Ptr, "Ptr", pen, "Float", x, "Float", y, "Float", width - offset, "Float", height - offset, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -819,7 +980,7 @@ class Graphics {
 		;* [Array] point1
 		;* [Array] point2
 	DrawLine(pen, point1, point2) {
-		if (status := DllCall("Gdiplus\GdipDrawLine", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", point1[0], "Float", point1[1], "Float", point2[0], "Float", point2[1], "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawLine", "Ptr", this.Ptr, "Ptr", pen, "Float", point1[0], "Float", point1[1], "Float", point2[0], "Float", point2[1], "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -833,7 +994,7 @@ class Graphics {
 			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipDrawLines", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawLines", "Ptr", this.Ptr, "Ptr", pen, "Ptr", struct.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -843,7 +1004,7 @@ class Graphics {
 		;* [Pen] pen
 		;* [Path] path
 	DrawPath(pen, path) {
-		if (status := DllCall("Gdiplus\GdipDrawPath", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", path.Ptr, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawPath", "Ptr", this.Ptr, "Ptr", pen, "Ptr", path.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -858,7 +1019,16 @@ class Graphics {
 		;* [Float] startAngle
 		;* [Float] sweepAngle
 	DrawPie(pen, x, y, width, height, startAngle, sweepAngle) {
-		if (status := DllCall("Gdiplus\GdipDrawPie", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", x, "Float", y, "Float", width - (offset := pen.Width), "Float", height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
+		try {
+			offset := pen.Width
+		}
+		catch {
+			if (status := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", pen, "Float*", &(offset := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		if (status := DllCall("Gdiplus\GdipDrawPie", "Ptr", this.Ptr, "Ptr", pen, "Float", x, "Float", y, "Float", width - offset, "Float", height - offset, "Float", startAngle, "Float", sweepAngle, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -872,7 +1042,7 @@ class Graphics {
 			struct.NumPut(index*8, "Float", point[0], "Float", point[1])
 		}
 
-		if (status := DllCall("Gdiplus\GdipDrawPolygon", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", struct.Ptr, "UInt", length, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawPolygon", "Ptr", this.Ptr, "Ptr", pen, "Ptr", struct.Ptr, "UInt", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -885,7 +1055,16 @@ class Graphics {
 		;* [Float] width
 		;* [Float] height
 	DrawRectangle(pen, x, y, width, height) {
-		if (status := DllCall("Gdiplus\GdipDrawRectangle", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Float", x, "Float", y, "Float", width - (offset := pen.Width), "Float", height - offset, "Int")) {
+		try {
+			offset := pen.Width
+		}
+		catch {
+			if (status := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", pen, "Float*", &(offset := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		if (status := DllCall("Gdiplus\GdipDrawRectangle", "Ptr", this.Ptr, "Ptr", pen, "Float", x, "Float", y, "Float", width - offset, "Float", height - offset, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -899,8 +1078,17 @@ class Graphics {
 		;* [Float] height
 		;* [Float] radius - Radius of the rounded corners.
 	DrawRoundedRectangle(pen, x, y, width, height, radius) {
+		try {
+			offset := pen.Width
+		}
+		catch {
+			if (status := DllCall("Gdiplus\GdipGetPenWidth", "Ptr", pen, "Float*", &(offset := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
 		diameter := radius*2
-			, width -= diameter + (offset := pen.Width), height -= diameter + offset
+			, width -= diameter + offset, height -= diameter + offset
 
 		DllCall("Gdiplus\GdipCreatePath", "UInt", 0, "Ptr*", &(pPath := 0))
 
@@ -910,7 +1098,7 @@ class Graphics {
 		DllCall("Gdiplus\GdipAddPathArc", "Ptr", pPath, "Float", x, "Float", y + height, "Float", diameter, "Float", diameter, "Float", 90, "Float", 90)
 		DllCall("Gdiplus\GdipClosePathFigure", "Ptr", pPath)
 
-		if (status := DllCall("Gdiplus\GdipDrawPath", "Ptr", this.Ptr, "Ptr", pen.Ptr, "Ptr", pPath, "Int")) {
+		if (status := DllCall("Gdiplus\GdipDrawPath", "Ptr", this.Ptr, "Ptr", pen, "Ptr", pPath, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 

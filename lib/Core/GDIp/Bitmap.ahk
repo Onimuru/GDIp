@@ -1,59 +1,83 @@
-﻿;/*
-;;* enum ImageFlags  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imageflags
-;	0x00000000 = ImageFlagsNone
-;	0x00000001 = ImageFlagsScalable
-;	0x00000002 = ImageFlagsHasAlpha
-;	0x00000004 = ImageFlagsHasTranslucent
-;	0x00000008 = ImageFlagsPartiallyScalable
-;	0x00000010 = ImageFlagsColorSpaceRGB
-;	0x00000020 = ImageFlagsColorSpaceCMYK
-;	0x00000040 = ImageFlagsColorSpaceGRAY
-;	0x00000080 = ImageFlagsColorSpaceYCBCR
-;	0x00000100 = ImageFlagsColorSpaceYCCK
-;	0x00001000 = ImageFlagsHasRealDPI
-;	0x00002000 = ImageFlagsHasRealPixelSize
-;	0x00010000 = ImageFlagsReadOnly
-;	0x00020000 = ImageFlagsCaching
-;
-;;* enum ImageLockMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imagelockmode
-;	0x0001 = ImageLockModeRead
-;	0x0002 = ImageLockModeWrite
-;	0x0004 = ImageLockModeUserInputBuf
-;
-;;* enum PixelFormat  ;: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-emfplus/47cbe48e-d13c-450b-8a23-6aa95488428e
-;	0x00030101 = PixelFormat1bppIndexed
-;	0x00030402 = PixelFormat4bppIndexed
-;	0x00030803 = PixelFormat8bppIndexed
-;	0x00101004 = PixelFormat16bppGrayScale
-;	0x00021005 = PixelFormat16bppRGB555
-;	0x00021006 = PixelFormat16bppRGB565
-;	0x00061007 = PixelFormat16bppARGB1555
-;	0x00021808 = PixelFormat24bppRGB
-;	0x00022009 = PixelFormat32bppRGB
-;	0x0026200A = PixelFormat32bppARGB
-;	0x000E200B = PixelFormat32bppPARGB
-;	0x0010300C = PixelFormat48bppRGB
-;	0x0034400D = PixelFormat64bppARGB
-;	0x001A400E = PixelFormat64bppPARGB
-;
-;;* enum RotateFlipType  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-rotatefliptype
-;	0 = RotateNoneFlipNone
-;	1 = Rotate90FlipNone
-;	2 = Rotate180FlipNone
-;	3 = Rotate270FlipNone
-;	4 = RotateNoneFlipX
-;	5 = Rotate90FlipX
-;	6 = Rotate180FlipX
-;	7 = Rotate270FlipX
-;	RotateNoneFlipY = Rotate180FlipX
-;	Rotate90FlipY = Rotate270FlipX
-;	Rotate180FlipY = RotateNoneFlipX
-;	Rotate270FlipY = Rotate90FlipX
-;	RotateNoneFlipXY = Rotate180FlipNone
-;	Rotate90FlipXY = Rotate270FlipNone
-;	Rotate180FlipXY = RotateNoneFlipNone
-;	Rotate270FlipXY = Rotate90FlipNone
-;*/
+﻿/*
+* MIT License
+*
+* Copyright (c) 2021 Onimuru
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/*
+;* enum ImageFlags  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imageflags
+	0x00000000 = ImageFlagsNone
+	0x00000001 = ImageFlagsScalable
+	0x00000002 = ImageFlagsHasAlpha
+	0x00000004 = ImageFlagsHasTranslucent
+	0x00000008 = ImageFlagsPartiallyScalable
+	0x00000010 = ImageFlagsColorSpaceRGB
+	0x00000020 = ImageFlagsColorSpaceCMYK
+	0x00000040 = ImageFlagsColorSpaceGRAY
+	0x00000080 = ImageFlagsColorSpaceYCBCR
+	0x00000100 = ImageFlagsColorSpaceYCCK
+	0x00001000 = ImageFlagsHasRealDPI
+	0x00002000 = ImageFlagsHasRealPixelSize
+	0x00010000 = ImageFlagsReadOnly
+	0x00020000 = ImageFlagsCaching
+
+;* enum ImageLockMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-imagelockmode
+	0x0001 = ImageLockModeRead
+	0x0002 = ImageLockModeWrite
+	0x0004 = ImageLockModeUserInputBuf
+
+;* enum PixelFormat  ;: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-emfplus/47cbe48e-d13c-450b-8a23-6aa95488428e
+	0x00030101 = PixelFormat1bppIndexed
+	0x00030402 = PixelFormat4bppIndexed
+	0x00030803 = PixelFormat8bppIndexed
+	0x00101004 = PixelFormat16bppGrayScale
+	0x00021005 = PixelFormat16bppRGB555
+	0x00021006 = PixelFormat16bppRGB565
+	0x00061007 = PixelFormat16bppARGB1555
+	0x00021808 = PixelFormat24bppRGB
+	0x00022009 = PixelFormat32bppRGB
+	0x0026200A = PixelFormat32bppARGB
+	0x000E200B = PixelFormat32bppPARGB
+	0x0010300C = PixelFormat48bppRGB
+	0x0034400D = PixelFormat64bppARGB
+	0x001A400E = PixelFormat64bppPARGB
+
+;* enum RotateFlipType  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimaging/ne-gdiplusimaging-rotatefliptype
+	0 = RotateNoneFlipNone
+	1 = Rotate90FlipNone
+	2 = Rotate180FlipNone
+	3 = Rotate270FlipNone
+	4 = RotateNoneFlipX
+	5 = Rotate90FlipX
+	6 = Rotate180FlipX
+	7 = Rotate270FlipX
+	RotateNoneFlipY = Rotate180FlipX
+	Rotate90FlipY = Rotate270FlipX
+	Rotate180FlipY = RotateNoneFlipX
+	Rotate270FlipY = Rotate90FlipX
+	RotateNoneFlipXY = Rotate180FlipNone
+	Rotate90FlipXY = Rotate270FlipNone
+	Rotate180FlipXY = RotateNoneFlipNone
+	Rotate270FlipXY = Rotate90FlipNone
+*/
 
 ;* GDIp.CreateBitmap(width, height[, pixelFormat, stride, scan0])
 ;* Parameter:
@@ -124,7 +148,7 @@ static CreateBitmapFromFile(file, useICM := False) {
 ;* Return:
 	;* [Bitmap]
 static CreateBitmapFromGraphics(graphics, width, height) {
-	if (status := DllCall("Gdiplus\GdipCreateBitmapFromGraphics", "Int", width, "Int", height, "Ptr", graphics.Ptr, "Ptr*", &(pBitmap := 0), "Int")) {
+	if (status := DllCall("Gdiplus\GdipCreateBitmapFromGraphics", "Int", width, "Int", height, "Ptr", graphics, "Ptr*", &(pBitmap := 0), "Int")) {
 		throw (ErrorFromStatus(status))
 	}
 
@@ -236,11 +260,26 @@ static CreateBitmapFromWindow(hWnd, client := True) {
 ;* Return:
 	;* [HBitmap]
 static CreateHBITMAPFromBitmap(bitmap, background := 0xFFFFFFFF) {
-	if (status := DllCall("Gdiplus\GdipCreateHBITMAPFromBitmap", "Ptr", bitmap.Ptr, "Ptr*", (hBitmap := 0), "UInt", background, "Int")) {
+	if (status := DllCall("Gdiplus\GdipCreateHBITMAPFromBitmap", "Ptr", bitmap, "Ptr*", (hBitmap := 0), "UInt", background, "Int")) {
 		throw (ErrorFromStatus(status))
 	}
 
 	return (GDI.HBitmap(hBitmap))
+}
+
+;* GDIp.CreateThumbnail(bitmap, width, height)
+;* Parameter:
+	;* [Bitmap] bitmap
+	;* [Integer] width
+	;* [Integer] height
+;* Return:
+	;* [Bitmap]
+static CreateThumbnail(bitmap, width, height) {
+	if (status := DllCall("Gdiplus\GdipGetImageThumbnail", "Ptr", bitmap, "UInt", width, "UInt", height, "Ptr*", &(pBitmap := 0), "Ptr", 0, "Ptr", 0, "Int")) {
+		throw (ErrorFromStatus(status))
+	}
+
+	return (GDIp.Bitmap(pBitmap))
 }
 
 ;~ CreateHICONFromBitmap
@@ -267,9 +306,9 @@ class Bitmap {
 		;~ The new bitmap will have the same pixel format.
 	;* Return:
 		;* [Bitmap]
-	Clone(x := unset, y := unset, width := unset, height := unset, pixelFormat := unset) {
+	Clone(x := unset, y := unset, width := unset, height := unset, pixelFormat := 0) {
 		if (status := (IsSet(x) && IsSet(y) && IsSet(width) && IsSet(height))
-			? (DllCall("Gdiplus\GdipCloneBitmapArea", "Float", x, "Float", y, "Float", width, "Float", height, "UInt", (IsSet(pixelFormat)) ? (pixelFormat) : (this.PixelFormat), "Ptr", this.Ptr, "Ptr*", &(pBitmap := 0), "Int"))
+			? (DllCall("Gdiplus\GdipCloneBitmapArea", "Float", x, "Float", y, "Float", width, "Float", height, "UInt", pixelFormat || this.GetPixelFormat(), "Ptr", this.Ptr, "Ptr*", &(pBitmap := 0), "Int"))
 			: (DllCall("Gdiplus\GdipCloneImage", "Ptr", this.Ptr, "Ptr*", &(pBitmap := 0), "Int"))) {
 			throw (ErrorFromStatus(status))
 		}
@@ -287,116 +326,141 @@ class Bitmap {
 
 	Rect[&unit := 0] {
 		Get {
-			static rect := Structure.CreateRect(0, 0, 0, 0, "Float")
-
-			if (status := DllCall("Gdiplus\GdipGetImageBounds", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int*", &unit, "Int")) {
-				throw (ErrorFromStatus(status))
-			}
-
-			return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
+			return (this.GetRect(&unit))
 		}
 	}
 
-	;* width := bitmap.Width
+	;* bitmap.GetRect([&unit])
 	;* Return:
-		;* [Integer]
+		;* [Object]
+	GetRect(&unit := 0) {
+		static rect := Structure.CreateRect(0, 0, 0, 0, "Float")
+
+		if (status := DllCall("Gdiplus\GdipGetImageBounds", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int*", &unit, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
+	}
+
 	Width {
 		Get {
-			if (status := DllCall("Gdiplus\GdipGetImageWidth", "Ptr", this.Ptr, "UInt*", &(width := 0), "Int")) {
-				throw (ErrorFromStatus(status))
-			}
-
-			return (width)
+			return (this.GetWidth())
 		}
 	}
 
-	;* height := bitmap.Height
+	;* bitmap.GetWidth()
 	;* Return:
 		;* [Integer]
+	GetWidth() {
+		if (status := DllCall("Gdiplus\GdipGetImageWidth", "Ptr", this.Ptr, "UInt*", &(width := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (width)
+	}
+
 	Height {
 		Get {
-			if (status := DllCall("Gdiplus\GdipGetImageHeight", "Ptr", this.Ptr, "UInt*", &(height := 0), "Int")) {
-				throw (ErrorFromStatus(status))
-			}
-
-			return (height)
+			return (this.GetHeight())
 		}
 	}
 
-	;* pixelFormat := bitmap.PixelFormat
+	;* bitmap.GetHeight()
 	;* Return:
-		;* [Integer] - See PixelFormat enumeration.
+		;* [Integer]
+	GetHeight() {
+		if (status := DllCall("Gdiplus\GdipGetImageHeight", "Ptr", this.Ptr, "UInt*", &(height := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (height)
+	}
+
 	PixelFormat {
 		Get {
-			if (status := DllCall("Gdiplus\GdipGetImagePixelFormat", "Ptr", this.Ptr, "UInt*", &(pixelFormat := 0), "Int")) {
-				throw (ErrorFromStatus(status))
-			}
-
-			return (pixelFormat)
+			return (this.GetPixelFormat())
 		}
 	}
 
-	;* flags := bitmap.Flags
+	;* bitmap.GetPixelFormat()
 	;* Return:
-		;* [Integer] - See ImageFlags enumeration.
+		;* [Integer] - See PixelFormat enumeration.
+	GetPixelFormat() {
+		if (status := DllCall("Gdiplus\GdipGetImagePixelFormat", "Ptr", this.Ptr, "UInt*", &(pixelFormat := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (pixelFormat)
+	}
+
 	Flags {
 		Get {
-			if (status := DllCall("Gdiplus\GdipGetImageFlags", "Ptr", this.Ptr, "UInt*", &(flags := 0), "Int")) {
-				throw (ErrorFromStatus(status))
-			}
-
-			return (flags)
+			return (this.GetFlags())
 		}
 	}
 
-	;* bitmap.Resolution := [xDpi, yDpi]
+	;* bitmap.GetFlags()
+	;* Return:
+		;* [Integer] - See ImageFlags enumeration.
+	GetFlags() {
+		if (status := DllCall("Gdiplus\GdipGetImageFlags", "Ptr", this.Ptr, "UInt*", &(flags := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (flags)
+	}
+
+	Resolution {
+		Set {
+			this.SetResolution(value*)
+
+			return (value)
+		}
+	}
+
+	;* bitmap.SetResolution(xDpi, yDpi)
 	;* Parameter:
 		;* [Integer] xDpi
 		;* [Integer] yDpi
-	Resolution {
-		Set {
-			if (status := DllCall("Gdiplus\GdipBitmapSetResolution", "Ptr", this.Ptr, "Float", value[0], "Float", value[1], "Int")) {
-				throw (ErrorFromStatus(status))
-			}
+	SetResolution(xDpi, yDpi) {
+		if (status := DllCall("Gdiplus\GdipBitmapSetResolution", "Ptr", this.Ptr, "Float", xDpi, "Float", yDpi, "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 	}
 
-	;* [xDpi := ]bitmap.HorizontalResolution[ := xDpi]
-	;* Return:
-		;* [Integer]
 	HorizontalResolution {
 		Get {
-			if (status := DllCall("Gdiplus\GdipGetImageHorizontalResolution", "Ptr", this.Ptr, "UInt*", &(xDpi := 0), "Int")) {
-				throw (ErrorFromStatus(status))
-			}
-
-			return (xDpi)
-		}
-
-		Set {
-			if (status := DllCall("Gdiplus\GdipBitmapSetResolution", "Ptr", this.Ptr, "Float", value, "Float", this.VerticalResolution, "Int")) {
-				throw (ErrorFromStatus(status))
-			}
+			return (this.GetHorizontalResolution())
 		}
 	}
 
-	;* [yDpi := ]bitmap.VerticalResolution[ := yDpi]
+	;* bitmap.GetHorizontalResolution()
 	;* Return:
 		;* [Integer]
+	GetHorizontalResolution() {
+		if (status := DllCall("Gdiplus\GdipGetImageHorizontalResolution", "Ptr", this.Ptr, "UInt*", &(xDpi := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (xDpi)
+	}
+
 	VerticalResolution {
 		Get {
-			if (status := DllCall("Gdiplus\GdipGetImageVerticalResolution", "Ptr", this.Ptr, "UInt*", &(yDpi := 0), "Int")) {
-				throw (ErrorFromStatus(status))
-			}
+			return (this.GetVerticalResolution())
+		}
+	}
 
-			return (yDpi)
+	;* bitmap.GetVerticalResolution()
+	;* Return:
+		;* [Integer]
+	GetVerticalResolution() {
+		if (status := DllCall("Gdiplus\GdipGetImageVerticalResolution", "Ptr", this.Ptr, "UInt*", &(yDpi := 0), "Int")) {
+			throw (ErrorFromStatus(status))
 		}
 
-		Set {
-			if (status := DllCall("Gdiplus\GdipBitmapSetResolution", "Ptr", this.Ptr, "Float", this.HorizontalResolution, "Float", value, "Int")) {
-				throw (ErrorFromStatus(status))
-			}
-		}
+		return (yDpi)
 	}
 
 	;--------------- Method -------------------------------------------------------;
@@ -478,24 +542,10 @@ class Bitmap {
 		}
 	}
 
-	;* bitmap.GetThumbnail(width, height)
-	;* Parameter:
-		;* [Integer] width
-		;* [Integer] height
-	;* Return:
-		;* [Bitmap]
-	GetThumbnail(width, height) {
-		if (status := DllCall("Gdiplus\GdipGetImageThumbnail", "Ptr", this.Ptr, "UInt", width, "UInt", height, "Ptr*", &(pBitmap := 0), "Ptr", 0, "Ptr", 0, "Int")) {
-			throw (ErrorFromStatus(status))
-		}
-
-		return (GDIp.Bitmap(pBitmap))
-	}
-
 	;~ ApplyEffect
 
 	ConvertFormat(pixelFormat, dithertype, palettetype, colorPalette, alphaThresholdPercent) {
-		if (status := DllCall("Gdiplus\GdipBitmapConvertFormat", "Ptr", this.Ptr, "UInt", pixelFormat, "UInt", dithertype, "UInt", palettetype, "Ptr", colorPalette.Ptr, "UInt", alphaThresholdPercent, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+		if (status := DllCall("Gdiplus\GdipBitmapConvertFormat", "Ptr", this.Ptr, "UInt", pixelFormat, "UInt", dithertype, "UInt", palettetype, "Ptr", colorPalette, "UInt", alphaThresholdPercent, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -514,7 +564,7 @@ class Bitmap {
 		;* [Integer] lockMode - See ImageLockMode enumeration.
 	;* Return:
 		;* [Integer] - Boolean value that indicates if the bitmap was locked.
-	LockBits(x := 0, y := 0, width := unset, height := unset, lockMode := 0x0003, pixelFormat := unset) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
+	LockBits(x := 0, y := 0, width := unset, height := unset, lockMode := 0x0003, pixelFormat := 0) {  ;? http://supercomputingblog.com/graphics/using-lockbits-in-gdi/
 		if (!this.HasProp("BitmapData")) {
 			if (!IsSet(width)) {
 				if (!IsSet(height)) {
@@ -530,7 +580,7 @@ class Bitmap {
 
 			bitmapData := Structure.CreateBitmapData()
 
-			if (status := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", Structure.CreateRect(x, y, width, height, "UInt").Ptr, "UInt", lockMode, "UInt", (IsSet(pixelFormat)) ? (pixelFormat) : (this.PixelFormat), "Ptr", bitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+			if (status := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", Structure.CreateRect(x, y, width, height, "UInt").Ptr, "UInt", lockMode, "UInt", pixelFormat || this.GetPixelFormat(), "Ptr", bitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
 				throw (ErrorFromStatus(status))
 			}
 
@@ -601,7 +651,7 @@ class Bitmap {
 ;* Return:
 	;* [CachedBitmap]
 static CreateCachedBitmap(bitmap, graphics) {
-	if (status := DllCall("Gdiplus\GdipCreateCachedBitmap", "Ptr", bitmap.Ptr, "Ptr", graphics.Ptr, "Ptr*", &(pCachedBitmap := 0), "Int")) {
+	if (status := DllCall("Gdiplus\GdipCreateCachedBitmap", "Ptr", bitmap, "Ptr", graphics, "Ptr*", &(pCachedBitmap := 0), "Int")) {
 		throw (ErrorFromStatus(status))
 	}
 

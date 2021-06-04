@@ -1,4 +1,28 @@
 ﻿/*
+* MIT License
+*
+* Copyright (c) 2021 Onimuru
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/*
 ;* enum DashCap  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-dashcap
 	0 = DashCapFlat
 	2 = DashCapRound
@@ -69,7 +93,7 @@ static CreatePen(color, width := 1, unit := 2) {
 ;* Return:
 	;* [Pen]
 static CreatePenFromBrush(brush, width := 1, unit := 2) {
-	if (status := DllCall("Gdiplus\GdipCreatePen2", "Ptr", brush.Ptr, "Float", width, "Int", 2, "Ptr*", &(pPen := 0), "Int", unit, "Int")) {
+	if (status := DllCall("Gdiplus\GdipCreatePen2", "Ptr", brush, "Float", width, "Int", 2, "Ptr*", &(pPen := 0), "Int", unit, "Int")) {
 		throw (ErrorFromStatus(status))
 	}
 
@@ -101,6 +125,23 @@ class Pen {
 	}
 
 	;-------------- Property ------------------------------------------------------;
+
+	Type {
+		Get {
+			return (this.GetType())
+		}
+	}
+
+	;* pen.GetType()
+	;* Return:
+		;* [Integer] - See PenType enumeration.
+	GetType() {
+		if (status := DllCall("Gdiplus\GdipGetPenFillType", "Ptr", this.Ptr, "Int*", &(type := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (type)
+	}
 
 	Color {
 		Get {
@@ -239,26 +280,9 @@ class Pen {
 	;* Parameter:
 		;* [Brush] brush
 	SetBrush(brush) {
-		if (status := DllCall("Gdiplus\GdipSetPenBrushFill", "Ptr", this.Ptr, "Ptr", brush.Ptr, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetPenBrushFill", "Ptr", this.Ptr, "Ptr", brush, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
-	}
-
-	Type {
-		Get {
-			return (this.GetType())
-		}
-	}
-
-	;* pen.GetType()
-	;* Return:
-		;* [Integer] - See PenType enumeration.
-	GetType() {
-		if (status := DllCall("Gdiplus\GdipGetPenFillType", "Ptr", this.Ptr, "Int*", &(type := 0), "Int")) {
-			throw (ErrorFromStatus(status))
-		}
-
-		return (type)
 	}
 
 	Alignment {
@@ -277,7 +301,7 @@ class Pen {
 	;* Return:
 		;* [Integer] - See PenAlignment enumeration.
 	GetAlignment() {
-		if (status := DllCall("Gdiplus\GdipGetPenMode", "Ptr", this.Ptr, "Int*", &(alignment := 0), "Int")) {  ;~ If you set the alignment of a Pen object to Inset, you cannot use that pen to draw compound lines or triangular dash caps.
+		if (status := DllCall("Gdiplus\GdipGetPenMode", "Ptr", this.Ptr, "Int*", &(alignment := 0), "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
@@ -287,6 +311,8 @@ class Pen {
 	;* pen.SetAlignment(alignment)
 	;* Parameter:
 		;* [Integer] alignment - See PenAlignment enumeration.
+	;* Note:
+		  ;~ If you set the alignment to `PenAlignmentInset`, you cannot use that pen to draw compound lines or triangular dash caps.
 	SetAlignment(alignment) {
 		if (status := DllCall("Gdiplus\GdipSetPenMode", "Ptr", this.Ptr, "Int", alignment, "Int")) {
 			throw (ErrorFromStatus(status))
@@ -296,12 +322,14 @@ class Pen {
 	;* pen.SetCompoundArray(compoundArray)
 	;* Parameter:
 		;* [Array] compoundArray
+	;* Note:
+		;~ If you set the alignment to `PenAlignmentInset`, you cannot use that pen to draw compound lines.
 	SetCompoundArray(compoundArray) {
-		for index, number in (compounds := Structure(compoundArray.Length*4), compoundArray) {
+		for index, number in (compounds := Structure((length := compoundArray.Length)*4), compoundArray) {
 			compounds.NumPut(index*4, "Float", number)
 		}
 
-		if (status := DllCall("Gdiplus\GdipSetPenCompoundArray", "Ptr", this.Ptr, "Ptr", compounds.Ptr, "Int", index, "Int")) {  ;~ If you set the alignment of a Pen object to PenAlignmentInset, you cannot use that pen to draw compound lines.
+		if (status := DllCall("Gdiplus\GdipSetPenCompoundArray", "Ptr", this.Ptr, "Ptr", compounds.Ptr, "Int", length, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -413,8 +441,10 @@ class Pen {
 	;* pen.SetDashCap(dashCap)
 	;* Parameter:
 		;* [Integer] dashCap - See DashCap enumeration.
+	;* Note:
+		;~ If you set the alignment to `PenAlignmentInset`, you cannot use that pen to draw triangular dash caps.
 	SetDashCap(dashCap) {
-		if (status := DllCall("Gdiplus\GdipSetPenDashCap197819", "Ptr", this.Ptr, "Int", dashCap, "Int")) {  ;~ If you set the alignment of a Pen object to Pen Alignment Inset, you cannot use that pen to draw triangular dash caps.
+		if (status := DllCall("Gdiplus\GdipSetPenDashCap197819", "Ptr", this.Ptr, "Int", dashCap, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
@@ -494,17 +524,8 @@ class Pen {
 		}
 	}
 
-	Transform {
-		Get {
-			return (this.GetTransform())
-		}
-
-		Set {
-			this.SetTransform(value)
-
-			return (value)
-		}
-	}
+	;--------------- Method -------------------------------------------------------;
+	;-----------------------------------------------------  Transform  -------------;
 
 	;* pen.GetTransform()
 	;* Return:
@@ -521,13 +542,10 @@ class Pen {
 	;* Parameter:
 		;* [Matrix] matrix
 	SetTransform(matrix) {
-		if (status := DllCall("Gdiplus\GdipSetPenTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int")) {
+		if (status := DllCall("Gdiplus\GdipSetPenTransform", "Ptr", this.Ptr, "Ptr", matrix, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
-
-	;--------------- Method -------------------------------------------------------;
-	;-----------------------------------------------------  Transform  -------------;
 
 	;* pen.TranslateTransform(x, y[, matrixOrder])
 	;* Parameter:
@@ -555,7 +573,7 @@ class Pen {
 		;* [Matrix] matrix
 		;* [Integer] matrixOrder
 	MultiplyTransform(matrix, matrixOrder := 0) {
-		if (status := DllCall("Gdiplus\GdipMultiplyPenTransform", "Ptr", this.Ptr, "Ptr", matrix.Ptr, "Int", matrixOrder, "Int")) {
+		if (status := DllCall("Gdiplus\GdipMultiplyPenTransform", "Ptr", this.Ptr, "Ptr", matrix, "Int", matrixOrder, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
