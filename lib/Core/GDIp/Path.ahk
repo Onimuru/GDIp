@@ -67,11 +67,30 @@ class Path {
 
 	;-------------- Property ------------------------------------------------------;
 
+	Rect {
+		Get {
+			return (this.GetRect())
+		}
+	}
+
+	;* path.GetRect()
+	;* Return:
+		;* [Object]
+	GetRect() {
+		static rect := Structure.CreateRect(0, 0, "Float")
+
+		if (status := DllCall("gdiplus\GdipGetPathWorldBounds", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
+	}
+
 	FillMode {
 		Get {
 			return (this.GetFillMode())
 		}
-		
+
 		Set {
 			this.SetFillMode(value)
 
@@ -155,19 +174,6 @@ class Path {
 		}
 
 		return (array)
-	}
-
-	;* path.GetWorldBounds()
-	;* Return:
-		;* [Object]
-	GetWorldBounds() {
-		static rect := Structure.CreateRect(0, 0, "Float")
-
-		if (status := DllCall("gdiplus\GdipGetPathWorldBounds", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int")) {
-			throw (ErrorFromStatus(status))
-		}
-
-		return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
 	}
 
 	;--------------- Method -------------------------------------------------------;

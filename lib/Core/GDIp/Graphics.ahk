@@ -671,9 +671,59 @@ class Graphics {
 		}
 	}
 
-	;------------------------------------------------------- Bitmap ---------------;
+	;-------------------------------------------------------  Image  ---------------;
 
-	;* graphics.DrawBitmap(bitmap[, dx, dy, dWidth, dHeight, sx, sy, sWidth, sHeight, unit, imageAttributes])
+	;* graphics.DrawImage(bitmap[, x, y])
+	;* Parameter:
+		;* [Bitmap] bitmap
+		;* [Float] x
+		;* [Float] y
+	DrawImage(bitmap, x := 0, y := 0) {
+		if (status := DllCall("Gdiplus\GdipDrawImage", "Ptr", this.Ptr, "Ptr", bitmap, "Float", x, "Float", y, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+
+	;* graphics.DrawImageFX(bitmap, matrix, effect[, x, y, width, height, imageAttributes, unit])
+	;* Parameter:
+		;* [Bitmap] bitmap
+		;* [Matrix] matrix
+		;* [Effect] effect
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+		;* [Imageattributes] imageAttributes
+		;* [Integer] unit - See Unit enumeration.
+	DrawImageFX(bitmap, matrix, effect, x := unset, y := unset, width := unset, height := unset, imageAttributes := 0, unit := 2) {
+		if (IsSet(x) && IsSet(y) && IsSet(width) && IsSet(height)) {
+			static rect := Structure.CreateRect(0, 0, 0, 0, "Float")
+
+			rect.NumPut(0, "Float", x, "Float", y, "Float", width, "Float", height)
+
+			if (status := DllCall("Gdiplus\GdipDrawImageFX", "Ptr", this.Ptr, "Ptr", bitmap, "Ptr", rect, "Ptr", matrix, "Ptr", effect, "Ptr", imageAttributes, "Int", unit, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+		else if (status := DllCall("Gdiplus\GdipDrawImageFX", "Ptr", this.Ptr, "Ptr", bitmap, "Ptr", 0, "Ptr", matrix, "Ptr", effect, "Ptr", imageAttributes, "Int", unit, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+
+	;* graphics.DrawImageRect(bitmap, x, y, width, height)
+	;* Parameter:
+		;* [Bitmap] bitmap
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	DrawImageRect(bitmap, x, y, width, height) {
+		if (status := DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap, "Float", x, "Float", y, "Float", width, "Float", height, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+
+	;* graphics.DrawImageRectRect(bitmap, dx, dy, dWidth, dHeight, sx, sy, sWidth, sHeight[, imageAttributes, unit])
 	;* Parameter:
 		;* [Bitmap] bitmap
 		;* [Float] dx
@@ -684,17 +734,15 @@ class Graphics {
 		;* [Float] sy
 		;* [Float] sWidth
 		;* [Float] sHeight
-		;* [Integer] unit - See Unit enumeration.
 		;* [ImageAttributes] imageAttributes
-	DrawBitmap(bitmap, dx := unset, dy := unset, dWidth := unset, dHeight := unset, sx := unset, sy := unset, sWidth := unset, sHeight := unset, unit := 2, imageAttributes := 0) {
-		if (status := (IsSet(sx) && IsSet(sy) && IsSet(sWidth) && IsSet(sHeight))
-			? (DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap, "Float", dx, "Float", dy, "Float", dWidth, "Float", dHeight, "Float", sx, "Float", sy, "Float", sWidth, "Float", sHeight, "Int", unit, "Ptr", imageAttributes, "Ptr", 0, "Ptr", 0, "Int"))
-			: ((IsSet(dx) && IsSet(dy) && IsSet(dWidth) && IsSet(dHeight))
-				? (DllCall("Gdiplus\GdipDrawImageRect", "Ptr", this.Ptr, "Ptr", bitmap, "Float", dx, "Float", dy, "Float", dWidth, "Float", dHeight, "Int"))
-				: (DllCall("Gdiplus\GdipDrawImage", "Ptr", this.Ptr, "Ptr", bitmap, "Float", 0, "Float", 0, "Int")))) {
+		;* [Integer] unit - See Unit enumeration.
+	DrawImageRectRect(bitmap, dx, dy, dWidth, dHeight, sx, sy, sWidth, sHeight, imageAttributes := 0, unit := 2) {
+		if (status := DllCall("Gdiplus\GdipDrawImageRectRect", "Ptr", this.Ptr, "Ptr", bitmap, "Float", dx, "Float", dy, "Float", dWidth, "Float", dHeight, "Float", sx, "Float", sy, "Float", sWidth, "Float", sHeight, "Int", unit, "Ptr", imageAttributes, "Ptr", 0, "Ptr", 0, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 	}
+
+	;------------------------------------------------------- Bitmap ---------------;
 
 	;* graphics.DrawCachedBitmap(bitmap[, x, y])
 	;* Parameter:

@@ -120,40 +120,39 @@ GetProcAddress(libraryName, functionName) {
 	return (DllCall("Kernel32\GetProcAddress", "Ptr", DllCall("Kernel32\GetModuleHandle", "Str", libraryName, "Ptr"), "AStr", functionName, "Ptr"))
 }
 
-;=================================================== Error Handling ===========;
+;=======================================================  Ole32  ===============;
 
-;* ErrorFromMessage(messageID)
-ErrorFromMessage(messageID) {
-	if (!(length := DllCall("Kernel32\FormatMessage", "UInt", 0x1100  ;? 0x1100 = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER
-		, "Ptr", 0, "UInt", messageID, "UInt", 0, "Ptr*", &(buffer := 0), "UInt", 0, "Ptr", 0, "Int"))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-formatmessage
-		return (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+StringFromCLSID(CLSID) {
+	if (DllCall("Ole32\StringFromCLSID", "Ptr", CLSID, "Ptr*", &(pointer := 0), "UInt")) {
+		throw
 	}
 
-	message := StrGet(buffer, length - 2)  ;* Account for the newline and carriage return characters.
-	DllCall("Kernel32\LocalFree", "Ptr", buffer)
+	string := StrGet(pointer)
+	DllCall("Ole32\CoTaskMemFree", "Ptr", pointer)
 
-	return (Error(Format("0x{:X}", messageID), -1, message))
+	return (string)
 }
 
-;* ErrorFromStatus(status)
-ErrorFromStatus(status) {
-	static statusLookup := Map(1, "GenericError", 2, "InvalidParameter", 3, "OutOfMemory", 4, "ObjectBusy", 5, "InsufficientBuffer", 6, "NotImplemented", 7, "Win32Error", 8, "WrongState", 9, "Aborted", 10, "FileNotFound", 11, "ValueOverflow", 12, "AccessDenied", 13, "UnknownImageFormat", 14, "FontFamilyNotFound", 15, "FontStyleNotFound", 16, "NotTrueTypeFont", 17, "UnsupportedGdiplusVersion", 18, "GdiplusNotInitialized", 19, "PropertyNotFound", 20, "PropertyNotSupported", 21, "ProfileNotFound")  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplustypes/ne-gdiplustypes-status
+CLSIDFromString(string) {
+	if (DllCall("Ole32\CLSIDFromString", "Ptr", StrPtr(string), "Ptr", (CLSID := Structure(16).Ptr), "UInt")) {
+		throw
+	}
 
-	return (Error(status, -2, statusLookup[status]))
+	return (CLSID)
 }
 
 ;======================================================= MSVCRT ===============;
 
-MemCopy(dest, src, bytes) {
+MemoryCopy(dest, src, bytes) {
 	return (DllCall("msvcrt\memcpy", "Ptr", dest, "Ptr", src, "UInt", bytes))
 }
 
-MemMove(dest, src, bytes) {
+MemoryMove(dest, src, bytes) {
 	return (DllCall("msvcrt\memmove", "Ptr", dest, "Ptr", src, "UInt", bytes))
 }
 
-MemoryDifference(ptr1, ptr2, num) {
-   return DllCall("msvcrt\memcmp", "ptr", ptr1, "ptr", ptr2, "int", num)
+MemoryDifference(ptr1, ptr2, bytes) {
+   return (DllCall("msvcrt\memcmp", "Ptr", ptr1, "Ptr", ptr2, "Int", bytes))
 }
 
 ;======================================================= User32 ===============;
@@ -308,6 +307,65 @@ UpdateLayeredWindow(hWnd, DC, x := unset, y := unset, width := unset, height := 
 	}
 }
 
+;=================================================== Error Handling ===========;
+
+;* ErrorFromMessage(messageID)
+ErrorFromMessage(messageID) {
+	if (!(length := DllCall("Kernel32\FormatMessage", "UInt", 0x1100  ;? 0x1100 = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER
+		, "Ptr", 0, "UInt", messageID, "UInt", 0, "Ptr*", &(buffer := 0), "UInt", 0, "Ptr", 0, "Int"))) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-formatmessage
+		return (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
+	}
+
+	message := StrGet(buffer, length - 2)  ;* Account for the newline and carriage return characters.
+	DllCall("Kernel32\LocalFree", "Ptr", buffer)
+
+	return (Error(Format("0x{:X}", messageID), -1, message))
+}
+
+;* ErrorFromStatus(status)
+ErrorFromStatus(status) {
+	static statusLookup := Map(1, "GenericError", 2, "InvalidParameter", 3, "OutOfMemory", 4, "ObjectBusy", 5, "InsufficientBuffer", 6, "NotImplemented", 7, "Win32Error", 8, "WrongState", 9, "Aborted", 10, "FileNotFound", 11, "ValueOverflow", 12, "AccessDenied", 13, "UnknownImageFormat", 14, "FontFamilyNotFound", 15, "FontStyleNotFound", 16, "NotTrueTypeFont", 17, "UnsupportedGdiplusVersion", 18, "GdiplusNotInitialized", 19, "PropertyNotFound", 20, "PropertyNotSupported", 21, "ProfileNotFound")  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplustypes/ne-gdiplustypes-status
+
+	return (Error(status, -2, statusLookup[status]))
+}
+
+;====================================================  PixelFormat  ============;
+
+;* PixelFormatSizeOf(pixelFormat)
+;* Return:
+	;* [Integer] - The pixel size of `pixelFormat` (in bits).
+PixelFormatSizeOf(pixelFormat) {
+	return ((pixelFormat >> 8) & 0xFF)
+}
+
+;* PixelFormatIsAlpha(pixelFormat)
+;* Return:
+	;* [Integer] - Boolean value that indicates if `pixelFormat` can have an alpha channel.
+PixelFormatIsAlpha(pixelFormat) {
+	return ((pixelFormat & 0x00040000) != 0)  ;? 0x00040000 = PixelFormatAlpha
+}
+
+;* PixelFormatIsCanonical(pixelFormat)
+;* Return:
+	;* [Integer] - Boolean value that indicates if `pixelFormat` is a canonical format (`PixelFormat32bppARGB`, `PixelFormat32bppPARGB`, `PixelFormat64bppARGB` or `PixelFormat64bppPARGB`).
+PixelFormatIsCanonical(pixelFormat) {
+	return ((pixelFormat & 0x00200000) != 0)  ;? 0x00200000 = PixelFormatCanonical
+}
+
+;* PixelFormatIsExtended(pixelFormat)
+;* Return:
+	;* [Integer] - Boolean value that indicates if `pixelFormat` is an extended format i.e. supports 16 bits per channel.
+PixelFormatIsExtended(pixelFormat) {
+	return ((pixelFormat & 0x00100000) != 0)  ;? 0x00100000 = PixelFormatExtended
+}
+
+;* PixelFormatIsIndexed(pixelFormat)
+;* Return:
+	;* [Integer] - Boolean value that indicates if `pixelFormat` is an indexed color format.
+PixelFormatIsIndexed(pixelFormat) {
+	return ((pixelFormat & 0x00010000) != 0)  ;? 0x00010000 = PixelFormatIndexed
+}
+
 ;===============  Class  =======================================================;
 
 /*
@@ -332,8 +390,7 @@ UpdateLayeredWindow(hWnd, DC, x := unset, y := unset, width := unset, height := 
 
 class LayeredWindow {
 
-	__New(x, y, width, height, className := "LayeredWindow", classStyle := 0x00000000, windowProc := False, hCursor := 32512  ;? 32512 = OCR_NORMAL
-		, title := "No-Face", exStyle := 0x00000000, style := 0x00000000, parent := 0, show := "SW_SHOWNOACTIVATE", alpha := 0xFF, pixelFormat := 0x000E200B, interpolation := 7, smoothing := 4) {
+	__New(x, y, width, height, className := "LayeredWindow", classStyle := 0x00000000, windowProc := False, hCursor := 32512, title := "No-Face", exStyle := 0x00000000, style := 0x00000000, parent := 0, show := "SW_SHOWNOACTIVATE", alpha := 0xFF, pixelFormat := 0x000E200B, interpolation := 7, smoothing := 4) {
 		this.Class := className
 
 		if (!DllCall("User32\GetClassInfoEx", "Ptr", hInstance := DllCall("Kernel32\GetModuleHandle", "Ptr", 0, "Ptr"), "Ptr", classNamePtr := StrPtr(className), "Ptr", sWndClassEx := Structure(cbSize := (A_PtrSize == 8) ? (80) : (48)), "UInt")) {  ;: https://docs.microsoft.com/en-gb/windows/win32/api/winuser/nf-winuser-getclassinfoexa?redirectedfrom=MSDN
@@ -425,15 +482,11 @@ class LayeredWindow {
 		this.Point := Structure.CreatePoint(x, y, "UInt"), this.Size := Structure.CreateSize(width, height), this.Blend := Structure.CreateBlendFunction(alpha)
 
 		this.DC := GDI.CreateCompatibleDC()
-			, this.DC.SelectObject(GDI.CreateDIBSection(Structure.CreateBitmapInfoHeader(width, -height, bitCount := 32), this.DC, 0, &(pBits := 0)))
+			, this.DC.SelectObject(GDI.CreateDIBSection(Structure.CreateBitmapInfoHeader(width, -height, bitCount := (pixelFormat >> 8) & 0xFF), this.DC, 0, &(pBits := 0)))
 
 		this.Bitmap := GDIp.CreateBitmap(width, height, pixelFormat, width*(bitCount >> 3), pBits)
 		this.Graphics := GDIp.CreateGraphicsFromBitmap(this.Bitmap)
 			, this.Graphics.SetInterpolationMode(interpolation), this.Graphics.SetSmoothingMode(smoothing)
-	}
-
-	static RegisterClass(className := "LayeredWindow", classStyle := 0x00000000, windowProc := False, hCursor := 32512) {  ;? 32512 = OCR_NORMAL
-
 	}
 
 	__Delete() {
@@ -506,15 +559,15 @@ class LayeredWindow {
 	AddExStyle(exStyle) {
 		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") | exStyle)  ;? -20 = GWL_EXSTYLE
 
-		if (!DllCall("User32\SetWindowPos", "Ptr", this.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {  ;? 0x0027 = SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos
+		if (!DllCall("User32\SetWindowPos", "Ptr", hWnd, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {  ;? 0x0027 = SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}
 
 	RemoveExStyle(exStyle) {
-		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") & ~(exStyle))
+		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") & ~exStyle)
 
-		if (!DllCall("User32\SetWindowPos", "Ptr", this.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {
+		if (!DllCall("User32\SetWindowPos", "Ptr", hWnd, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}
@@ -522,7 +575,7 @@ class LayeredWindow {
 	ToggleExStyle(exStyle) {
 		DllCall("User32\SetWindowLongPtr", "Ptr", hWnd := this.Handle, "Int", -20, "Ptr", DllCall("User32\GetWindowLongPtr", "Ptr", hWnd, "Int", -20, "Ptr") ^ exStyle)
 
-		if (!DllCall("User32\SetWindowPos", "Ptr", this.Handle, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {
+		if (!DllCall("User32\SetWindowPos", "Ptr", hWnd, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x0027, "UInt")) {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 	}

@@ -122,6 +122,33 @@ static CreateBitmapFromBase64(base64) {  ;* ** Conversion: https://base64.guru/c
 	return (bitmap)
 }
 
+;* GDIp.CreateBitmapFromBitmapWithEffect(bitmap, effect[, x, y, width, height])
+;* Parameter:
+	;* [Bitmap] bitmap
+	;* [Effect] effect
+	;* [Integer] x
+	;* [Integer] y
+	;* [Integer] width
+	;* [Integer] height
+;* Return:
+	;* [Bitmap]
+static CreateBitmapFromBitmapWithEffect(bitmap, effect, x := unset, y := unset, width := unset, height := unset) {
+	if (IsSet(x) && IsSet(y) && IsSet(width) && IsSet(height)) {
+		static rect := Structure.CreateRect(0, 0, 0, 0, "Int")
+
+		rect.NumPut(0, "Int", x, "Int", y, "Int", width, "Int", height)
+
+		if (status := DllCall("Gdiplus\GdipBitmapCreateApplyEffect", "Ptr*", bitmap, "Int", 1, "Ptr", effect, "Ptr", rect.Ptr, "Ptr", 0, "Ptr*", &(pBitmap := 0), "UInt", 0, "Ptr*", 0, "Int", 0, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
+	else if (status := DllCall("Gdiplus\GdipBitmapCreateApplyEffect", "Ptr*", bitmap, "Int", 1, "Ptr", effect, "Ptr", 0, "Ptr", 0, "Ptr*", &(pBitmap := 0), "UInt", 0, "Ptr*", 0, "Int", 0, "Int")) {
+		throw (ErrorFromStatus(status))
+	}
+
+	return (this.Bitmap(pBitmap))
+}
+
 ;* GDIp.CreateBitmapFromFile(file[, useICM])
 ;* Parameter:
 	;* [String] file
@@ -510,7 +537,7 @@ class Bitmap {
 
 			loop (height) {
 				loop (x := reset, width) {
-					Numput("UInt", color, scan0 + 4*x++ + y*stride)  ;~ The Stride data member is negative if the pixel data is stored bottom-up.
+					Numput("UInt", color, scan0 + x++*4 + y*stride)  ;~ The Stride data member is negative if the pixel data is stored bottom-up.
 				}
 
 				y++
@@ -542,7 +569,27 @@ class Bitmap {
 		}
 	}
 
-	;~ ApplyEffect
+	;* bitmap.ApplyEffect(effect[, x, y, width, height])
+	;* Parameter:
+		;* [Effect] effect
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	ApplyEffect(effect, x := unset, y := unset, width := unset, height := unset) {
+		if (IsSet(x) && IsSet(y) && IsSet(width) && IsSet(height)) {
+			static rect := Structure.CreateRect(0, 0, 0, 0, "Int")
+
+			rect.NumPut(0, "Int", x, "Int", y, "Int", width, "Int", height)
+
+			if (status := DllCall("Gdiplus\GdipBitmapApplyEffect", "Ptr", this.Ptr, "Ptr", effect, "Ptr", rect, "UInt", 0, "Ptr*", 0, "Int", 0, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+		else if (status := DllCall("Gdiplus\GdipBitmapApplyEffect", "Ptr", this.Ptr, "Ptr", effect, "Ptr", 0, "UInt", 0, "Ptr*", 0, "Int", 0, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+	}
 
 	ConvertFormat(pixelFormat, dithertype, palettetype, colorPalette, alphaThresholdPercent) {
 		if (status := DllCall("Gdiplus\GdipBitmapConvertFormat", "Ptr", this.Ptr, "UInt", pixelFormat, "UInt", dithertype, "UInt", palettetype, "Ptr", colorPalette, "UInt", alphaThresholdPercent, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
@@ -550,7 +597,6 @@ class Bitmap {
 		}
 	}
 
-	;~ CreateApplyEffect
 	;~ GetHistogram
 	;~ GetHistogramSize
 
@@ -578,9 +624,7 @@ class Bitmap {
 				DllCall("Gdiplus\GdipGetImageHeight", "Ptr", this.Ptr, "UInt*", &(height := 0))
 			}
 
-			bitmapData := Structure.CreateBitmapData()
-
-			if (status := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", Structure.CreateRect(x, y, width, height, "UInt").Ptr, "UInt", lockMode, "UInt", pixelFormat || this.GetPixelFormat(), "Ptr", bitmapData.Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
+			if (status := DllCall("Gdiplus\GdipBitmapLockBits", "Ptr", this.Ptr, "Ptr", Structure.CreateRect(x, y, width, height, "UInt").Ptr, "UInt", lockMode, "UInt", pixelFormat || this.GetPixelFormat(), "Ptr", (bitmapData := Structure.CreateBitmapData()).Ptr, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusheaders/nf-gdiplusheaders-bitmap-lockbits
 				throw (ErrorFromStatus(status))
 			}
 
@@ -614,7 +658,7 @@ class Bitmap {
 		}
 	}
 
-	;* bitmap.RotateFlip(file)
+	;* bitmap.SaveToFile(file)
 	;* Parameter:
 		;* [String] file
 	SaveToFile(file) {
@@ -641,6 +685,10 @@ class Bitmap {
 		if (status := DllCall("Gdiplus\GdipSaveImageToFile", "Ptr", this.Ptr, "Ptr", StrPtr(file), "Ptr", pCodec, "UInt", 0, "Int")) {
 			throw (ErrorFromStatus(status))
 		}
+	}
+
+	;* bitmap.SaveToStream()
+	SaveToStream() {
 	}
 }
 

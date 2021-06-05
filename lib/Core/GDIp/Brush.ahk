@@ -500,6 +500,7 @@ class PathBrush extends GDIp.SolidBrush {
 		;* [Object]
 	GetRect() {
 		static rect := Structure(16)
+		
 		if (status := DllCall("Gdiplus\GdipGetPathGradientRect", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int")) {
 			throw (ErrorFromStatus(status))
 		}

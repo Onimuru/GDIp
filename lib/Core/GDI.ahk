@@ -157,12 +157,15 @@ Class GDI {
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 
-		(instance := this.CompatibleDC()).Handle := hDC
-		return (instance)
+		return (this.CompatibleDC(hDC))
 	}
 
 	class CompatibleDC {
-		Class := "DC"
+		Class := "DC", OriginalObjects := {}
+
+		__New(hDC) {
+			this.Handle := hDC
+		}
 
 		__Delete() {
 			this.Reset()
@@ -173,14 +176,6 @@ Class GDI {
 		}
 
 		;-------------- Property ------------------------------------------------------;
-
-		OriginalObjects {
-			Get {
-				this.DefineProp("OriginalObjects", {Value: object := {}})  ;* Only initialize this object as needed.
-
-				return (object)
-			}
-		}
 
 		;* DC.GetDeviceCaps(DC, index)
 		;* Parameter:
@@ -204,6 +199,18 @@ Class GDI {
 			}
 
 			return (information)
+		}
+
+		Layout {
+			Get {
+				return (this.GetLayout())
+			}
+
+			Set {
+				this.SetLayout(value)
+
+				return (value)
+			}
 		}
 
 		;* DC.GetLayout()
@@ -307,17 +314,17 @@ Class GDI {
 
 	;------------------------------------------------------  HBitmap  --------------;
 
-	;* GDI.CreateBitmap(width, height[, bitCount, planes, &pBits])
+	;* GDI.CreateBitmap(width, height[, bitCount, planes, &bits])
 	;* Parameter:
 		;* [Integer] width
 		;* [Integer] height
 		;* [Integer] bitCount
 		;* [Integer] planes
-		;* [Integer] pBits
+		;* [Structure] bits
 	;* Return:
 		;* [HBitmap]
-	static CreateBitmap(width, height, bitCount := 32, planes := 1, &pBits := 0) {
-		if (!(hBitmap := DllCall("Gdi32\CreateBitmap", "Int", width, "Int", height, "UInt", planes, "UInt", bitCount, "Ptr", pBits, "Ptr"))) {  ;~ DDB (monochrome)
+	static CreateBitmap(width, height, bitCount := 32, planes := 1, &bits := 0) {
+		if (!(hBitmap := DllCall("Gdi32\CreateBitmap", "Int", width, "Int", height, "UInt", planes, "UInt", bitCount, "Ptr", bits, "Ptr"))) {  ;~ DDB (monochrome)
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 
@@ -331,7 +338,7 @@ Class GDI {
 		;* [DC] DC
 	;* Return:
 		;* [HBitmap]
-	static CreateCompatibleBitmap(width, height, DC := unset) {
+	static CreateCompatibleBitmap(width, height, DC := 0) {
 		if (!(hBitmap := DllCall("Gdi32\CreateCompatibleBitmap", "Ptr", ((IsSet(DC)) ? (DC) : (GetDC())).Handle, "Int", width, "Int", height, "Ptr"))) {  ;~ DDB
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
@@ -339,18 +346,18 @@ Class GDI {
 		return (this.HBitmap(hBitmap))
 	}
 
-	;* GDI.CreateDIBSection(bitmapInfo[, DC, usage, &pBits, hSection, offset])
+	;* GDI.CreateDIBSection(bitmapInfo[, DC, usage, &bits, hSection, offset])
 	;* Parameter:
 		;* [Structure] bitmapInfo
 		;* [DC] DC
 		;* [Integer] usage
-		;* [Integer] pBits
+		;* [Structure] bits
 		;* [Integer] hSection
 		;* [Integer] offset
 	;* Return:
 		;* [HBitmap]
-	static CreateDIBSection(bitmapInfo, DC := unset, usage := 0, &pBits := 0, hSection := 0, offset := 0) {
-		if (!(hBitmap := DllCall("Gdi32\CreateDIBSection", "Ptr", ((IsSet(DC)) ? (DC) : (GetDC())).Handle, "Ptr", bitmapInfo.Ptr, "UInt", usage, "Ptr*", &pBits, "Ptr", hSection, "UInt", offset, "Ptr"))) {  ;~ DIB
+	static CreateDIBSection(bitmapInfo, DC := unset, usage := 0, &bits := 0, hSection := 0, offset := 0) {
+		if (!(hBitmap := DllCall("Gdi32\CreateDIBSection", "Ptr", ((IsSet(DC)) ? (DC) : (GetDC())).Handle, "Ptr", bitmapInfo.Ptr, "UInt", usage, "Ptr*", &bits, "Ptr", hSection, "UInt", offset, "Ptr"))) {  ;~ DIB
 			throw (ErrorFromMessage(DllCall("Kernel32\GetLastError")))
 		}
 

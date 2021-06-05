@@ -58,6 +58,30 @@
 	1 = ColorMatrixFlagsSkipGrays
 	2 = ColorMatrixFlagsAltGray
 
+;* enum CombineMode  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-combinemode
+	0 = CombineModeReplace
+	1 = CombineModeIntersect
+	2 = CombineModeUnion
+	3 = CombineModeXor
+	4 = CombineModeExclude
+	5 = CombineModeComplement
+
+;* enum CurveAdjustments  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ne-gdipluseffects-curveadjustments
+	0 = AdjustExposure
+	1 = AdjustDensity
+	2 = AdjustContrast
+	3 = AdjustHighlight
+	4 = AdjustShadow
+	5 = AdjustMidtone
+	6 = AdjustWhiteSaturation
+	7 = AdjustBlackSaturation
+
+;* enum CurveChannel  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ne-gdipluseffects-curvechannel
+	0 = CurveChannelAll
+	1 = CurveChannelRed
+	2 = CurveChannelGreen
+	3 = CurveChannelBlue
+
 ;* enum FontStyle  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusenums/ne-gdiplusenums-fontstyle
 	0 = FontStyleRegular
 	1 = FontStyleBold
@@ -149,6 +173,271 @@ class GDIp {
 	}
 
 	;---------------  Class  -------------------------------------------------------;
+	;------------------------------------------------------- Effect ---------------;
+
+	;* GDIp.CreateBlurEffect(radius, expandEdge)
+	;* Parameter:
+		;* [Float] radius - Real number that specifies the blur radius (the radius of the Gaussian convolution kernel) in pixels. The radius must be in the range 0 through 255. As the radius increases, the resulting bitmap becomes more blurry.
+		;* [Integer] expandEdge - Boolean value that specifies whether the bitmap expands by an amount equal to the blur radius. If TRUE, the bitmap expands by an amount equal to the radius so that it can have soft edges. If FALSE, the bitmap remains the same size and the soft edges are clipped.
+	;* Return:
+		;* [Effect]
+	static CreateBlurEffect(radius, expandEdge) {
+		static GUID := CLSIDFromString("{633C80A4-1843-482B-9EF2-BE2834C5FDD4}")  ;? {0x633C80A4, 0x1843, 0x482B, {0x9E, 0xF2, 0xBE, 0x28, 0x34, 0xC5, 0xFD, 0xD4}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		(params := Structure(8)).NumPut(0, "Float", radius, "UInt", expandEdge)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ns-gdipluseffects-blurparams
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", params, "UInt", 8, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateSharpenEffect(radius, amount)
+	;* Parameter:
+		;* [Float] radius - Specifies the sharpening radius (the radius of the convolution kernel) in pixels. The radius must be in the range 0 through 255. As the radius increases, more surrounding pixels are involved in calculating the new value of a given pixel.
+		;* [Float] amount - Real number in the range 0 through 100 that specifies the amount of sharpening to be applied. A value of 0 specifies no sharpening. As the value of amount increases, the sharpness increases.
+	;* Return:
+		;* [Effect]
+	static CreateSharpenEffect(radius, amount) {
+		static GUID := CLSIDFromString("{63CBF3EE-C526-402C-8F71-62C540BF5142}")  ;? {0x63CBF3EE, 0xC526, 0x402C, {0x8F, 0x71, 0x62, 0xC5, 0x40, 0xBF, 0x51, 0x42}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		(params := Structure(8)).NumPut(0, "Float", radius, "Float", amount)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ns-gdipluseffects-sharpenparams
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", params, "UInt", 8, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateColorMatrixEffect(colorMatrix)
+	;* Parameter:
+		;* [Structure] colorMatrix - A 5x5 matrix structure to apply.
+	;* Return:
+		;* [Effect]
+	static CreateColorMatrixEffect(colorMatrix) {
+		static GUID := CLSIDFromString("{718F2615-7933-40E3-A511-5F68FE14DD74}")  ;? {0x718F2615, 0x7933, 0x40E3, {0xA5, 0x11, 0x5F, 0x68, 0xFE, 0x14, 0xDD, 0x74}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", colorMatrix, "UInt", 100, "Int")) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/nf-gdipluseffects-colormatrixeffect-setparameters
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateColorLUTEffect()
+	;* Return:
+		;* [Effect]
+	static CreateColorLUTEffect() {
+		static GUID := CLSIDFromString("{A7CE72A9-0F7F-40D7-B3CC-D0C02D5C3212}")  ;? {0xA7CE72A9, 0xF7F, 0x40D7, {0xB3, 0xCC, 0xD0, 0xC0, 0x2D, 0x5C, 0x32, 0x12}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateBrightnessContrastEffect(brightness, contrast)
+	;* Parameter:
+		;* [Integer] brightness - Integer in the range -255 through 255 that specifies the brightness level. If the value is 0, the brightness remains the same. As the value moves from 0 to 255, the brightness of the image increases. As the value moves from 0 to -255, the brightness of the image decreases.
+		;* [Integer] contrast - Integer in the range -100 through 100 that specifies the contrast level. If the value is 0, the contrast remains the same. As the value moves from 0 to 100, the contrast of the image increases. As the value moves from 0 to -100, the contrast of the image decreases.
+	;* Return:
+		;* [Effect]
+	static CreateBrightnessContrastEffect(brightness, contrast) {
+		static GUID := CLSIDFromString("{D3A1DBE1-8EC4-4C17-9F4C-EA97AD1C343D}")  ;? {0xD3A1DBE1, 0x8EC4, 0x4C17, {0x9F, 0x4C, 0xEA, 0x97, 0xAD, 0x1C, 0x34, 0x3D}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		(params := Structure(8)).NumPut(0, "Int", brightness, "Int", contrast)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ns-gdipluseffects-brightnesscontrastparams
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", params, "UInt", 8, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateHueSaturationLightnessEffect(hue, saturation, lightness)
+	;* Parameter:
+		;* [Integer] hue - Integer in the range -180 through 180 that specifies the change in hue. A value of 0 specifies no change. Positive values specify counterclockwise rotation on the color wheel. Negative values specify clockwise rotation on the color wheel.
+		;* [Integer] saturation - Integer in the range -100 through 100 that specifies the change in saturation. A value of 0 specifies no change. Positive values specify increased saturation and negative values specify decreased saturation.
+		;* [Integer] lightness - Integer in the range -100 through 100 that specifies the change in lightness. A value of 0 specifies no change. Positive values specify increased lightness and negative values specify decreased lightness.
+	;* Return:
+		;* [Effect]
+	static CreateHueSaturationLightnessEffect(hue, saturation, lightness) {
+		static GUID := CLSIDFromString("{8B2DD6C3-EB07-4D87-A5F0-7108E26A9C5F}")  ;? {0x8B2DD6C3, 0xEB07, 0x4D87, {0xA5, 0xF0, 0x71, 0x8, 0xE2, 0x6A, 0x9C, 0x5F}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		(params := Structure(12)).NumPut(0, "Int", hue, "Int", saturation, "Int", lightness)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ns-gdipluseffects-huesaturationlightnessparams
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", params, "UInt", 12, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateLevelsEffect(highlight, midtone, shadow)
+	;* Parameter:
+		;* [Integer] highlight - Integer in the range 0 through 100 that specifies which pixels should be lightened. You can use this adjustment to lighten pixels that are already lighter than a certain threshold. Setting highlight to 100 specifies no change. Setting highlight to t specifies that a color channel value is increased if it is already greater than t percent of full intensity. For example, setting highlight to 90 specifies that all color channel values greater than 90 percent of full intensity are increased.
+		;* [Integer] midtone - Integer in the range -100 through 100 that specifies how much to lighten or darken an image. Color channel values in the middle of the intensity range are altered more than color channel values near the minimum or maximum intensity. You can use this adjustment to lighten (or darken) an image without loosing the contrast between the darkest and lightest portions of the image. A value of 0 specifies no change. Positive values specify that the midtones are made lighter, and negative values specify that the midtones are made darker.
+		;* [Integer] shadow - Integer in the range 0 through 100 that specifies which pixels should be darkened. You can use this adjustment to darken pixels that are already darker than a certain threshold. Setting shadow to 0 specifies no change. Setting shadow to t specifies that a color channel value is decreased if it is already less than t percent of full intensity. For example, setting shadow to 10 specifies that all color channel values less than 10 percent of full intensity are decreased.
+	;* Return:
+		;* [Effect]
+	static CreateLevelsEffect(highlight, midtone, shadow) {
+		static GUID := CLSIDFromString("{99C354EC-2A31-4F3A-8C34-17A803B33A25}")  ;? {0x99C354EC, 0x2A31, 0x4F3A, {0x8C, 0x34, 0x17, 0xA8, 0x3, 0xB3, 0x3A, 0x25}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		(params := Structure(12)).NumPut(0, "Int", highlight, "Int", midtone, "Int", shadow)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ns-gdipluseffects-levelsparams
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", params, "UInt", 12, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateTintEffect(hue, amount)
+	;* Parameter:
+		;* [Integer] hue - Integer in the range -180 through 180 that specifies the hue to be strengthened or weakened. A value of 0 specifies blue. A positive value specifies a clockwise angle on the color wheel. For example, positive 60 specifies cyan and positive 120 specifies green. A negative value specifies a counter-clockwise angle on the color wheel. For example, negative 60 specifies magenta and negative 120 specifies red.
+		;* [Integer] amount - Integer in the range -100 through 100 that specifies how much the hue (given by the hue parameter) is strengthened or weakened. A value of 0 specifies no change. Positive values specify that the hue is strengthened and negative values specify that the hue is weakened.
+	;* Return:
+		;* [Effect]
+	static CreateTintEffect(hue, amount) {
+		static GUID := CLSIDFromString("{1077AF00-2848-4441-9489-44AD4C2D7A2C}")  ;? {0x1077AF00, 0x2848, 0x4441, {0x94, 0x89, 0x44, 0xAD, 0x4C, 0x2D, 0x7A, 0x2C}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		(params := Structure(8)).NumPut(0, "Int", hue, "Int", amount)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ns-gdipluseffects-tintparams
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", params, "UInt", 8, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateColorBalanceEffect(cyanRed, magentaGreen, yellowBlue)
+	;* Parameter:
+		;* [Integer] cyanRed - Integer in the range -100 through 100 that specifies a change in the amount of red in the image. If the value is 0, there is no change. As the value moves from 0 to 100, the amount of red in the image increases and the amount of cyan decreases. As the value moves from 0 to -100, the amount of red in the image decreases and the amount of cyan increases.
+		;* [Integer] magentaGreen - Integer in the range -100 through 100 that specifies a change in the amount of green in the image. If the value is 0, there is no change. As the value moves from 0 to 100, the amount of green in the image increases and the amount of magenta decreases. As the value moves from 0 to -100, the amount of green in the image decreases and the amount of magenta increases.
+		;* [Integer] yellowBlue - Integer in the range -100 through 100 that specifies a change in the amount of blue in the image. If the value is 0, there is no change. As the value moves from 0 to 100, the amount of blue in the image increases and the amount of yellow decreases. As the value moves from 0 to -100, the amount of blue in the image decreases and the amount of yellow increases.
+	;* Return:
+		;* [Effect]
+	static CreateColorBalanceEffect(cyanRed, magentaGreen, yellowBlue) {
+		static GUID := CLSIDFromString("{537E597D-251E-48DA-9664-29CA496B70F8}")  ;? {0x537E597D, 0x251E, 0x48DA, {0x96, 0x64, 0x29, 0xCA, 0x49, 0x6B, 0x70, 0xF8}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		(params := Structure(12)).NumPut(0, "Int", cyanRed, "Int", magentaGreen, "Int", yellowBlue)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ns-gdipluseffects-colorbalanceparams
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", params, "UInt", 12, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateRedEyeCorrectionEffect(objects*)
+	;* Parameter:
+		;* [Integer] objects - Any number of objects with `x`, `y`, `Width` and `Height` properties which specify areas of the bitmap to which red eye correction should be applied.
+	;* Return:
+		;* [Effect]
+	static CreateRedEyeCorrectionEffect(objects*) {
+		static GUID := CLSIDFromString("{74D29D05-69A4-4266-9549-3CC52836B632}")  ;? {0x74D29D05, 0x69A4, 0x4266, {0x95, 0x49, 0x3C, 0xC5, 0x28, 0x36, 0xB6, 0x32}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		for index, rect in (areas := Structure(bytes := (numberOfAreas := objects.Length)*16), objects) {
+			areas.NumPut(index*16, "Int", rect.x, "Int", rect.y, "Int", rect.x + rect.Width - 1, "Int", rect.y + rect.Height - 1)  ;: https://docs.microsoft.com/en-us/windows/win32/api/windef/ns-windef-rect
+		}
+
+		(params := Structure(16)).NumPut(0, "UInt", numberOfAreas, "UInt", 0, "Ptr", areas.Ptr)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ns-gdipluseffects-redeyecorrectionparams
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", params.Ptr, "UInt", 16 + bytes, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	;* GDIp.CreateRedEyeCorrectionEffect(adjustment, channel, adjustValue)
+	;* Parameter:
+		;* [Integer] adjustment - See CurveAdjustments enumeration.
+		;* [Integer] channel - See CurveChannel enumeration.
+		;* [Integer] adjustValue - Integer that specifies the intensity of the adjustment. The range of acceptable values depends on which adjustment is being applied:
+			; AdjustExposure - In the [-255, 255] interval.
+			; AdjustDensity - In the [-255, 255] interval.
+			; AdjustContrast - In the [-100, 100] interval.
+			; AdjustHighlight - In the [-100, 100] interval.
+			; AdjustShadow - In the [-100, 100] interval.
+			; AdjustMidtone - In the [-100, 100] interval.
+			; AdjustWhiteSaturation - In the [0, 255] interval.
+			; AdjustBlackSaturation - In the [0, 255] interval.
+	;* Return:
+		;* [Effect]
+	static CreateColorCurveEffect(adjustment, channel, adjustValue) {
+		static GUID := CLSIDFromString("{DD6A0022-58E4-4A67-9D9B-D48EB881A53D}")  ;? {0xDD6A0022, 0x58E4, 0x4A67, {0x9D, 0x9B, 0xD4, 0x8E, 0xB8, 0x81, 0xA5, 0x3D}}
+
+		if (status := DllCall("Gdiplus\GdipCreateEffect", "Ptr", GUID, "Ptr*", &(pEffect := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		(params := Structure(12)).NumPut(0, "Int", adjustment, "Int", channel, "Int", adjustValue)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdipluseffects/ns-gdipluseffects-colorcurveparams
+
+		if (status := DllCall("Gdiplus\GdipSetEffectParameters", "Ptr", pEffect, "Ptr", params, "UInt", 12, "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Effect(pEffect))
+	}
+
+	class Effect {
+		Class := "Effect"
+
+		__New(pEffect) {
+			this.Ptr := pEffect
+		}
+
+		__Delete() {
+			if (status := DllCall("Gdiplus\GdipDeleteEffect", "Ptr", this.Ptr, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+	}
+
+	;------------------------------------------------------- Matrix ---------------;
+
+	#Include %A_LineFile%\..\GDIp\Matrix.ahk
+
 	;--------------------------------------------------  ImageAttributes  ----------;
 
 	;* GDIp.CreateImageAttributes()
@@ -310,14 +599,6 @@ class GDIp {
 		}
 	}
 
-	;------------------------------------------------------- Effect ---------------;
-
-	;~ CreateEffect
-	;~ DeleteEffect
-	;~ GetEffectParameters
-	;~ GetEffectParameterSize
-	;~ SetEffectParameters
-
 	;------------------------------------------------------- Bitmap ---------------;
 
 	#Include %A_LineFile%\..\GDIp\Bitmap.ahk
@@ -334,10 +615,6 @@ class GDIp {
 
 	#Include %A_LineFile%\..\GDIp\Pen.ahk
 
-	;------------------------------------------------------- Matrix ---------------;
-
-	#Include %A_LineFile%\..\GDIp\Matrix.ahk
-
 	;-------------------------------------------------------- Path ----------------;
 
 	#Include %A_LineFile%\..\GDIp\Path.ahk
@@ -349,6 +626,39 @@ class GDIp {
 		;* [Region]
 	static CreateRegion() {
 		if (status := DllCall("Gdiplus\GdipCreateRegion", "Ptr*", &(pRegion := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Region(pRegion))
+	}
+
+	;* GDIp.CreateRegionFromPath(path)
+	;* Parameter:
+		;* [Path] path
+	;* Return:
+		;* [Region]
+	static CreateRegionFromPath(path) {
+		if (status := DllCall("Gdiplus\GdipCreateRegionPath", "Ptr", path, "Ptr*", &(pRegion := 0), "Int")) {
+			throw (ErrorFromStatus(status))
+		}
+
+		return (this.Region(pRegion))
+	}
+
+	;* GDIp.CreateRegionFromRect(x, y, width, height)
+	;* Parameter:
+		;* [Float] x
+		;* [Float] y
+		;* [Float] width
+		;* [Float] height
+	;* Return:
+		;* [Region]
+	static CreateRegionFromRect(x, y, width, height) {
+		static rect := Structure.CreateRect(0, 0, 0, 0, "Float")
+
+		rect.NumPut(0, "Float", x, "Float", y, "Float", width, "Float", height)
+
+		if (status := DllCall("Gdiplus\GdipCreateRegionRect", "Ptr", rect.Ptr, "Ptr*", &(pRegion := 0), "Int")) {
 			throw (ErrorFromStatus(status))
 		}
 
@@ -381,13 +691,103 @@ class GDIp {
 
 		;-------------- Property ------------------------------------------------------;
 
+		Rect[graphics] {
+			Get {
+				return (this.GetRect(graphics))
+			}
+		}
+
+		;* region.GetRect(graphics)
+		;* Parameter:
+			;* [Graphics] graphics - Graphics object that contains the world and page transformations required to calculate the device coordinates of this region.
+		;* Return:
+			;* [Object]
+		GetRect(graphics) {
+			static rect := Structure.CreateRect(0, 0, 0, 0, "Float")
+
+			if (status := DllCall("Gdiplus\GdipGetRegionBounds", "Ptr", this.Ptr, "Ptr", graphics, "Ptr", rect.Ptr, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return ({x: rect.NumGet(0, "Float"), y: rect.NumGet(4, "Float"), Width: rect.NumGet(8, "Float"), Height: rect.NumGet(12, "Float")})
+		}
+
+		IsEmpty[graphics] {
+			Get {
+				return (this.IsEmpty(graphics))
+			}
+		}
+
 		;* region.IsEmpty(graphics)
 		;* Parameter:
-			;* [Graphics] graphics
+			;* [Graphics] graphics - Graphics object that contains the world and page transformations required to calculate the device coordinates of this region.
 		;* Return:
 			;* [Integer]
 		IsEmpty(graphics) {
-			if (status := DllCall("Gdiplus\GdipIsEmptyRegion", "Ptr", this.Ptr, "Ptr", graphics, "UInt*", &(bool := False), "Int")) {
+			if (status := DllCall("Gdiplus\GdipIsEmptyRegion", "Ptr", this.Ptr, "Ptr", graphics, "UInt*", &(bool := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return (bool)
+		}
+
+		IsInfinite[graphics] {
+			Get {
+				return (this.IsInfinite(graphics))
+			}
+		}
+
+		;* region.IsInfinite(graphics)
+		;* Parameter:
+			;* [Graphics] graphics - Graphics object that contains the world and page transformations required to calculate the device coordinates of this region.
+		;* Return:
+			;* [Integer]
+		IsInfinite(graphics) {
+			if (status := DllCall("Gdiplus\GdipIsInfiniteRegion", "Ptr", this.Ptr, "Ptr", graphics, "UInt*", &(bool := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return (bool)
+		}
+
+		IsPointVisible[graphics, x, y] {
+			Get {
+				return (this.IsPointVisible(graphics, x, y))
+			}
+		}
+
+		;* region.IsPointVisible(graphics, x, y)
+		;* Parameter:
+			;* [Graphics] graphics - Graphics object that contains the world and page transformations required to calculate the device coordinates of this region.
+			;* [Float] x
+			;* [Float] y
+		;* Return:
+			;* [Integer]
+		IsPointVisible(graphics, x, y) {
+			if (status := DllCall("Gdiplus\GdipIsVisibleRegionPoint", "Ptr", this.Ptr, "Float", x, "Float", y, "Ptr", graphics, "UInt*", &(bool := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return (bool)
+		}
+
+		IsRectVisible[graphics, x, y, width, height] {
+			Get {
+				return (this.IsRectVisible(graphics, x, y, width, height))
+			}
+		}
+
+		;* region.IsRectVisible(graphics, x, y, width, height)
+		;* Parameter:
+			;* [Graphics] graphics - Graphics object that contains the world and page transformations required to calculate the device coordinates of this region.
+			;* [Float] x
+			;* [Float] y
+			;* [Float] width
+			;* [Float] height
+		;* Return:
+			;* [Integer]
+		IsRectVisible(graphics, x, y, width, height) {
+			if (status := DllCall("Gdiplus\GdipIsVisibleRegionRect", "Ptr", this.Ptr, "Float", x, "Float", y, "Float", width, "Float", height, "Ptr", graphics, "UInt*", &(bool := 0), "Int")) {
 				throw (ErrorFromStatus(status))
 			}
 
@@ -395,6 +795,70 @@ class GDIp {
 		}
 
 		;--------------- Method -------------------------------------------------------;
+
+		;* GDIp.Region.Equals(graphics, region1, region2)
+		;* Parameter:
+			;* [Graphics] graphics - Graphics object that contains the world and page transformations required to calculate the device coordinates of this region.
+			;* [Region] region1
+			;* [Region] region2
+		;* Return:
+			;* [Integer]
+		static Equals(graphics, region1, region2) {
+			if (status := DllCall("Gdiplus\GdipIsEqualRegion", "Ptr", region1, "Ptr", region2, "Ptr", graphics, "UInt*", &(bool := 0), "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+
+			return (bool)
+		}
+
+		SetEmpty() {
+			if (status := DllCall("Gdiplus\GdipSetEmpty", "Ptr", this.Ptr, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		SetInfinite() {
+			if (status := DllCall("Gdiplus\GdipSetInfinite", "Ptr", this.Ptr, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* region.CombinePath(path, combineMode)
+		;* Parameter:
+			;* [Path] path
+			;* [Integer] combineMode - See CombineMode enumeration.
+		CombinePath(path, combineMode) {
+			if (status := DllCall("Gdiplus\GdipCombineRegionPath", "Ptr", this.Ptr, "Ptr", path, "Int", combineMode, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* region.CombineRect(x, y, width, height, combineMode)
+		;* Parameter:
+			;* [Float] x
+			;* [Float] y
+			;* [Float] width
+			;* [Float] height
+			;* [Integer] combineMode - See CombineMode enumeration.
+		CombineRect(x, y, width, height, combineMode) {
+			static rect := Structure.CreateRect(0, 0, 0, 0, "Float")
+
+			rect.NumPut(0, "Float", x, "Float", y, "Float", width, "Float", height)
+
+			if (status := DllCall("Gdiplus\GdipCombineRegionRect", "Ptr", this.Ptr, "Ptr", rect.Ptr, "Int", combineMode, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
+
+		;* region.CombineRegion(region, combineMode)
+		;* Parameter:
+			;* [Region] region
+			;* [Integer] combineMode - See CombineMode enumeration.
+		CombineRegion(region, combineMode) {
+			if (status := DllCall("Gdiplus\GdipCombineRegionRegion", "Ptr", this.Ptr, "Ptr", region, "Int", combineMode, "Int")) {
+				throw (ErrorFromStatus(status))
+			}
+		}
 
 		;* region.Translate(x, y)
 		;* Parameter:
