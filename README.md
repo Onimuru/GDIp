@@ -29,8 +29,10 @@ imageAttributes := GDIp.CreateImageAttributes()
 imageAttributes.SetColorMatrix(Structure.CreateNegativeColorMatrix())  ; Apply a negative (5x5) color matrix.
 
 ; Draw two lines to demonstrate that the image is in fact rotated around the center of the window:
-canvas.Graphics.DrawLine(Pen[0], Vec2(0, 0), Vec2(canvas.Width, canvas.Height))
-canvas.Graphics.DrawLine(Pen[0], Vec2(canvas.Width, 0), Vec2(0, canvas.Height))
+pen := GDIp.CreateSolidBrush(0xFFFFFFFF)
+
+canvas.Graphics.DrawLine(pen, Vec2(0, 0), Vec2(canvas.Width, canvas.Height))
+canvas.Graphics.DrawLine(pen, Vec2(canvas.Width, 0), Vec2(0, canvas.Height))
 
 ; Translate the graphics to the center of the window minus the dimensions of the scaled image so that the image is drawn in the center of the window:
 canvas.Graphics.TranslateTransform(canvas.Width*0.5 - width*0.5*0.5, canvas.Height*0.5 - width*0.5*0.5)
