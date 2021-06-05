@@ -158,7 +158,7 @@ __GridProc(hWnd, uMsg, wParam, lParam) {
 
 					static select := GDIp.CreateBitmapFromFile(A_WorkingDir . "\res\Image\Isometric\Select.png")
 
-					Overlay.Graphics.DrawBitmap(select, node[0] - 16, node[1] - 7 - 16 - 32, 32, 16)
+					Overlay.Graphics.DrawImageRect(select, node[0] - 16, node[1] - 7 - 16 - 32, 32, 16)
 					Overlay.Update()
 				}
 
@@ -398,7 +398,7 @@ __GridProc(hWnd, uMsg, wParam, lParam) {
 ;======================================================== GDIp ================;
 
 CreateGrid(x, y, width) {
-	nodes := (grid := LayeredWindow(x, y, width, width*0.5 + 32, "IsometricGrid", ["CS_HREDRAW", "CS_VREDRAW"], __GridProc, 32512, False, ["WS_EX_LAYERED", "WS_EX_NOACTIVATE", "WS_EX_TOOLWINDOW", "WS_EX_TOPMOST"], [["WS_CLIPCHILDREN", "WS_POPUPWINDOW"], ["WS_CAPTION", "WS_MAXIMIZEBOX", "WS_MAXIMIZEBOX", "WS_MINIMIZEBOX", "WS_SIZEBOX"]], False, "SW_SHOWNOACTIVATE", 0xFF, 0x000E200B)).Nodes := []
+	nodes := (grid := LayeredWindow(x, y, width, width*0.5 + 32, "IsometricGrid", ["CS_HREDRAW", "CS_VREDRAW"], __GridProc, 32512, False, ["WS_EX_LAYERED", "WS_EX_NOACTIVATE", "WS_EX_TOOLWINDOW", "WS_EX_TOPMOST"], ["WS_CLIPCHILDREN", "WS_POPUPWINDOW"], False, "SW_SHOWNOACTIVATE", 0xFF, 0x000E200B)).Nodes := []
 
 	loop ((width := grid.Width)/32) {
 		outerIndex := A_Index - 1
@@ -418,7 +418,7 @@ CreateLayers(x, y, width, number := 3) {
 	layers := []
 
 	loop (number) {
-		layers.Push(LayeredWindow(x, y - 16*(A_index - 1), width, width*0.5 + 32, "IsometricLayer", ["CS_HREDRAW", "CS_VREDRAW"], False, False, False, ["WS_EX_LAYERED", "WS_EX_NOACTIVATE", "WS_EX_TOOLWINDOW", "WS_EX_TRANSPARENT"], [["WS_CHILDWINDOW", "WS_CLIPCHILDREN", "WS_POPUPWINDOW"], ["WS_CAPTION", "WS_MAXIMIZEBOX", "WS_MINIMIZEBOX", "WS_SIZEBOX", "WS_THICKFRAME"]], (A_index = 1) ? (Grid.Handle) : (layers[-1].Handle)))
+		layers.Push(LayeredWindow(x, y - 16*(A_index - 1), width, width*0.5 + 32, "IsometricLayer", ["CS_HREDRAW", "CS_VREDRAW"], False, False, False, ["WS_EX_LAYERED", "WS_EX_NOACTIVATE", "WS_EX_TOOLWINDOW", "WS_EX_TRANSPARENT"], ["WS_CHILDWINDOW", "WS_CLIPCHILDREN", "WS_POPUP"], (A_index = 1) ? (Grid.Handle) : (layers[-1].Handle)))
 
 		blocks := layers[-1].Blocks := []
 
@@ -431,7 +431,7 @@ CreateLayers(x, y, width, number := 3) {
 }
 
 CreateOverlay(x, y, width) {
-	overlay := LayeredWindow(x, y, width, width*0.5, "IsometricLayer", False, False, False, False, ["WS_EX_LAYERED", "WS_EX_NOACTIVATE", "WS_EX_TOOLWINDOW", "WS_EX_TRANSPARENT"], [["WS_POPUPWINDOW"], ["WS_CAPTION", "WS_MAXIMIZEBOX", "WS_MINIMIZEBOX", "WS_SIZEBOX", "WS_THICKFRAME"]], Grid.Handle, 0)
+	overlay := LayeredWindow(x, y, width, width*0.5, "IsometricLayer", False, False, False, False, ["WS_EX_LAYERED", "WS_EX_NOACTIVATE", "WS_EX_TOOLWINDOW", "WS_EX_TRANSPARENT"], ["WS_OVERLAPPEDWINDOW"], Grid.Handle, 0)
 
 	static SWP_ASYNCWINDOWPOS := 0x4000, SWP_DEFERERASE := 0x2000, SWP_DRAWFRAME := 0x0020, SWP_FRAMECHANGED := 0x0020, SWP_HIDEWINDOW := 0x0080, SWP_NOACTIVATE := 0x0010, SWP_NOCOPYBITS := 0x0100, SWP_NOMOVE := 0x0002, SWP_NOOWNERZORDER := 0x0200, SWP_NOREDRAW := 0x0008, SWP_NOREPOSITION := 0x0200, SWP_NOSENDCHANGING := 0x0400, SWP_NOSIZE := 0x0001, SWP_NOZORDER := 0x0004, SWP_SHOWWINDOW := 0x0040
 
@@ -488,34 +488,13 @@ DrawTile(window, node, file, alpha := unset) {
 		}
 
 		tile := tiles[file], width := tile.Width
-			, window.Graphics.DrawBitmap(tile, node[0] - 16, node[1] - 7 - 32, 32, 32, 0, 0, width, width, 2, pImageAttributes)
+			, window.Graphics.DrawImageRectRect(tile, node[0] - 16, node[1] - 7 - 32, 32, 32, 0, 0, width, width, pImageAttributes)
 
 		DllCall("Gdiplus\GdipDisposeImageAttributes", "Ptr", pImageAttributes)
 	}
 	else {
-		window.Graphics.DrawBitmap(tiles[file], node[0] - 16, node[1] - 7 - 32, 32, 32)
+		window.Graphics.DrawImageRect(tiles[file], node[0] - 16, node[1] - 7 - 32, 32, 32)
 	}
-
-;	resized := GDIp.CreateBitmap(32, 16, 0x000E200B)
-;	graphics := GDIp.CreateGraphicsFromBitmap(resized), graphics.SetInterpolationMode(7), graphics.SetSmoothingMode(4)
-;		, graphics.DrawBitmap(tiles[file], 0, 0, 32, 16)
-;
-;	bitmap.LockBits()
-;	resized.LockBits()
-;
-;	stride1 := resized.BitmapData.NumGet(8, "Int"), scan01 := resized.BitmapData.NumGet(16, "Ptr"), stride2 := bitmap.BitmapData.NumGet(8, "Int"), scan02 := bitmap.BitmapData.NumGet(16, "Ptr")
-;		, reset := node[0], y := node[1] - 7
-;
-;	static height := [4, 8, 12, 16, 20, 24, 28, 32, 32, 28, 24, 20, 16, 12, 8, 4]
-;
-;	for index, pixels in height {
-;		offset := pixels*0.5
-;
-;		DllCall("msvcrt\memcpy", "Ptr", scan02 + (reset - offset)*4 + (y + index)*stride2, "Ptr", scan01 + (16 - offset)*4 + index*stride1, "UInt", pixels*4)
-;	}
-;
-;	bitmap.UnlockBits()
-;	resized.UnlockBits()
 }
 
 DrawTiles(window, nodes, file) {
@@ -544,7 +523,7 @@ DrawTiles(window, nodes, file) {
 		, graphics := window.Graphics
 
 	for node in nodes {
-		graphics.DrawBitmap(tile, node[0] - 16, node[1] - 7 - 16, 32, 32, 0, 0, width, width)
+		graphics.DrawImageRectRect(tile, node[0] - 16, node[1] - 7 - 16, 32, 32, 0, 0, width, width)
 	}
 }
 
@@ -601,47 +580,13 @@ DrawBlock(window, node, file, alpha := unset) {
 		}
 
 		DllCall("Gdiplus\GdipGetImageDimension", "Ptr", (block := blocks[file]).Ptr, "Float*", &(width := 0), "Float*", &(height := 0))
-			, window.Graphics.DrawBitmap(block, node[0] - 16, node[1] - 7 - 32, 32, 32, 0, 0, width, height, 2, pImageAttributes)
+			, window.Graphics.DrawImageRectRect(block, node[0] - 16, node[1] - 7 - 32, 32, 32, 0, 0, width, height, pImageAttributes)
 
 		DllCall("Gdiplus\GdipDisposeImageAttributes", "Ptr", pImageAttributes)
 	}
 	else {
-		window.Graphics.DrawBitmap(blocks[file], node[0] - 16, node[1] - 7 - 32, 32, 32)
+		window.Graphics.DrawImageRect(blocks[file], node[0] - 16, node[1] - 7 - 32, 32, 32)
 	}
-
-;	resized := GDIp.CreateBitmap(32, 32)
-;	graphics := GDIp.CreateGraphicsFromBitmap(resized), graphics.SetCompositingMode(1), graphics.SetCompositingQuality(3), graphics.SetInterpolationMode(7), graphics.SetSmoothingMode(4)
-;		, graphics.DrawBitmap(blocks[file], 0, 0, 32, 32, 0, 0, 64, 64, 2, imageAttributes := 0)
-;
-;	bitmap.LockBits()
-;	resized.LockBits()
-;
-;	stride1 := resized.BitmapData.NumGet(8, "Int"), scan01 := resized.BitmapData.NumGet(16, "Ptr"), stride2 := bitmap.BitmapData.NumGet(8, "Int"), scan02 := bitmap.BitmapData.NumGet(16, "Ptr")
-;		, reset := node[0], y := node[1] - 16 - 7
-;
-;	static height := [4, 8, 12, 16, 20, 24, 28, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 28, 24, 20, 16, 12, 8, 4]
-;
-;	if (IsSet(alpha)) {
-;		for index, pixels in height {
-;			offset := pixels*0.5
-;
-;			loop (x1 := 15 - offset, x2 := reset - offset, pixels) {
-;				color := NumGet(scan01 + ++x1*4 + index*stride1, "UInt")
-;
-;				Numput("UInt", (Round((color >> 24)*alpha) << 24) | (color & 0x00FFFFFF), scan02 + ++x2*4 + (y + index)*stride2)
-;			}
-;		}
-;	}
-;	else {
-;		for index, pixels in height {
-;			offset := pixels*0.5
-;
-;			DllCall("msvcrt\memcpy", "Ptr", scan02 + (reset - offset)*4 + (y + index)*stride2, "Ptr", scan01 + (16 - offset)*4 + index*stride1, "UInt", pixels*4)
-;		}
-;	}
-;
-;	bitmap.UnlockBits()
-;	resized.UnlockBits()
 }
 
 DrawPlane(window, node, file, alpha := unset) {
@@ -686,11 +631,11 @@ DrawPlane(window, node, file, alpha := unset) {
 			throw (ErrorFromStatus(status))
 		}
 
-		window.Graphics.DrawBitmap(plane, node[0] - 16, node[1] - 7 - 16, 64, 64, 0, 0, width, width, 2, pImageAttributes)
+		window.Graphics.DrawImageRectRect(plane, node[0] - 16, node[1] - 7 - 16, 64, 64, 0, 0, width, width, pImageAttributes)
 
 		DllCall("Gdiplus\GdipDisposeImageAttributes", "Ptr", pImageAttributes)
 	}
 	else {
-		window.Graphics.DrawBitmap(plane, node[0] - 16, node[1] - 7 - 16, 64, 64, 0, 0, width, width)
+		window.Graphics.DrawImageRectRect(plane, node[0] - 16, node[1] - 7 - 16, 64, 64, 0, 0, width, width)
 	}
 }
